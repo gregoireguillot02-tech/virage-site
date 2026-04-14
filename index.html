@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIRAGE — Reprends le controle de ta consommation</title>
+  <meta name="description" content="VIRAGE est la plateforme d'aide au sevrage tabac, cannabis et vaping pour les 18-35 ans. Coach IA, teleconsultation, substituts et suivi personnalise au meme endroit.">
+  <meta name="theme-color" content="#1B4332">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #2D6A4F;
+      --color-primary-light: #52B788;
+      --color-primary-dark: #1B4332;
+      --color-primary-pale: #D8F3DC;
+      --color-primary-mist: #B7E4C7;
+      --color-accent: #E09F3E;
+      --color-accent-light: #FFF1D0;
+      --color-terracotta: #C97B5A;
+      --color-charcoal: #1A1A2E;
+      --color-slate: #4A4A68;
+      --color-grey: #8D8DA0;
+      --color-grey-light: #C8C8D4;
+      --color-off-white: #F7F7FA;
+      --color-white: #FFFFFF;
+      --color-success: #2D6A4F;
+      --color-warning: #E09F3E;
+      --color-error: #D64045;
+      --color-info: #3A86A8;
+      --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-20: 80px;
+      --space-24: 96px;
+      --space-32: 128px;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-2xl: 24px;
+      --radius-full: 9999px;
+      --shadow-1: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-2: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-3: 0 8px 32px rgba(0,0,0,0.12);
+      --shadow-4: 0 16px 48px rgba(0,0,0,0.16);
+      --transition-fast: 150ms ease;
+      --transition-base: 200ms ease;
+      --transition-slow: 300ms ease;
+      --transition-slower: 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--color-slate);
+      background: var(--color-white);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: inherit; }
+
+    /* ===========================
+       NAVIGATION
+       =========================== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 0 var(--space-6);
+      transition: all var(--transition-slow);
+    }
+
+    .nav.scrolled {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+
+    .nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+
+    .nav-logo-icon { height: 32px; width: auto; transition: opacity var(--transition-base); }
+    .nav-logo-icon--light { display: block; }
+    .nav-logo-icon--dark { display: none; }
+    .nav.scrolled .nav-logo-icon--light { display: none; }
+    .nav.scrolled .nav-logo-icon--dark { display: block; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background: currentColor;
+      transition: width var(--transition-base);
+    }
+
+    .nav-links a:hover::after { width: 100%; }
+    .nav-links a:hover { color: var(--color-white); }
+    .nav.scrolled .nav-links a { color: var(--color-grey); }
+    .nav.scrolled .nav-links a:hover { color: var(--color-charcoal); }
+
+    .nav-cta {
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 9px 18px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(255,255,255,0.25);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all var(--transition-base);
+      background: transparent;
+      color: var(--color-white);
+    }
+
+    .nav-cta:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+    .nav.scrolled .nav-cta { background: var(--color-primary); color: var(--color-white); border-color: var(--color-primary); }
+    .nav.scrolled .nav-cta:hover { background: var(--color-primary-light); border-color: var(--color-primary-light); }
+
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+      position: relative;
+      width: 24px;
+      height: 24px;
+      justify-content: center;
+    }
+
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--color-white);
+      border-radius: 1px;
+      transition: all var(--transition-base);
+      transform-origin: center;
+    }
+
+    .nav.scrolled .nav-hamburger span { background: var(--color-charcoal); }
+    .nav-hamburger.active span:nth-child(1) { transform: translateY(3.5px) rotate(45deg); }
+    .nav-hamburger.active span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.active span:nth-child(3) { transform: translateY(-3.5px) rotate(-45deg); }
+
+    .nav-mobile {
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      background: var(--color-white);
+      padding: var(--space-4) var(--space-6) var(--space-6);
+      box-shadow: var(--shadow-3);
+      z-index: 999;
+      transform: translateY(-10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all var(--transition-slow);
+    }
+
+    .nav-mobile.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+
+    .nav-mobile a {
+      display: block;
+      padding: var(--space-3) 0;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--color-charcoal);
+      text-decoration: none;
+      border-bottom: 1px solid var(--color-off-white);
+    }
+
+    .nav-mobile .nav-cta-mobile {
+      display: block;
+      text-align: center;
+      margin-top: var(--space-4);
+      padding: var(--space-3) var(--space-6);
+      background: var(--color-primary);
+      color: var(--color-white);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      border: none;
+    }
+
+    /* ===========================
+       UTILITIES
+       =========================== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6); }
+    .container--narrow { max-width: 800px; }
+    .container--wide { max-width: 1400px; }
+
+    /* ===========================
+       HERO
+       =========================== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(165deg, #0a1f15 0%, var(--color-primary-dark) 40%, #1e5a3f 70%, var(--color-primary) 100%);
+      overflow: hidden;
+      padding: 140px var(--space-6) var(--space-20);
+    }
+
+    .hero-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(82,183,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(82,183,136,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .hero-glow-1 {
+      position: absolute;
+      top: -20%;
+      right: -10%;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(82, 183, 136, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-glow-2 {
+      position: absolute;
+      bottom: -30%;
+      left: -15%;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(224, 159, 62, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--space-12);
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content { color: var(--color-white); }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(82, 183, 136, 0.12);
+      border: 1px solid rgba(82, 183, 136, 0.2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-primary-light);
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-6);
+    }
+
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary-light);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero-overline {
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: var(--space-4);
+    }
+
+    .hero-title {
+      font-family: var(--font-heading);
+      font-size: clamp(2.75rem, 5.5vw, 4.25rem);
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.035em;
+      color: var(--color-white);
+      margin-bottom: var(--space-6);
+    }
+
+    .hero-title span { color: var(--color-primary-light); }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      line-height: 1.65;
+      color: rgba(255,255,255,0.6);
+      max-width: 480px;
+      margin-bottom: var(--space-8);
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-10);
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all var(--transition-base);
+      background: var(--color-accent);
+      color: var(--color-charcoal);
+      box-shadow: 0 2px 12px rgba(224, 159, 62, 0.3);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(224, 159, 62, 0.35); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      padding: 13px 24px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      text-decoration: none;
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.8);
+      transition: all var(--transition-base);
+    }
+
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.08); color: var(--color-white); }
+
+    .hero-proof { display: flex; align-items: center; gap: var(--space-4); }
+
+    .hero-avatars { display: flex; }
+
+    .hero-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid rgba(27, 67, 50, 0.8);
+      margin-left: -10px;
+      object-fit: cover;
+      background: var(--color-primary);
+    }
+
+    .hero-avatar:first-child { margin-left: 0; }
+
+    .hero-proof-text {
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.4;
+    }
+
+    .hero-proof-text strong { color: rgba(255,255,255,0.7); font-weight: 600; }
+
+    /* Hero phone mockup */
+    .hero-visual { display: flex; justify-content: center; align-items: center; position: relative; }
+
+    .hero-phone {
+      width: 290px;
+      height: 600px;
+      background: #0d1f17;
+      border-radius: 44px;
+      border: 2.5px solid rgba(255,255,255,0.08);
+      position: relative;
+      box-shadow: 0 50px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.04);
+      overflow: hidden;
+    }
+
+    .hero-phone-notch {
+      width: 126px;
+      height: 30px;
+      background: #000;
+      border-radius: 0 0 20px 20px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-phone-screen { padding: 12px 20px 0; color: var(--color-white); }
+
+    .phone-status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+      margin-bottom: 20px;
+    }
+
+    .phone-status-time {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+
+    .phone-status-icons {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .phone-status-icons span {
+      display: block;
+      width: 14px;
+      height: 10px;
+      border-radius: 2px;
+      border: 1.5px solid rgba(255,255,255,0.6);
+    }
+
+    .phone-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .phone-greeting {
+      font-family: var(--font-heading);
+      font-size: 1.375rem;
+      font-weight: 700;
+    }
+
+    .phone-greeting-sub {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+    }
+
+    .phone-notif-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(82, 183, 136, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phone-notif-dot svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--color-primary-light);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    .phone-counter {
+      background: linear-gradient(135deg, rgba(82, 183, 136, 0.12) 0%, rgba(45, 106, 79, 0.12) 100%);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(82, 183, 136, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone-counter::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(82, 183, 136, 0.06);
+    }
+
+    .phone-counter-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .phone-counter-value {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--color-primary-light);
+      letter-spacing: -0.02em;
+    }
+
+    .phone-counter-unit {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+
+    .phone-progress-bar {
+      margin-top: 10px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    .phone-progress-fill {
+      height: 100%;
+      width: 47%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+    }
+
+    .phone-progress-label {
+      font-size: 0.625rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .phone-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .phone-stat-card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .phone-stat-label {
+      font-size: 0.625rem;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .phone-stat-value {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .phone-stat-value--money { color: var(--color-accent); }
+    .phone-stat-value--count { color: var(--color-primary-mist); }
+
+    .phone-chat-bubble {
+      background: rgba(82, 183, 136, 0.1);
+      border-radius: 16px 16px 16px 4px;
+      padding: 14px 16px;
+      border: 1px solid rgba(82, 183, 136, 0.12);
+    }
+
+    .phone-chat-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .phone-chat-ai-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-primary-light);
+    }
+
+    .phone-chat-ai-label {
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: var(--color-primary-light);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .phone-chat-text {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* Floating badges around phone */
+    .hero-float {
+      position: absolute;
+      background: rgba(255,255,255,0.95);
+      border-radius: var(--radius-lg);
+      padding: 10px 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-charcoal);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .hero-float--1 { top: 15%; left: -20px; animation-delay: 0s; }
+    .hero-float--2 { bottom: 22%; right: -30px; animation-delay: -2s; }
+
+    .hero-float-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-float-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ===========================
+       LOGOS BANNER
+       =========================== */
+    .section-logos {
+      padding: var(--space-10) var(--space-6);
+      background: var(--color-white);
+      border-bottom: 1px solid var(--color-off-white);
+    }
+
+    .logos-label {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-grey-light);
+      margin-bottom: var(--space-6);
+    }
+
+    .logos-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-12);
+      flex-wrap: wrap;
+      opacity: 0.35;
+    }
+
+    .logos-row span {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--color-charcoal);
+      letter-spacing: 0.02em;
+    }
+
+    /* ===========================
+       PROBLEM SECTION
+       =========================== */
+    .section-problem {
+      padding: var(--space-32) var(--space-6);
+      background: var(--color-off-white);
+      text-align: center;
+      position: relative;
+    }
+
+    .problem-stat {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--color-charcoal);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: var(--space-8);
+    }
+
+    .problem-stat em { font-style: normal; color: var(--color-primary); }
+
+    .problem-text {
+      font-size: 1.125rem;
+      line-height: 1.75;
+      color: var(--color-grey);
+      max-width: 600px;
+      margin: 0 auto var(--space-12);
+    }
+
+    .problem-text strong { color: var(--color-slate); font-weight: 600; }
+
+    .problem-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .problem-stat-item { text-align: center; }
+
+    .problem-stat-number {
+      font-family: var(--font-heading);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .problem-stat-label {
+      font-size: 0.8125rem;
+      color: var(--color-grey);
+      margin-top: var(--space-1);
+      line-height: 1.4;
+    }
+
+    /* ===========================
+       HOW IT WORKS
+       =========================== */
+    .section-how {
+      padding: var(--space-24) var(--space-6) var(--space-32);
+      background: var(--color-white);
+    }
+
+    .how-header { text-align: center; margin-bottom: var(--space-16); }
+
+    .how-header .section-heading {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-8);
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .how-grid::before {
+      content: '';
+      position: absolute;
+      top: 44px;
+      left: 16.66%;
+      right: 16.66%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-primary-pale), var(--color-primary-light), var(--color-primary-pale));
+    }
+
+    .how-step { text-align: center; position: relative; }
+
+    .how-step-number {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: var(--color-white);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-6);
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 16px rgba(45, 106, 79, 0.25);
+    }
+
+    .how-step-title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-charcoal);
+      margin-bottom: var(--space-2);
+    }
+
+    .how-step-desc {
+      font-size: 0.9375rem;
+      color: var(--color-grey);
+      line-height: 1.6;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* ===========================
+       FEATURES
+       =========================== */
+    .section-features {
+      padding: var(--space-24) var(--space-6) var(--space-32);
+      background: var(--color-off-white);
+    }
+
+    .section-label {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-4);
+    }
+
+    .section-heading {
+      font-family: var(--font-heading);
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--color-charcoal);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: var(--space-4);
+      max-width: 620px;
+    }
+
+    .section-subheading {
+      font-size: 1.0625rem;
+      color: var(--color-grey);
+      max-width: 540px;
+      margin-bottom: var(--space-12);
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-6);
+    }
+
+    .feature-card {
+      background: var(--color-white);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      transition: all var(--transition-slower);
+      border: 1px solid var(--color-off-white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--color-primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition-slower);
+    }
+
+    .feature-card:hover { box-shadow: var(--shadow-2); transform: translateY(-4px); border-color: transparent; }
+    .feature-card:hover::before { transform: scaleX(1); }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .feature-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .feature-title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-charcoal);
+      margin-bottom: var(--space-2);
+    }
+
+    .feature-desc {
+      font-size: 0.9375rem;
+      color: var(--color-grey);
+      line-height: 1.65;
+    }
+
+    /* ===========================
+       APPROACH
+       =========================== */
+    .section-approach {
+      padding: var(--space-24) var(--space-6) var(--space-32);
+      background: var(--color-white);
+    }
+
+    .approach-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .approach-text {
+      font-size: 1.0625rem;
+      color: var(--color-slate);
+      line-height: 1.75;
+      margin-bottom: var(--space-8);
+    }
+
+    .approach-text strong { color: var(--color-charcoal); }
+
+    .approach-values {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .approach-value {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+    }
+
+    .approach-value-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-primary-light);
+      flex-shrink: 0;
+      margin-top: 7px;
+    }
+
+    .approach-value-text { font-size: 0.9375rem; color: var(--color-slate); line-height: 1.5; }
+    .approach-value-text strong { color: var(--color-charcoal); font-weight: 600; }
+
+    .comparison-table {
+      background: var(--color-white);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-2);
+      border: 1px solid var(--color-off-white);
+    }
+
+    .comparison-table table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+
+    .comparison-table thead { background: var(--color-primary-dark); color: var(--color-white); }
+
+    .comparison-table th {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      padding: var(--space-4);
+      text-align: left;
+      font-size: 0.8125rem;
+      letter-spacing: 0.02em;
+    }
+
+    .comparison-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-off-white);
+      color: var(--color-slate);
+      line-height: 1.4;
+    }
+
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table td:first-child { font-weight: 600; color: var(--color-charcoal); width: 26%; }
+    .comparison-table td:nth-child(2) { color: var(--color-grey); }
+    .comparison-table td:last-child { color: var(--color-primary); font-weight: 600; }
+
+    /* ===========================
+       TESTIMONIALS
+       =========================== */
+    .section-testimonials {
+      padding: var(--space-24) var(--space-6) var(--space-32);
+      background: var(--color-off-white);
+      overflow: hidden;
+    }
+
+    .testimonials-header {
+      text-align: center;
+      margin-bottom: var(--space-12);
+    }
+
+    .testimonials-header .section-heading {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .testimonial-card {
+      background: var(--color-white);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6) var(--space-6) var(--space-6);
+      box-shadow: var(--shadow-1);
+      transition: all var(--transition-slower);
+      border: 1px solid transparent;
+    }
+
+    .testimonial-card:hover {
+      box-shadow: var(--shadow-2);
+      transform: translateY(-2px);
+      border-color: var(--color-primary-pale);
+    }
+
+    .testimonial-stars {
+      display: flex;
+      gap: 2px;
+      margin-bottom: var(--space-4);
+    }
+
+    .testimonial-stars svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--color-accent);
+    }
+
+    .testimonial-text {
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--color-slate);
+      margin-bottom: var(--space-6);
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .testimonial-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--color-grey-light);
+    }
+
+    .testimonial-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-charcoal);
+    }
+
+    .testimonial-meta {
+      font-size: 0.75rem;
+      color: var(--color-grey);
+    }
+
+    /* ===========================
+       TEAM
+       =========================== */
+    .section-team {
+      padding: var(--space-24) var(--space-6) var(--space-32);
+      background: var(--color-white);
+    }
+
+    .team-header { text-align: center; margin-bottom: var(--space-12); }
+    .team-header .section-heading { margin-left: auto; margin-right: auto; }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .team-card {
+      background: var(--color-off-white);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      transition: box-shadow var(--transition-base);
+    }
+
+    .team-card:hover { box-shadow: var(--shadow-2); }
+
+    .team-card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .team-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--color-white);
+      flex-shrink: 0;
+    }
+
+    .team-avatar--gg { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); }
+    .team-avatar--pm { background: linear-gradient(135deg, var(--color-terracotta), #d9946d); }
+
+    .team-name {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-charcoal);
+    }
+
+    .team-role {
+      font-size: 0.8125rem;
+      color: var(--color-grey);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .team-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+
+    .team-tag {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary-pale);
+      color: var(--color-primary-dark);
+      letter-spacing: 0.01em;
+    }
+
+    .team-bio {
+      font-size: 0.9375rem;
+      color: var(--color-slate);
+      line-height: 1.65;
+      margin-bottom: var(--space-4);
+    }
+
+    .team-quote {
+      font-size: 0.875rem;
+      font-style: italic;
+      color: var(--color-grey);
+      padding-left: var(--space-4);
+      border-left: 2px solid var(--color-primary-light);
+      line-height: 1.55;
+    }
+
+    /* ===========================
+       TRUST
+       =========================== */
+    .section-trust {
+      padding: var(--space-24) var(--space-6) var(--space-32);
+      background: var(--color-off-white);
+    }
+
+    .trust-header { text-align: center; margin-bottom: var(--space-12); }
+    .trust-header .section-heading { margin-left: auto; margin-right: auto; }
+
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .trust-card {
+      text-align: center;
+      background: var(--color-white);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8) var(--space-6);
+      box-shadow: var(--shadow-1);
+      transition: all var(--transition-slower);
+      border: 1px solid transparent;
+    }
+
+    .trust-card:hover { box-shadow: var(--shadow-2); transform: translateY(-2px); border-color: var(--color-primary-pale); }
+
+    .trust-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-4);
+      background: var(--color-primary-pale);
+    }
+
+    .trust-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--color-primary);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .trust-title {
+      font-family: var(--font-heading);
+      font-size: 1.0625rem;
+      font-weight: 600;
+      color: var(--color-charcoal);
+      margin-bottom: var(--space-2);
+    }
+
+    .trust-desc {
+      font-size: 0.875rem;
+      color: var(--color-grey);
+      line-height: 1.55;
+    }
+
+    /* ===========================
+       FAQ
+       =========================== */
+    .section-faq {
+      padding: var(--space-24) var(--space-6) var(--space-32);
+      background: var(--color-white);
+    }
+
+    .faq-header { text-align: center; margin-bottom: var(--space-12); }
+    .faq-header .section-heading { margin-left: auto; margin-right: auto; }
+
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--color-off-white);
+    }
+
+    .faq-question {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-6) 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-charcoal);
+      gap: var(--space-4);
+    }
+
+    .faq-question:hover { color: var(--color-primary); }
+
+    .faq-chevron {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      stroke: var(--color-grey);
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-base);
+    }
+
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-slow), padding var(--transition-slow);
+    }
+
+    .faq-item.open .faq-answer { max-height: 300px; }
+
+    .faq-answer-inner {
+      padding-bottom: var(--space-6);
+      font-size: 0.9375rem;
+      color: var(--color-grey);
+      line-height: 1.7;
+    }
+
+    /* ===========================
+       CTA
+       =========================== */
+    .section-cta {
+      padding: var(--space-32) var(--space-6);
+      background: linear-gradient(165deg, #0a1f15 0%, var(--color-primary-dark) 40%, var(--color-primary) 100%);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-cta .hero-grid-bg { opacity: 0.5; }
+
+    .cta-glow {
+      position: absolute;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(82, 183, 136, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .cta-heading {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--color-white);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: var(--space-4);
+    }
+
+    .cta-subheading {
+      font-size: 1.0625rem;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: var(--space-10);
+      line-height: 1.6;
+    }
+
+    .cta-form {
+      display: flex;
+      gap: var(--space-3);
+      max-width: 460px;
+      margin: 0 auto var(--space-4);
+    }
+
+    .cta-input {
+      flex: 1;
+      padding: 15px 18px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: var(--color-white);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      outline: none;
+      transition: all var(--transition-fast);
+    }
+
+    .cta-input::placeholder { color: rgba(255,255,255,0.3); }
+    .cta-input:focus { border-color: var(--color-primary-light); background: rgba(255,255,255,0.1); }
+
+    .cta-submit {
+      padding: 15px 28px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--color-accent);
+      color: var(--color-charcoal);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      white-space: nowrap;
+    }
+
+    .cta-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(224, 159, 62, 0.35); }
+
+    .cta-note { font-size: 0.8125rem; color: rgba(255,255,255,0.3); margin-top: var(--space-4); }
+
+    /* ===========================
+       FOOTER
+       =========================== */
+    .footer {
+      background: #0d1117;
+      padding: var(--space-16) var(--space-6) var(--space-8);
+      color: rgba(255,255,255,0.45);
+    }
+
+    .footer-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.8fr 1fr 1fr 1fr;
+      gap: var(--space-10);
+      margin-bottom: var(--space-12);
+    }
+
+    .footer-logo { margin-bottom: var(--space-4); }
+    .footer-logo svg { height: 28px; width: auto; }
+
+    .footer-desc {
+      font-size: 0.875rem;
+      line-height: 1.65;
+      margin-bottom: var(--space-6);
+      max-width: 280px;
+    }
+
+    .footer-socials { display: flex; gap: var(--space-3); }
+
+    .footer-social {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+
+    .footer-social:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .footer-social svg { width: 16px; height: 16px; fill: rgba(255,255,255,0.5); }
+
+    .footer-column-title {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-4);
+    }
+
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover { color: rgba(255,255,255,0.9); }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: var(--space-8);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8125rem;
+    }
+
+    .footer-legal { display: flex; gap: var(--space-6); }
+
+    .footer-legal a {
+      color: rgba(255,255,255,0.35);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .footer-legal a:hover { color: rgba(255,255,255,0.7); }
+
+    /* ===========================
+       ANIMATIONS
+       =========================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+    .reveal-delay-5 { transition-delay: 0.40s; }
+
+    /* Number counter animation */
+    .counter-animate {
+      display: inline-block;
+    }
+
+    /* ===========================
+       RESPONSIVE
+       =========================== */
+    @media (max-width: 1024px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; }
+      .hero-subtitle, .hero-proof { margin-left: auto; margin-right: auto; }
+      .hero-actions, .hero-proof { justify-content: center; }
+      .hero-badge { margin-left: auto; margin-right: auto; }
+      .hero-visual { display: none; }
+      .approach-grid { grid-template-columns: 1fr; gap: var(--space-8); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: var(--space-8); }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links, .nav-cta-desktop { display: none; }
+      .nav-hamburger { display: flex; }
+      .hero { padding: 120px var(--space-6) var(--space-16); min-height: auto; }
+      .hero-title { font-size: 2.25rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .how-grid { grid-template-columns: 1fr; gap: var(--space-10); }
+      .how-grid::before { display: none; }
+      .testimonials-grid { grid-template-columns: 1fr; max-width: 480px; }
+      .team-grid { grid-template-columns: 1fr; }
+      .trust-grid { grid-template-columns: 1fr; }
+      .problem-stats-row { grid-template-columns: 1fr; gap: var(--space-4); }
+      .cta-form { flex-direction: column; }
+      .footer-grid { grid-template-columns: 1fr; gap: var(--space-6); }
+      .footer-bottom { flex-direction: column; gap: var(--space-4); text-align: center; }
+      .footer-legal { justify-content: center; }
+      .section-problem, .section-how, .section-features, .section-approach, .section-testimonials, .section-team, .section-trust, .section-faq, .section-cta {
+        padding: var(--space-16) var(--space-6) var(--space-20);
+      }
+      .logos-row { gap: var(--space-8); }
+    }
+
+    @media (max-width: 480px) {
+      .hero-actions { flex-direction: column; align-items: center; }
+      .hero-title { font-size: 1.875rem; }
+      .feature-card, .team-card { padding: var(--space-6); }
+      .problem-stat { font-size: 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <!-- Logo sombre (fond clair / nav scrolled) -->
+        <svg class="nav-logo-icon nav-logo-icon--dark" viewBox="0 0 340 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="nav-g-dark" x1="0" y1="0.5" x2="1" y2="0.5"><stop offset="0%" stop-color="#C8C8D4"/><stop offset="35%" stop-color="#52B788"/><stop offset="100%" stop-color="#2D6A4F"/></linearGradient></defs>
+          <rect x="4" y="11" width="68" height="48" rx="24" fill="url(#nav-g-dark)"/>
+          <circle cx="48" cy="35" r="18" fill="white"/>
+          <circle cx="48" cy="35" r="6" fill="#52B788"/>
+          <circle cx="48" cy="35" r="2.5" fill="white"/>
+          <circle cx="48" cy="35" r="10.5" stroke="#52B788" stroke-width="0.6" fill="none" opacity="0.25"/>
+          <text x="90" y="48" font-family="Outfit, sans-serif" font-weight="700" font-size="42" letter-spacing="5" fill="#1B4332">VIRAGE</text>
+        </svg>
+        <!-- Logo clair (fond sombre / hero) -->
+        <svg class="nav-logo-icon nav-logo-icon--light" viewBox="0 0 340 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="nav-g-light" x1="0" y1="0.5" x2="1" y2="0.5"><stop offset="0%" stop-color="rgba(255,255,255,0.08)"/><stop offset="35%" stop-color="#52B788"/><stop offset="100%" stop-color="#2D6A4F"/></linearGradient></defs>
+          <rect x="4" y="11" width="68" height="48" rx="24" fill="url(#nav-g-light)"/>
+          <circle cx="48" cy="35" r="18" fill="white"/>
+          <circle cx="48" cy="35" r="6" fill="#52B788"/>
+          <circle cx="48" cy="35" r="2.5" fill="#0f2b1e"/>
+          <circle cx="48" cy="35" r="10.5" stroke="#52B788" stroke-width="0.6" fill="none" opacity="0.2"/>
+          <text x="90" y="48" font-family="Outfit, sans-serif" font-weight="700" font-size="42" letter-spacing="5" fill="white">VIRAGE</text>
+        </svg>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Fonctionnalites</a></li>
+        <li><a href="#approach">Notre approche</a></li>
+        <li><a href="#testimonials">Temoignages</a></li>
+        <li><a href="#team">Equipe</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <a href="#contact" class="nav-cta nav-cta-desktop">Liste d'attente</a>
+      <button class="nav-hamburger" id="hamburger" aria-label="Menu de navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="nav-mobile" id="mobileMenu">
+    <a href="#features" onclick="closeMobile()">Fonctionnalites</a>
+    <a href="#approach" onclick="closeMobile()">Notre approche</a>
+    <a href="#testimonials" onclick="closeMobile()">Temoignages</a>
+    <a href="#team" onclick="closeMobile()">Equipe</a>
+    <a href="#faq" onclick="closeMobile()">FAQ</a>
+    <a href="#contact" class="nav-cta-mobile" onclick="closeMobile()">Rejoindre la liste d'attente</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Lancement 2026
+        </div>
+        <p class="hero-overline">Tabac. Cannabis. Vaping.</p>
+        <h1 class="hero-title">
+          Reprends le controle.<br>
+          <span>A ton rythme.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Tout ce dont tu as besoin pour decrocher, au meme endroit. Coach IA, suivi, teleconsultation, substituts. VIRAGE t'accompagne avec bienveillance, sans pression.
+        </p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn-primary">Rejoindre la liste d'attente</a>
+          <a href="#how" class="btn-secondary">Decouvrir l'approche</a>
+        </div>
+        <div class="hero-proof">
+          <div class="hero-avatars">
+            <img src="https://i.pravatar.cc/72?img=32" alt="" class="hero-avatar" loading="lazy">
+            <img src="https://i.pravatar.cc/72?img=47" alt="" class="hero-avatar" loading="lazy">
+            <img src="https://i.pravatar.cc/72?img=12" alt="" class="hero-avatar" loading="lazy">
+            <img src="https://i.pravatar.cc/72?img=5" alt="" class="hero-avatar" loading="lazy">
+          </div>
+          <p class="hero-proof-text">
+            <strong>12 millions</strong> de fumeurs quotidiens en France.<br>
+            Aucune app ne leur parle vraiment.
+          </p>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div style="position:relative;">
+          <div class="hero-float hero-float--1">
+            <div class="hero-float-icon" style="background: var(--color-primary-pale);">
+              <svg viewBox="0 0 24 24" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.6875rem;color:var(--color-grey);">Progression</div>
+              <div style="color:var(--color-primary);font-weight:700;">+47%</div>
+            </div>
+          </div>
+          <div class="hero-phone">
+            <div class="hero-phone-notch"></div>
+            <div class="hero-phone-screen">
+              <div class="phone-status-bar">
+                <span class="phone-status-time">14:32</span>
+                <div class="phone-status-icons">
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+              <div class="phone-header-row">
+                <div>
+                  <p class="phone-greeting">Salut, Thomas.</p>
+                  <p class="phone-greeting-sub">Ton coach est la pour toi.</p>
+                </div>
+                <div class="phone-notif-dot">
+                  <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </div>
+              </div>
+              <div class="phone-counter">
+                <p class="phone-counter-label">Sans fumer depuis</p>
+                <p class="phone-counter-value">14 <span class="phone-counter-unit">jours</span></p>
+                <div class="phone-progress-bar"><div class="phone-progress-fill"></div></div>
+                <p class="phone-progress-label">Objectif : 30 jours</p>
+              </div>
+              <div class="phone-row">
+                <div class="phone-stat-card">
+                  <p class="phone-stat-label">Economies</p>
+                  <p class="phone-stat-value phone-stat-value--money">126 &euro;</p>
+                </div>
+                <div class="phone-stat-card">
+                  <p class="phone-stat-label">Non fumees</p>
+                  <p class="phone-stat-value phone-stat-value--count">196</p>
+                </div>
+              </div>
+              <div class="phone-chat-bubble">
+                <div class="phone-chat-header">
+                  <span class="phone-chat-ai-dot"></span>
+                  <span class="phone-chat-ai-label">Coach IA</span>
+                </div>
+                <p class="phone-chat-text">14 jours, c'est solide. Un craving ? C'est normal. On gere ca ensemble.</p>
+              </div>
+            </div>
+          </div>
+          <div class="hero-float hero-float--2">
+            <div class="hero-float-icon" style="background: var(--color-accent-light);">
+              <svg viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.6875rem;color:var(--color-grey);">Economies</div>
+              <div style="color:var(--color-accent);font-weight:700;">126 &euro; sauves</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- PROBLEM -->
+  <section class="section-problem" id="problem">
+    <div class="container container--narrow">
+      <h2 class="problem-stat reveal">
+        <em>12 millions</em> de fumeurs quotidiens.<br>
+        Explosion du vaping chez les jeunes.<br>
+        <em>0 solution</em> qui leur parle.
+      </h2>
+      <p class="problem-text reveal reveal-delay-1">
+        Les solutions existantes sont dispersees — une app ici, un patch la, une consultation ailleurs. Rien n'est reuni. <strong>Aucune plateforme ne centralise tout le parcours de sevrage pour les 18-35 ans.</strong>
+      </p>
+      <div class="problem-stats-row reveal reveal-delay-2">
+        <div class="problem-stat-item">
+          <p class="problem-stat-number counter-animate" data-target="75000">0</p>
+          <p class="problem-stat-label">deces par an lies au tabac</p>
+        </div>
+        <div class="problem-stat-item">
+          <p class="problem-stat-number counter-animate" data-target="32">0</p>
+          <p class="problem-stat-label">% des 18-24 ans vapotent</p>
+        </div>
+        <div class="problem-stat-item">
+          <p class="problem-stat-number counter-animate" data-target="900">0</p>
+          <p class="problem-stat-label">millions &euro; / an en couts de sante</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section-how" id="how">
+    <div class="container">
+      <div class="how-header">
+        <p class="section-label reveal">Comment ca marche</p>
+        <h2 class="section-heading reveal reveal-delay-1">Trois etapes. Zero prise de tete.</h2>
+      </div>
+      <div class="how-grid">
+        <div class="how-step reveal">
+          <div class="how-step-number">1</div>
+          <h3 class="how-step-title">Dis-nous ou tu en es</h3>
+          <p class="how-step-desc">Tabac, cannabis, vaping — on s'adapte a ta situation. Pas de questionnaire interminable, juste l'essentiel.</p>
+        </div>
+        <div class="how-step reveal reveal-delay-1">
+          <div class="how-step-number">2</div>
+          <h3 class="how-step-title">Accede a tout depuis un seul endroit</h3>
+          <p class="how-step-desc">Coach IA 24h/24, teleconsultation avec un addictologue, commande de substituts nicotiniques. Tout est dans l'app.</p>
+        </div>
+        <div class="how-step reveal reveal-delay-2">
+          <div class="how-step-number">3</div>
+          <h3 class="how-step-title">Suis ta progression</h3>
+          <p class="how-step-desc">Compteur d'abstinence, economies visualisees, recompenses. Chaque jour sans fumer est un jour gagne.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section-features" id="features">
+    <div class="container">
+      <p class="section-label reveal">Tout au meme endroit</p>
+      <h2 class="section-heading reveal reveal-delay-1">La premiere plateforme qui reunit tout ton parcours de sevrage.</h2>
+      <p class="section-subheading reveal reveal-delay-2">Coach IA, teleconsultation avec des professionnels de sante, marketplace de substituts, suivi personnalise. Plus besoin de jongler entre dix apps et trois sites.</p>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon" style="background: var(--color-primary-pale);">
+            <svg viewBox="0 0 24 24" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Coach IA personnalise</h3>
+          <p class="feature-desc">Des conversations naturelles, pas des scripts. Le coach s'adapte a ton rythme, tes habitudes et tes moments de fragilite. Disponible quand tu en as besoin.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon" style="background: var(--color-accent-light);">
+            <svg viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Compteur d'abstinence</h3>
+          <p class="feature-desc">Chaque jour compte. Visualise ta progression en temps reel et celebre chaque etape franchie, meme les plus petites.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon" style="background: #E8F0FE;">
+            <svg viewBox="0 0 24 24" stroke="var(--color-info)" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Economies visualisees</h3>
+          <p class="feature-desc">Vois concretement l'argent que tu economises chaque semaine. Un paquet par jour, c'est plus de 4 000 euros par an.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon" style="background: #FFF0E6;">
+            <svg viewBox="0 0 24 24" stroke="var(--color-terracotta)" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Systeme de recompenses</h3>
+          <p class="feature-desc">Motivation par paliers et badges. Chaque victoire est reconnue. Parce que le sevrage, c'est aussi apprendre a se feliciter.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-4">
+          <div class="feature-icon" style="background: var(--color-primary-pale);">
+            <svg viewBox="0 0 24 24" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Marketplace de substituts</h3>
+          <p class="feature-desc">Patchs, gommes, pastilles : commande tes substituts nicotiniques directement depuis l'app. Livres chez toi, sans courir en pharmacie.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-5">
+          <div class="feature-icon" style="background: var(--color-accent-light);">
+            <svg viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Teleconsultation</h3>
+          <p class="feature-desc">Consulte des addictologues et tabacologues directement depuis l'app. Un vrai suivi medical, accessible en quelques clics.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPROACH -->
+  <section class="section-approach" id="approach">
+    <div class="container">
+      <div class="approach-grid">
+        <div>
+          <p class="section-label reveal">Notre approche</p>
+          <h2 class="section-heading reveal reveal-delay-1">Technologie et expertise medicale, reunies.</h2>
+          <p class="approach-text reveal reveal-delay-2">
+            VIRAGE est ne d'un constat simple : les outils de sevrage existants sont disperses et ne parlent pas aux 18-35 ans. On a voulu creer <strong>la plateforme qu'on aurait aimee trouver</strong> pour un ami proche tombe dans l'addiction — un espace unique qui relie l'intelligence artificielle a l'accompagnement de vrais professionnels de sante.
+          </p>
+          <div class="approach-values reveal reveal-delay-3">
+            <div class="approach-value">
+              <div class="approach-value-dot"></div>
+              <p class="approach-value-text"><strong>Bienveillance</strong> — Accompagner sans juger, encourager a chaque etape</p>
+            </div>
+            <div class="approach-value">
+              <div class="approach-value-dot"></div>
+              <p class="approach-value-text"><strong>Progression</strong> — Chaque jour compte, chaque petit pas est une victoire</p>
+            </div>
+            <div class="approach-value">
+              <div class="approach-value-dot"></div>
+              <p class="approach-value-text"><strong>Expertise</strong> — Construit avec des addictologues et des tabacologues</p>
+            </div>
+            <div class="approach-value">
+              <div class="approach-value-dot"></div>
+              <p class="approach-value-text"><strong>Liberte</strong> — Se liberer d'une dependance, retrouver le controle de sa vie</p>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-table reveal reveal-delay-2">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Solutions existantes</th>
+                <th>VIRAGE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Approche</td><td>Outils isoles et disperses</td><td>Plateforme tout-en-un</td></tr>
+              <tr><td>Cible</td><td>Tout public, 35+</td><td>18-35 ans, digital natives</td></tr>
+              <tr><td>Technologie</td><td>Compteurs basiques</td><td>Coach IA + teleconsultation</td></tr>
+              <tr><td>Substances</td><td>Tabac uniquement</td><td>Tabac + cannabis + vaping</td></tr>
+              <tr><td>Acces sante</td><td>Rendez-vous en ville</td><td>Medecins et substituts dans l'app</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section-testimonials" id="testimonials">
+    <div class="container">
+      <div class="testimonials-header">
+        <p class="section-label reveal">Retours beta-testeurs</p>
+        <h2 class="section-heading reveal reveal-delay-1">Ce qu'ils en disent.</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card reveal">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-text">J'ai essaye plein d'apps pour arreter de fumer. Elles me faisaient toutes culpabiliser. Avec VIRAGE, j'ai l'impression de parler a un pote qui comprend ce que je traverse. Ca change tout.</p>
+          <div class="testimonial-author">
+            <img src="https://i.pravatar.cc/84?img=33" alt="Photo de Lucas" class="testimonial-avatar" loading="lazy">
+            <div>
+              <p class="testimonial-name">Lucas M.</p>
+              <p class="testimonial-meta">24 ans, Paris — 21 jours sans fumer</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal reveal-delay-1">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-text">Le compteur d'economies m'a convaincu. Voir que j'economisais 50 euros par semaine, concretement, c'est plus motivant que n'importe quel discours sante. Je vapotais depuis 3 ans.</p>
+          <div class="testimonial-author">
+            <img src="https://i.pravatar.cc/84?img=47" alt="Photo de Sarah" class="testimonial-avatar" loading="lazy">
+            <div>
+              <p class="testimonial-name">Sarah K.</p>
+              <p class="testimonial-meta">22 ans, Lyon — 35 jours sans vaper</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal reveal-delay-2">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-text">Je fumais des joints tous les soirs depuis la fac. Le coach IA ne m'a jamais juge. Il m'a juste aide a comprendre pourquoi je fumais et a trouver des alternatives. C'est subtil mais ca marche.</p>
+          <div class="testimonial-author">
+            <img src="https://i.pravatar.cc/84?img=12" alt="Photo de Mehdi" class="testimonial-avatar" loading="lazy">
+            <div>
+              <p class="testimonial-name">Mehdi B.</p>
+              <p class="testimonial-meta">27 ans, Bordeaux — 14 jours sans cannabis</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal reveal-delay-1">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-text">Avoir le compteur, le coach et la possibilite de consulter un tabacologue au meme endroit, ca simplifie tout. Plus besoin de gerer trois trucs differents. C'est fluide.</p>
+          <div class="testimonial-author">
+            <img src="https://i.pravatar.cc/84?img=26" alt="Photo de Emma" class="testimonial-avatar" loading="lazy">
+            <div>
+              <p class="testimonial-name">Emma L.</p>
+              <p class="testimonial-meta">20 ans, Marseille — 7 jours sans fumer</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal reveal-delay-2">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-text">Le systeme de recompenses est addictif (dans le bon sens). Chaque badge debloque me donne envie de continuer. J'en suis a 45 jours et je n'ai jamais tenu aussi longtemps.</p>
+          <div class="testimonial-author">
+            <img src="https://i.pravatar.cc/84?img=52" alt="Photo de Antoine" class="testimonial-avatar" loading="lazy">
+            <div>
+              <p class="testimonial-name">Antoine D.</p>
+              <p class="testimonial-meta">29 ans, Nantes — 45 jours sans fumer</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal reveal-delay-3">
+          <div class="testimonial-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-text">Ma copine m'a inscrit pour rire. 2 mois plus tard j'ai arrete la cigarette. Le coach m'envoyait un message pile quand j'en avais besoin. C'est bluffant.</p>
+          <div class="testimonial-author">
+            <img src="https://i.pravatar.cc/84?img=59" alt="Photo de Theo" class="testimonial-avatar" loading="lazy">
+            <div>
+              <p class="testimonial-name">Theo R.</p>
+              <p class="testimonial-meta">26 ans, Toulouse — 62 jours sans fumer</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="section-team" id="team">
+    <div class="container">
+      <div class="team-header">
+        <p class="section-label reveal">L'equipe</p>
+        <h2 class="section-heading reveal reveal-delay-1">Deux entrepreneurs,<br>un meme constat.</h2>
+      </div>
+      <div class="team-grid">
+        <div class="team-card reveal">
+          <div class="team-card-header">
+            <div class="team-avatar team-avatar--gg">GG</div>
+            <div>
+              <p class="team-name">Gregoire Guillot</p>
+              <p class="team-role">Co-fondateur — Commercial & Strategie</p>
+            </div>
+          </div>
+          <div class="team-tags">
+            <span class="team-tag">Strategie & Commercial</span>
+            <span class="team-tag">Partenariats sante</span>
+          </div>
+          <p class="team-bio">Entrepreneur avec une experience solide dans la creation de plateformes digitales a impact. Chez VIRAGE, il pilote la strategie commerciale, les partenariats avec les professionnels de sante et les dossiers de financement.</p>
+          <p class="team-quote">L'idee est nee d'un ami proche tombe dans l'addiction. On a voulu faire quelque chose d'utile avec ca.</p>
+        </div>
+        <div class="team-card reveal reveal-delay-1">
+          <div class="team-card-header">
+            <div class="team-avatar team-avatar--pm">PM</div>
+            <div>
+              <p class="team-name">Paul Michel</p>
+              <p class="team-role">Co-fondateur — Produit & Technique</p>
+            </div>
+          </div>
+          <div class="team-tags">
+            <span class="team-tag">Produit & Tech</span>
+            <span class="team-tag">Architecture IA</span>
+          </div>
+          <p class="team-bio">Entrepreneur tech avec une expertise en developpement produit et en intelligence artificielle. Il porte la vision technique de VIRAGE et construit l'architecture de la plateforme.</p>
+          <p class="team-quote">On construit l'outil qu'on aurait voulu trouver : simple, complet et qui respecte ses utilisateurs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST -->
+  <section class="section-trust" id="trust">
+    <div class="container">
+      <div class="trust-header">
+        <p class="section-label reveal">Nos engagements</p>
+        <h2 class="section-heading reveal reveal-delay-1">Construit pour meriter ta confiance.</h2>
+      </div>
+      <div class="trust-grid">
+        <div class="trust-card reveal">
+          <div class="trust-icon">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="trust-title">IA + expertise medicale</h3>
+          <p class="trust-desc">L'IA accompagne au quotidien, les professionnels de sante supervisent. Addictologues et tabacologues sont integres a la plateforme.</p>
+        </div>
+        <div class="trust-card reveal reveal-delay-1">
+          <div class="trust-icon">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="trust-title">Donnees protegees</h3>
+          <p class="trust-desc">Conforme RGPD, hebergement en France, chiffrement de bout en bout. Tes donnees t'appartiennent, point final.</p>
+        </div>
+        <div class="trust-card reveal reveal-delay-2">
+          <div class="trust-icon">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h3 class="trust-title">Gratuit au lancement</h3>
+          <p class="trust-desc">Modele freemium accessible a tous. L'aide au sevrage ne devrait pas etre un luxe reserve a ceux qui peuvent se le payer.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section-faq" id="faq">
+    <div class="container">
+      <div class="faq-header">
+        <p class="section-label reveal">Questions frequentes</p>
+        <h2 class="section-heading reveal reveal-delay-1">Tout ce que tu veux savoir.</h2>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item reveal">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            VIRAGE est-il un dispositif medical ?
+            <svg class="faq-chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p class="faq-answer-inner">VIRAGE est une plateforme d'accompagnement au sevrage, pas un dispositif medical au sens reglementaire. Cela dit, des professionnels de sante (addictologues, tabacologues) sont directement accessibles depuis l'app pour un suivi medical. L'IA et l'expertise humaine se completent.</p>
+          </div>
+        </div>
+        <div class="faq-item reveal reveal-delay-1">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Quelles substances sont couvertes ?
+            <svg class="faq-chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p class="faq-answer-inner">VIRAGE accompagne le sevrage de trois substances : le tabac (cigarettes), le cannabis et le vaping (cigarettes electroniques, puffs). C'est la seule plateforme francaise a couvrir ces trois addictions dans une seule interface, avec acces a des substituts nicotiniques et de la teleconsultation.</p>
+          </div>
+        </div>
+        <div class="faq-item reveal reveal-delay-2">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Comment fonctionne le coach IA ?
+            <svg class="faq-chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p class="faq-answer-inner">Le coach IA engage des conversations naturelles, apprend tes habitudes, identifie tes declencheurs et te propose des strategies personnalisees. Il n'utilise pas de scripts pre-ecrits : chaque echange est unique et adapte a ta situation. Et si tu as besoin d'un avis medical, il peut te rediriger vers un professionnel de sante directement dans l'app.</p>
+          </div>
+        </div>
+        <div class="faq-item reveal reveal-delay-3">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            C'est vraiment gratuit ?
+            <svg class="faq-chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p class="faq-answer-inner">Au lancement, oui. VIRAGE fonctionnera sur un modele freemium : les fonctionnalites essentielles (coach IA, compteur, economies) seront gratuites. La teleconsultation et la marketplace de substituts nicotiniques seront disponibles a des tarifs accessibles.</p>
+          </div>
+        </div>
+        <div class="faq-item reveal reveal-delay-4">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Mes donnees sont-elles en securite ?
+            <svg class="faq-chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p class="faq-answer-inner">Oui. Toutes les donnees sont hebergees en France, conformement au RGPD. Tes conversations avec le coach IA sont chiffrees et ne sont jamais partagees avec des tiers. Tu peux supprimer l'integralite de tes donnees a tout moment depuis l'application.</p>
+          </div>
+        </div>
+        <div class="faq-item reveal reveal-delay-5">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Quand l'application sera-t-elle disponible ?
+            <svg class="faq-chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p class="faq-answer-inner">Le lancement est prevu courant 2026 sur iOS et Android. En t'inscrivant a la liste d'attente, tu seras parmi les premiers a y acceder et tu pourras participer a la phase de beta-test.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="section-cta" id="contact">
+    <div class="hero-grid-bg"></div>
+    <div class="cta-glow"></div>
+    <div class="cta-content reveal">
+      <h2 class="cta-heading">Pret a prendre le virage ?</h2>
+      <p class="cta-subheading">Laisse ton email pour etre informe du lancement et faire partie des premiers utilisateurs.</p>
+      <form class="cta-form" onsubmit="handleSubmit(event)">
+        <input type="email" class="cta-input" placeholder="ton@email.com" required aria-label="Adresse email">
+        <button type="submit" class="cta-submit">Je m'inscris</button>
+      </form>
+      <p class="cta-note">Lancement prevu 2026. Aucun spam, promis.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">
+          <svg viewBox="0 0 340 70" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:28px;width:auto;">
+            <defs><linearGradient id="footer-g" x1="0" y1="0.5" x2="1" y2="0.5"><stop offset="0%" stop-color="rgba(255,255,255,0.08)"/><stop offset="35%" stop-color="#52B788"/><stop offset="100%" stop-color="#2D6A4F"/></linearGradient></defs>
+            <rect x="4" y="11" width="68" height="48" rx="24" fill="url(#footer-g)"/>
+            <circle cx="48" cy="35" r="18" fill="white"/>
+            <circle cx="48" cy="35" r="6" fill="#52B788"/>
+            <circle cx="48" cy="35" r="2.5" fill="#0d1117"/>
+            <circle cx="48" cy="35" r="10.5" stroke="#52B788" stroke-width="0.6" fill="none" opacity="0.2"/>
+            <text x="90" y="48" font-family="Outfit, sans-serif" font-weight="700" font-size="42" letter-spacing="5" fill="rgba(255,255,255,0.85)">VIRAGE</text>
+          </svg>
+        </div>
+        <p class="footer-desc">Application d'aide au sevrage tabac, cannabis et vaping. Concue pour les 18-35 ans, par des 18-35 ans.</p>
+        <div class="footer-socials">
+          <a href="#" class="footer-social" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a href="#" class="footer-social" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <p class="footer-column-title">Produit</p>
+        <ul class="footer-links">
+          <li><a href="#features">Fonctionnalites</a></li>
+          <li><a href="#how">Comment ca marche</a></li>
+          <li><a href="#approach">Notre approche</a></li>
+          <li><a href="#contact">Liste d'attente</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-column-title">Ressources</p>
+        <ul class="footer-links">
+          <li><a href="#">Blog</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#">Presse</a></li>
+          <li><a href="#">Professionnels de sante</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-column-title">Contact</p>
+        <ul class="footer-links">
+          <li><a href="mailto:contact@virage.one">contact@virage.one</a></li>
+          <li><a href="#">Partenariats</a></li>
+          <li><a href="#">Carrieres</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>2026 VIRAGE. Tous droits reserves.</p>
+      <div class="footer-legal">
+        <a href="#">Mentions legales</a>
+        <a href="#">Confidentialite</a>
+        <a href="#">CGU</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // Nav scroll
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+    }, { passive: true });
+
+    // Mobile menu
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('open');
+    });
+
+    function closeMobile() {
+      hamburger.classList.remove('active');
+      mobileMenu.classList.remove('open');
+    }
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Counter animation
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.dataset.target);
+          const duration = 2000;
+          const start = performance.now();
+
+          function update(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(target * eased);
+
+            if (target >= 1000) {
+              el.textContent = current.toLocaleString('fr-FR');
+            } else {
+              el.textContent = current;
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(update);
+            }
+          }
+
+          requestAnimationFrame(update);
+          counterObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.counter-animate').forEach(el => counterObserver.observe(el));
+
+    // FAQ toggle
+    function toggleFaq(btn) {
+      const item = btn.parentElement;
+      const wasOpen = item.classList.contains('open');
+
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+
+      if (!wasOpen) {
+        item.classList.add('open');
+      }
+    }
+
+    // Form
+    function handleSubmit(e) {
+      e.preventDefault();
+      const input = e.target.querySelector('input');
+      const btn = e.target.querySelector('button');
+      const original = btn.textContent;
+      btn.textContent = 'Merci !';
+      btn.style.background = 'var(--color-primary)';
+      btn.style.color = '#fff';
+      input.value = '';
+      input.disabled = true;
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.style.background = '';
+        btn.style.color = '';
+        input.disabled = false;
+        btn.disabled = false;
+      }, 4000);
+    }
+  </script>
+
+</body>
+</html>
