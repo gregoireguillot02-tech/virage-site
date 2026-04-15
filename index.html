@@ -1309,8 +1309,8 @@
     }
 
     .team-avatar {
-      width: 60px;
-      height: 60px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -1320,12 +1320,42 @@
       font-size: 1.125rem;
       color: var(--color-white);
       flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+      box-shadow: 0 8px 24px rgba(45, 106, 79, 0.18), inset 0 0 0 2px rgba(255,255,255,0.08);
+      transition: transform 450ms var(--ease-apple), box-shadow 450ms var(--ease-apple);
     }
 
-    .team-avatar--gg { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); }
-    .team-avatar--pm { background: linear-gradient(135deg, var(--color-terracotta), #d9946d); }
-    .team-avatar { transition: transform 450ms var(--ease-apple); }
-    .team-card:hover .team-avatar { transform: rotate(-4deg) scale(1.04); }
+    .team-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: grayscale(100%) contrast(1.02) brightness(0.98);
+      transition: filter 500ms var(--ease-apple), transform 500ms var(--ease-apple);
+      mix-blend-mode: luminosity;
+    }
+
+    .team-avatar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(45, 106, 79, 0.28), rgba(82, 183, 136, 0.12));
+      pointer-events: none;
+      transition: opacity 500ms var(--ease-apple);
+    }
+
+    .team-card:hover .team-avatar {
+      transform: rotate(-4deg) scale(1.06);
+      box-shadow: 0 14px 36px rgba(45, 106, 79, 0.28), inset 0 0 0 2px rgba(255,255,255,0.12);
+    }
+    .team-card:hover .team-avatar img {
+      filter: grayscale(0%) contrast(1) brightness(1);
+      transform: scale(1.05);
+    }
+    .team-card:hover .team-avatar::after { opacity: 0; }
 
     .team-name {
       font-family: var(--font-heading);
@@ -2246,7 +2276,9 @@
       <div class="team-grid">
         <div class="team-card reveal">
           <div class="team-card-header">
-            <div class="team-avatar team-avatar--gg">GG</div>
+            <div class="team-avatar team-avatar--gg">
+              <img src="/gregoire.jpeg" alt="Portrait de Grégoire Guillot" loading="lazy">
+            </div>
             <div>
               <p class="team-name">Grégoire Guillot</p>
               <p class="team-role">Co-fondateur — Commercial & Stratégie</p>
@@ -2261,7 +2293,9 @@
         </div>
         <div class="team-card reveal reveal-delay-1">
           <div class="team-card-header">
-            <div class="team-avatar team-avatar--pm">PM</div>
+            <div class="team-avatar team-avatar--pm">
+              <img src="/paul.jpeg" alt="Portrait de Paul Michel" loading="lazy">
+            </div>
             <div>
               <p class="team-name">Paul Michel</p>
               <p class="team-role">Co-fondateur — Produit & Technique</p>
