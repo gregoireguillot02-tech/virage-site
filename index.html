@@ -14,7 +14,9 @@
   <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cipxesubpcpsqplcqnus.supabase.co" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
       --color-primary: #2D6A4F;
@@ -1523,7 +1525,32 @@
 
     .cta-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(224, 159, 62, 0.35); }
 
-    .cta-note { font-size: 0.8125rem; color: rgba(255,255,255,0.3); margin-top: var(--space-4); }
+    .cta-note { font-size: 0.8125rem; color: rgba(255,255,255,0.3); margin-top: var(--space-4); transition: color 300ms var(--ease-apple); }
+    .cta-note.success { color: var(--color-primary-light); }
+    .cta-note.error { color: #ff9b9b; }
+
+    .cta-consent {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      max-width: 460px;
+      margin: var(--space-4) auto 0;
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.45);
+      text-align: left;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+    .cta-consent input[type="checkbox"] {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      accent-color: var(--color-primary-light);
+      cursor: pointer;
+    }
+    .cta-consent a { color: rgba(255,255,255,0.7); text-decoration: underline; transition: color var(--transition-fast); }
+    .cta-consent a:hover { color: var(--color-white); }
 
     /* ===========================
        FOOTER
@@ -2286,11 +2313,15 @@
     <div class="cta-content reveal">
       <h2 class="cta-heading">Prêt à prendre le virage ?</h2>
       <p class="cta-subheading">Laisse ton email pour être informé du lancement et faire partie des premiers utilisateurs.</p>
-      <form class="cta-form" onsubmit="handleSubmit(event)">
-        <input type="email" class="cta-input" placeholder="ton@email.com" required aria-label="Adresse email">
-        <button type="submit" class="cta-submit">Je m'inscris</button>
+      <form class="cta-form" id="waitlistForm">
+        <input type="email" name="email" class="cta-input" placeholder="ton@email.com" required aria-label="Adresse email" autocomplete="email">
+        <button type="submit" class="cta-submit" id="waitlistSubmit">Je m'inscris</button>
       </form>
-      <p class="cta-note">Lancement prévu 2026. Aucun spam, promis.</p>
+      <label class="cta-consent">
+        <input type="checkbox" id="waitlistConsent" required>
+        <span>J'accepte que mon email soit utilisé pour m'informer du lancement de VIRAGE. <a href="/confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a></span>
+      </label>
+      <p class="cta-note" id="waitlistNote">Lancement prévu 2026. Aucun spam, promis.</p>
     </div>
   </section>
 
@@ -2349,8 +2380,8 @@
     <div class="footer-bottom">
       <p>2026 VIRAGE. Tous droits réservés.</p>
       <div class="footer-legal">
-        <a href="#">Mentions légales</a>
-        <a href="#">Confidentialité</a>
+        <a href="/confidentialite.html">Mentions légales</a>
+        <a href="/confidentialite.html">Confidentialité</a>
         <a href="#">CGU</a>
       </div>
     </div>
@@ -2550,25 +2581,90 @@
       }
     }
 
-    // Form
-    function handleSubmit(e) {
-      e.preventDefault();
-      const input = e.target.querySelector('input');
-      const btn = e.target.querySelector('button');
-      const original = btn.textContent;
-      btn.textContent = 'Merci !';
-      btn.style.background = 'var(--color-primary)';
-      btn.style.color = '#fff';
-      input.value = '';
-      input.disabled = true;
-      btn.disabled = true;
-      setTimeout(() => {
-        btn.textContent = original;
-        btn.style.background = '';
-        btn.style.color = '';
-        input.disabled = false;
-        btn.disabled = false;
-      }, 4000);
+    // ============================================================
+    // WAITLIST FORM — Supabase integration
+    // ============================================================
+    const SUPABASE_URL = 'https://cipxesubpcpsqplcqnus.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_RxZ3ClMgOkAgGO409P--qQ_2ZNZTR9-';
+
+    const waitlistForm = document.getElementById('waitlistForm');
+    const waitlistSubmit = document.getElementById('waitlistSubmit');
+    const waitlistConsent = document.getElementById('waitlistConsent');
+    const waitlistNote = document.getElementById('waitlistNote');
+    const waitlistInput = waitlistForm ? waitlistForm.querySelector('input[type="email"]') : null;
+
+    function setNote(msg, state) {
+      if (!waitlistNote) return;
+      waitlistNote.textContent = msg;
+      waitlistNote.classList.remove('success', 'error');
+      if (state) waitlistNote.classList.add(state);
+    }
+
+    async function submitWaitlist(email) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          email: email.toLowerCase().trim(),
+          source: 'website',
+          user_agent: navigator.userAgent,
+          consent_rgpd: true
+        })
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(body || `HTTP ${res.status}`);
+      }
+    }
+
+    if (waitlistForm) {
+      waitlistForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = waitlistInput.value.trim();
+        if (!email) return;
+        if (!waitlistConsent.checked) {
+          setNote('Merci de cocher la case de consentement.', 'error');
+          return;
+        }
+
+        const originalLabel = waitlistSubmit.textContent;
+        waitlistSubmit.disabled = true;
+        waitlistInput.disabled = true;
+        waitlistSubmit.textContent = 'Envoi...';
+        setNote('');
+
+        try {
+          await submitWaitlist(email);
+          waitlistSubmit.textContent = 'Merci !';
+          waitlistSubmit.style.background = 'var(--color-primary-light)';
+          waitlistSubmit.style.color = '#fff';
+          waitlistInput.value = '';
+          setNote('Ton email est enregistré. A bientôt.', 'success');
+        } catch (err) {
+          const msg = (err.message || '').toLowerCase();
+          if (msg.includes('duplicate') || msg.includes('unique') || msg.includes('23505')) {
+            waitlistSubmit.textContent = 'Déjà inscrit';
+            setNote('Cet email est déjà inscrit. A bientôt.', 'success');
+          } else {
+            waitlistSubmit.textContent = 'Réessayer';
+            setNote('Une erreur est survenue. Merci de réessayer dans un instant.', 'error');
+            console.error('Waitlist error:', err);
+          }
+        } finally {
+          setTimeout(() => {
+            waitlistSubmit.textContent = originalLabel;
+            waitlistSubmit.style.background = '';
+            waitlistSubmit.style.color = '';
+            waitlistSubmit.disabled = false;
+            waitlistInput.disabled = false;
+          }, 5000);
+        }
+      });
     }
   </script>
 
