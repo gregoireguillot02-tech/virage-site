@@ -388,6 +388,64 @@
     /* Parallax layers */
     .parallax { will-change: transform; transform: translate3d(0, 0, 0); }
 
+    /* Scroll progress indicator */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      z-index: 2000;
+      pointer-events: none;
+    }
+    .scroll-progress__bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-accent) 100%);
+      transform-origin: left center;
+      transform: scaleX(0);
+      transition: transform 120ms linear;
+      box-shadow: 0 0 12px rgba(82, 183, 136, 0.4);
+    }
+
+    /* Hero mouse-follow spotlight */
+    .hero-spotlight {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(
+        600px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(82, 183, 136, 0.12),
+        transparent 40%
+      );
+      opacity: 0;
+      transition: opacity 500ms var(--ease-apple);
+      z-index: 0;
+    }
+    .hero:hover .hero-spotlight { opacity: 1; }
+
+    /* 3D tilt containers */
+    .tilt-wrap {
+      perspective: 1200px;
+      transform-style: preserve-3d;
+    }
+    .tilt-target {
+      transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transition: transform 400ms var(--ease-apple);
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .tilt-target.is-tilting { transition: none; }
+
+    /* Magnetic buttons */
+    .magnetic {
+      display: inline-flex;
+      transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
+      transition: transform 400ms var(--ease-apple);
+      will-change: transform;
+    }
+    .magnetic.is-moving { transition: transform 120ms linear; }
+
     .hero-overline {
       font-family: var(--font-body);
       font-size: 0.8125rem;
@@ -1001,8 +1059,17 @@
       transition: transform var(--transition-slower);
     }
 
-    .feature-card:hover { box-shadow: 0 14px 48px rgba(0,0,0,0.08); transform: translate3d(0, -6px, 0); border-color: transparent; }
+    .feature-card {
+      transform: translate3d(0, 0, 0) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transform-style: preserve-3d;
+    }
+    .feature-card:hover {
+      box-shadow: 0 18px 56px rgba(0,0,0,0.1);
+      transform: translate3d(0, -6px, 0) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      border-color: transparent;
+    }
     .feature-card:hover::before { transform: scaleX(1); }
+    .features-grid { perspective: 1400px; }
 
     .feature-icon {
       width: 52px;
@@ -1719,6 +1786,9 @@
 </head>
 <body>
 
+  <!-- SCROLL PROGRESS -->
+  <div class="scroll-progress" aria-hidden="true"><div class="scroll-progress__bar" id="scrollProgressBar"></div></div>
+
   <!-- NAVIGATION -->
   <nav class="nav" id="nav">
     <div class="nav-inner">
@@ -1771,6 +1841,7 @@
 
   <!-- HERO -->
   <section class="hero" id="hero">
+    <div class="hero-spotlight" aria-hidden="true"></div>
     <div class="hero-grid-bg parallax" data-speed="0.08"></div>
     <div class="hero-glow-1 parallax" data-speed="0.22"></div>
     <div class="hero-glow-2 parallax" data-speed="-0.14"></div>
@@ -1789,7 +1860,7 @@
           Tout ce dont tu as besoin pour décrocher, au même endroit. Coach IA, suivi, téléconsultation, substituts. VIRAGE t'accompagne avec bienveillance, sans pression.
         </p>
         <div class="hero-actions hero-reveal" style="animation-delay:1.1s">
-          <a href="#contact" class="btn-primary">Rejoindre la liste d'attente</a>
+          <a href="#contact" class="btn-primary magnetic" data-magnetic>Rejoindre la liste d'attente</a>
           <a href="#how" class="btn-secondary">Découvrir l'approche</a>
         </div>
         <div class="hero-proof hero-reveal" style="animation-delay:1.25s">
@@ -1805,8 +1876,8 @@
           </p>
         </div>
       </div>
-      <div class="hero-visual hero-reveal" style="animation-delay:0.4s">
-        <div style="position:relative;" class="parallax" data-speed="-0.1">
+      <div class="hero-visual hero-reveal tilt-wrap" style="animation-delay:0.4s" data-tilt>
+        <div style="position:relative;" class="parallax tilt-target" data-speed="-0.1">
           <div class="hero-float hero-float--1">
             <div class="hero-float-icon" style="background: var(--color-primary-pale);">
               <svg viewBox="0 0 24 24" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
@@ -1937,7 +2008,7 @@
       <h2 class="section-heading reveal reveal-delay-1">La première plateforme qui réunit tout ton parcours de sevrage.</h2>
       <p class="section-subheading reveal reveal-delay-2">Coach IA, téléconsultation avec des professionnels de santé, marketplace de substituts, suivi personnalisé. Plus besoin de jongler entre dix apps et trois sites.</p>
       <div class="features-grid">
-        <div class="feature-card reveal">
+        <div class="feature-card reveal" data-tilt="subtle">
           <div class="feature-icon" style="background: var(--color-primary-pale);">
             <svg viewBox="0 0 24 24" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -1946,7 +2017,7 @@
           <h3 class="feature-title">Coach IA personnalisé</h3>
           <p class="feature-desc">Des conversations naturelles, pas des scripts. Le coach s'adapte à ton rythme, tes habitudes et tes moments de fragilité. Disponible quand tu en as besoin.</p>
         </div>
-        <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-card reveal reveal-delay-1" data-tilt="subtle">
           <div class="feature-icon" style="background: var(--color-accent-light);">
             <svg viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -1955,7 +2026,7 @@
           <h3 class="feature-title">Compteur d'abstinence</h3>
           <p class="feature-desc">Chaque jour compte. Visualise ta progression en temps réel et célèbre chaque étape franchie, même les plus petites.</p>
         </div>
-        <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-card reveal reveal-delay-2" data-tilt="subtle">
           <div class="feature-icon" style="background: #E8F0FE;">
             <svg viewBox="0 0 24 24" stroke="var(--color-info)" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -1964,7 +2035,7 @@
           <h3 class="feature-title">Économies visualisées</h3>
           <p class="feature-desc">Vois concrètement l'argent que tu économises chaque semaine. Un paquet par jour, c'est plus de 4 000 euros par an.</p>
         </div>
-        <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-card reveal reveal-delay-3" data-tilt="subtle">
           <div class="feature-icon" style="background: #FFF0E6;">
             <svg viewBox="0 0 24 24" stroke="var(--color-terracotta)" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -1973,7 +2044,7 @@
           <h3 class="feature-title">Système de récompenses</h3>
           <p class="feature-desc">Motivation par paliers et badges. Chaque victoire est reconnue. Parce que le sevrage, c'est aussi apprendre à se féliciter.</p>
         </div>
-        <div class="feature-card reveal reveal-delay-4">
+        <div class="feature-card reveal reveal-delay-4" data-tilt="subtle">
           <div class="feature-icon" style="background: var(--color-primary-pale);">
             <svg viewBox="0 0 24 24" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round">
               <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
@@ -1982,7 +2053,7 @@
           <h3 class="feature-title">Marketplace de substituts</h3>
           <p class="feature-desc">Patchs, gommes, pastilles : commande tes substituts nicotiniques directement depuis l'app. Livrés chez toi, sans courir en pharmacie.</p>
         </div>
-        <div class="feature-card reveal reveal-delay-5">
+        <div class="feature-card reveal reveal-delay-5" data-tilt="subtle">
           <div class="feature-icon" style="background: var(--color-accent-light);">
             <svg viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -2067,7 +2138,7 @@
             <img src="https://i.pravatar.cc/84?img=33" alt="Photo de Lucas" class="testimonial-avatar" loading="lazy">
             <div>
               <p class="testimonial-name">Lucas M.</p>
-              <p class="testimonial-meta">24 ans, Paris — 21 jours sans fumer</p>
+              <p class="testimonial-meta">24 ans, Paris — <span class="counter-animate" data-target="21" data-duration="1800">0</span> jours sans fumer</p>
             </div>
           </div>
         </div>
@@ -2085,7 +2156,7 @@
             <img src="https://i.pravatar.cc/84?img=47" alt="Photo de Sarah" class="testimonial-avatar" loading="lazy">
             <div>
               <p class="testimonial-name">Sarah K.</p>
-              <p class="testimonial-meta">22 ans, Lyon — 35 jours sans vaper</p>
+              <p class="testimonial-meta">22 ans, Lyon — <span class="counter-animate" data-target="35" data-duration="1800">0</span> jours sans vaper</p>
             </div>
           </div>
         </div>
@@ -2103,7 +2174,7 @@
             <img src="https://i.pravatar.cc/84?img=12" alt="Photo de Mehdi" class="testimonial-avatar" loading="lazy">
             <div>
               <p class="testimonial-name">Mehdi B.</p>
-              <p class="testimonial-meta">27 ans, Bordeaux — 14 jours sans cannabis</p>
+              <p class="testimonial-meta">27 ans, Bordeaux — <span class="counter-animate" data-target="14" data-duration="1800">0</span> jours sans cannabis</p>
             </div>
           </div>
         </div>
@@ -2121,7 +2192,7 @@
             <img src="https://i.pravatar.cc/84?img=26" alt="Photo de Emma" class="testimonial-avatar" loading="lazy">
             <div>
               <p class="testimonial-name">Emma L.</p>
-              <p class="testimonial-meta">20 ans, Marseille — 7 jours sans fumer</p>
+              <p class="testimonial-meta">20 ans, Marseille — <span class="counter-animate" data-target="7" data-duration="1600">0</span> jours sans fumer</p>
             </div>
           </div>
         </div>
@@ -2139,7 +2210,7 @@
             <img src="https://i.pravatar.cc/84?img=52" alt="Photo de Antoine" class="testimonial-avatar" loading="lazy">
             <div>
               <p class="testimonial-name">Antoine D.</p>
-              <p class="testimonial-meta">29 ans, Nantes — 45 jours sans fumer</p>
+              <p class="testimonial-meta">29 ans, Nantes — <span class="counter-animate" data-target="45" data-duration="1800">0</span> jours sans fumer</p>
             </div>
           </div>
         </div>
@@ -2157,7 +2228,7 @@
             <img src="https://i.pravatar.cc/84?img=59" alt="Photo de Theo" class="testimonial-avatar" loading="lazy">
             <div>
               <p class="testimonial-name">Theo R.</p>
-              <p class="testimonial-meta">26 ans, Toulouse — 62 jours sans fumer</p>
+              <p class="testimonial-meta">26 ans, Toulouse — <span class="counter-animate" data-target="62" data-duration="1800">0</span> jours sans fumer</p>
             </div>
           </div>
         </div>
@@ -2567,6 +2638,110 @@
         if (!parallaxTicking) { requestAnimationFrame(updateParallax); parallaxTicking = true; }
       }, { passive: true });
       updateParallax();
+    }
+
+    // ============================================================
+    // SCROLL PROGRESS BAR
+    // ============================================================
+    const scrollBar = document.getElementById('scrollProgressBar');
+    if (scrollBar) {
+      let progressTicking = false;
+      function updateProgress() {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0;
+        scrollBar.style.transform = `scaleX(${pct.toFixed(3)})`;
+        progressTicking = false;
+      }
+      window.addEventListener('scroll', () => {
+        if (!progressTicking) { requestAnimationFrame(updateProgress); progressTicking = true; }
+      }, { passive: true });
+      updateProgress();
+    }
+
+    // ============================================================
+    // HERO — mouse-follow spotlight
+    // ============================================================
+    if (!prefersReduced) {
+      const heroEl = document.getElementById('hero');
+      if (heroEl) {
+        heroEl.addEventListener('mousemove', (e) => {
+          const rect = heroEl.getBoundingClientRect();
+          const mx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+          const my = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+          heroEl.style.setProperty('--mx', mx + '%');
+          heroEl.style.setProperty('--my', my + '%');
+        });
+      }
+    }
+
+    // ============================================================
+    // 3D TILT — phone mockup and cards
+    // ============================================================
+    if (!prefersReduced && window.matchMedia('(hover: hover)').matches) {
+      function attachTilt(el) {
+        const subtle = el.dataset.tilt === 'subtle';
+        const maxDeg = subtle ? 6 : 10;
+        const target = el.classList.contains('tilt-wrap') ? el.querySelector('.tilt-target') : el;
+        if (!target) return;
+
+        let rafId = null;
+        let tx = 0, ty = 0, targetX = 0, targetY = 0;
+
+        function animate() {
+          tx += (targetX - tx) * 0.18;
+          ty += (targetY - ty) * 0.18;
+          target.style.setProperty('--tilt-x', tx.toFixed(2) + 'deg');
+          target.style.setProperty('--tilt-y', ty.toFixed(2) + 'deg');
+          if (Math.abs(targetX - tx) > 0.01 || Math.abs(targetY - ty) > 0.01) {
+            rafId = requestAnimationFrame(animate);
+          } else {
+            rafId = null;
+          }
+        }
+
+        el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const cx = (e.clientX - rect.left) / rect.width;
+          const cy = (e.clientY - rect.top) / rect.height;
+          targetY = (cx - 0.5) * 2 * maxDeg;
+          targetX = -(cy - 0.5) * 2 * maxDeg;
+          target.classList.add('is-tilting');
+          if (!rafId) rafId = requestAnimationFrame(animate);
+        });
+
+        el.addEventListener('mouseleave', () => {
+          targetX = 0;
+          targetY = 0;
+          target.classList.remove('is-tilting');
+          if (!rafId) rafId = requestAnimationFrame(animate);
+        });
+      }
+
+      document.querySelectorAll('[data-tilt]').forEach(attachTilt);
+    }
+
+    // ============================================================
+    // MAGNETIC BUTTONS
+    // ============================================================
+    if (!prefersReduced && window.matchMedia('(hover: hover)').matches) {
+      document.querySelectorAll('[data-magnetic]').forEach(btn => {
+        const strength = 0.35;
+        btn.addEventListener('mousemove', (e) => {
+          const rect = btn.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const dx = (e.clientX - cx) * strength;
+          const dy = (e.clientY - cy) * strength;
+          btn.style.setProperty('--mag-x', dx.toFixed(2) + 'px');
+          btn.style.setProperty('--mag-y', dy.toFixed(2) + 'px');
+          btn.classList.add('is-moving');
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.setProperty('--mag-x', '0px');
+          btn.style.setProperty('--mag-y', '0px');
+          btn.classList.remove('is-moving');
+        });
+      });
     }
 
     // FAQ toggle
