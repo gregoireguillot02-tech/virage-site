@@ -27,6 +27,72 @@
       max-width: 1200px;
       margin: 0 auto;
     }
+    /* Login gate */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .login-box {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .login-box h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .login-box .login-sub {
+      font-size: 0.8125rem;
+      color: var(--grey);
+      margin-bottom: 28px;
+    }
+    .login-field {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .login-field:focus {
+      outline: none;
+      border-color: var(--green-light);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .login-btn:hover { background: var(--green-light); }
+    .login-error {
+      color: #D64045;
+      font-size: 0.75rem;
+      margin-top: 12px;
+      display: none;
+    }
+    .app-hidden { display: none !important; }
     h1 {
       font-family: 'Outfit', sans-serif;
       font-size: 1.75rem;
@@ -236,6 +302,23 @@
 </head>
 <body>
 
+  <!-- LOGIN GATE -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <h2>VIRAGE Analytics</h2>
+      <p class="login-sub">Acces reserve aux fondateurs</p>
+      <form id="loginForm">
+        <input type="text" class="login-field" id="loginUser" placeholder="Identifiant" autocomplete="username" required>
+        <input type="password" class="login-field" id="loginPass" placeholder="Mot de passe" autocomplete="current-password" required>
+        <button type="submit" class="login-btn">Se connecter</button>
+        <p class="login-error" id="loginError">Identifiant ou mot de passe incorrect</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP (hidden until auth) -->
+  <div id="app" class="app-hidden">
+
   <div class="header-row">
     <div class="header-left">
       <h1>VIRAGE Analytics</h1>
@@ -255,7 +338,45 @@
     <div class="loading">Chargement des donnees...</div>
   </div>
 
+  </div><!-- /app -->
+
   <script>
+    // ============================================================
+    // AUTH GATE — SHA-256 hash comparison (password not in plain text)
+    // ============================================================
+    var AUTH_HASH = '4ddeaa2454fe1f705196dab138b7bba79f155be1d568068421053d84fc3bb371';
+    var AUTH_SESSION_KEY = 'virage_auth';
+
+    async function sha256(text) {
+      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+
+    function unlockApp() {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('app').classList.remove('app-hidden');
+      loadData();
+    }
+
+    // Check saved session
+    if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'ok') {
+      unlockApp();
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var user = document.getElementById('loginUser').value.trim();
+      var pass = document.getElementById('loginPass').value;
+      var hash = await sha256(user + ':' + pass);
+      if (hash === AUTH_HASH) {
+        sessionStorage.setItem(AUTH_SESSION_KEY, 'ok');
+        unlockApp();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginPass').value = '';
+      }
+    });
+
     const SUPABASE_URL = 'https://cipxesubpcpsqplcqnus.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_RxZ3ClMgOkAgGO409P--qQ_2ZNZTR9-';
     let currentDays = 7;
@@ -477,7 +598,6 @@
         + '</div>';
     }
 
-    loadData();
   </script>
 </body>
 </html>
