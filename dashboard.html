@@ -3,601 +3,637 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIRAGE Analytics</title>
+  <title>VIRAGE Command Center</title>
   <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --green: #2D6A4F;
-      --green-light: #52B788;
-      --green-pale: #D8F3DC;
-      --accent: #E09F3E;
-      --charcoal: #1A1A2E;
-      --slate: #4A4A68;
-      --grey: #8D8DA0;
-      --off-white: #F7F7FA;
-      --white: #FFFFFF;
-      --radius: 12px;
+      --green:#2D6A4F; --green-light:#52B788; --green-pale:#D8F3DC; --green-dark:#1B4332;
+      --accent:#E09F3E; --accent-light:#FFF1D0;
+      --red:#D64045; --blue:#3A86A8;
+      --charcoal:#1A1A2E; --slate:#4A4A68; --grey:#8D8DA0; --grey-light:#C8C8D4;
+      --off-white:#F7F7FA; --white:#FFFFFF;
+      --radius:12px; --radius-lg:16px;
+      --shadow:0 1px 3px rgba(0,0,0,0.06);
+      --shadow-lg:0 4px 20px rgba(0,0,0,0.08);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--off-white);
-      color: var(--charcoal);
-      padding: 32px;
-      max-width: 1200px;
-      margin: 0 auto;
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--off-white);color:var(--charcoal);min-height:100vh}
+
+    /* LOGIN */
+    .login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1B4332,#2D6A4F);display:flex;align-items:center;justify-content:center;z-index:9999}
+    .login-box{background:var(--white);border-radius:var(--radius-lg);padding:48px 40px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+    .login-box h2{font-family:'Outfit',sans-serif;font-size:1.5rem;color:var(--green);margin-bottom:4px}
+    .login-box .login-sub{font-size:.8125rem;color:var(--grey);margin-bottom:28px}
+    .login-field{width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:8px;font-size:.875rem;font-family:inherit;margin-bottom:12px;transition:border-color .2s}
+    .login-field:focus{outline:none;border-color:var(--green-light)}
+    .login-btn{width:100%;padding:12px;background:var(--green);color:var(--white);border:none;border-radius:8px;font-size:.875rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s}
+    .login-btn:hover{background:var(--green-light)}
+    .login-error{color:var(--red);font-size:.75rem;margin-top:12px;display:none}
+    .app-hidden{display:none!important}
+
+    /* LAYOUT */
+    .app-shell{display:flex;min-height:100vh}
+    .sidebar{width:240px;background:var(--green-dark);color:var(--white);padding:24px 0;flex-shrink:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+    .sidebar-brand{padding:0 24px 24px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+    .sidebar-brand h1{font-family:'Outfit',sans-serif;font-size:1.125rem;font-weight:700;letter-spacing:.02em}
+    .sidebar-brand span{font-size:.6875rem;color:rgba(255,255,255,.5);display:block;margin-top:2px}
+    .sidebar-nav{flex:1;padding:8px 12px}
+    .sidebar-nav button{width:100%;text-align:left;background:none;border:none;color:rgba(255,255,255,.6);padding:10px 12px;border-radius:8px;font-size:.8125rem;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;margin-bottom:2px}
+    .sidebar-nav button:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .sidebar-nav button.active{background:rgba(82,183,136,.2);color:var(--green-light);font-weight:600}
+    .sidebar-nav button .nav-icon{width:18px;text-align:center;font-size:.875rem}
+    .sidebar-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,.1);font-size:.6875rem;color:rgba(255,255,255,.3)}
+    .main{margin-left:240px;flex:1;padding:28px 32px;min-width:0}
+
+    /* HEADER */
+    .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .top-bar h2{font-family:'Outfit',sans-serif;font-size:1.375rem;color:var(--charcoal)}
+    .top-bar-actions{display:flex;gap:8px;align-items:center}
+    .period-btn{padding:7px 16px;border:1px solid #ddd;background:var(--white);border-radius:999px;cursor:pointer;font-size:.75rem;font-weight:500;color:var(--slate);transition:all .15s;font-family:inherit}
+    .period-btn:hover{border-color:var(--green-light);color:var(--green)}
+    .period-btn.active{background:var(--green);color:var(--white);border-color:var(--green)}
+    .btn-icon{padding:7px 14px;border:1px solid #ddd;background:var(--white);border-radius:999px;cursor:pointer;font-size:.75rem;font-weight:500;color:var(--slate);transition:all .15s;font-family:inherit}
+    .btn-icon:hover{border-color:var(--green-light);color:var(--green)}
+    .btn-export{padding:7px 14px;border:1px solid var(--accent);background:var(--white);border-radius:999px;cursor:pointer;font-size:.75rem;font-weight:600;color:var(--accent);transition:all .15s;font-family:inherit}
+    .btn-export:hover{background:var(--accent);color:var(--white)}
+
+    /* KPI CARDS */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+    .kpi-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:box-shadow .2s}
+    .kpi-card:hover{box-shadow:var(--shadow-lg)}
+    .kpi-label{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--grey);margin-bottom:6px}
+    .kpi-value{font-family:'Outfit',sans-serif;font-size:1.75rem;font-weight:700;color:var(--charcoal);line-height:1.1}
+    .kpi-trend{font-size:.6875rem;margin-top:6px;font-weight:600;display:flex;align-items:center;gap:4px}
+    .kpi-trend.up{color:#2D6A4F}
+    .kpi-trend.down{color:var(--red)}
+    .kpi-trend.neutral{color:var(--grey)}
+
+    /* CARDS */
+    .cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+    .card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+    .card.full{grid-column:1/-1}
+    .card.third{grid-column:span 1}
+    .card-title{font-weight:600;font-size:.8125rem;color:var(--slate);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+    .card-title .badge{font-size:.625rem;background:var(--green-pale);color:var(--green);padding:3px 8px;border-radius:999px;font-weight:600}
+
+    /* CHART CONTAINERS */
+    .chart-wrap{position:relative;width:100%}
+    .chart-wrap.h200{height:200px}
+    .chart-wrap.h250{height:250px}
+    .chart-wrap.h300{height:300px}
+    .chart-wrap.h180{height:180px}
+
+    /* HEATMAP */
+    .heatmap{display:grid;grid-template-columns:40px repeat(7,1fr);gap:3px;font-size:.625rem}
+    .heatmap-label{display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:var(--grey);font-weight:500}
+    .heatmap-header{text-align:center;color:var(--grey);font-weight:600;padding:4px 0}
+    .heatmap-cell{border-radius:4px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--charcoal);transition:transform .15s;cursor:default;font-size:.625rem}
+    .heatmap-cell:hover{transform:scale(1.15);z-index:1}
+
+    /* FUNNEL */
+    .funnel{display:flex;flex-direction:column;gap:8px;padding:8px 0}
+    .funnel-step{display:flex;align-items:center;gap:16px}
+    .funnel-bar-wrap{flex:1;position:relative}
+    .funnel-bar{height:44px;border-radius:8px;display:flex;align-items:center;padding:0 16px;font-weight:600;font-size:.8125rem;color:var(--white);transition:width .6s ease}
+    .funnel-label{width:100px;font-size:.75rem;color:var(--slate);font-weight:500;text-align:right;flex-shrink:0}
+    .funnel-value{width:80px;font-size:.8125rem;font-weight:700;color:var(--charcoal);text-align:right;flex-shrink:0}
+    .funnel-rate{font-size:.6875rem;color:var(--grey);margin-left:4px}
+
+    /* TABLES */
+    .table-wrap{overflow-x:auto;max-height:400px;overflow-y:auto}
+    table{width:100%;border-collapse:collapse;font-size:.8125rem}
+    th{position:sticky;top:0;background:var(--white);text-align:left;padding:10px 12px;border-bottom:2px solid var(--off-white);color:var(--grey);font-weight:600;font-size:.6875rem;text-transform:uppercase;letter-spacing:.04em;z-index:1}
+    td{padding:10px 12px;border-bottom:1px solid var(--off-white);color:var(--slate)}
+    tr:hover td{background:rgba(82,183,136,.04)}
+    .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.6875rem;font-weight:600}
+    .tag-green{background:var(--green-pale);color:var(--green)}
+    .tag-accent{background:var(--accent-light);color:#b8872e}
+    .tag-grey{background:#eee;color:var(--slate)}
+
+    /* LIVE PULSE */
+    .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* EMPTY STATE */
+    .empty{text-align:center;padding:40px 20px;color:var(--grey);font-size:.8125rem}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .sidebar{display:none}
+      .main{margin-left:0}
+      .cards-grid{grid-template-columns:1fr}
+      .card.full,.card.third{grid-column:1}
     }
-    /* Login gate */
-    .login-overlay {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
+    @media(max-width:600px){
+      .main{padding:16px}
+      .kpi-grid{grid-template-columns:1fr 1fr}
     }
-    .login-box {
-      background: var(--white);
-      border-radius: 16px;
-      padding: 48px 40px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      text-align: center;
-    }
-    .login-box h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.5rem;
-      color: var(--green);
-      margin-bottom: 6px;
-    }
-    .login-box .login-sub {
-      font-size: 0.8125rem;
-      color: var(--grey);
-      margin-bottom: 28px;
-    }
-    .login-field {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-family: inherit;
-      margin-bottom: 12px;
-      transition: border-color 0.2s;
-    }
-    .login-field:focus {
-      outline: none;
-      border-color: var(--green-light);
-    }
-    .login-btn {
-      width: 100%;
-      padding: 12px;
-      background: var(--green);
-      color: var(--white);
-      border: none;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: background 0.2s;
-    }
-    .login-btn:hover { background: var(--green-light); }
-    .login-error {
-      color: #D64045;
-      font-size: 0.75rem;
-      margin-top: 12px;
-      display: none;
-    }
-    .app-hidden { display: none !important; }
-    h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.75rem;
-      color: var(--green);
-      margin-bottom: 8px;
-    }
-    .subtitle { color: var(--grey); font-size: 0.875rem; margin-bottom: 32px; }
-    .period-selector {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-    .period-btn {
-      padding: 8px 20px;
-      border: 1px solid #ddd;
-      background: var(--white);
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--slate);
-      transition: all 0.2s;
-    }
-    .period-btn:hover { border-color: var(--green-light); color: var(--green); }
-    .period-btn.active {
-      background: var(--green);
-      color: var(--white);
-      border-color: var(--green);
-    }
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    .kpi-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .kpi-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--grey);
-      margin-bottom: 8px;
-    }
-    .kpi-value {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--charcoal);
-    }
-    .kpi-sub {
-      font-size: 0.75rem;
-      color: var(--grey);
-      margin-top: 4px;
-    }
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    @media (max-width: 768px) {
-      .charts-grid { grid-template-columns: 1fr; }
-      body { padding: 16px; }
-    }
-    .chart-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .chart-card.full { grid-column: 1 / -1; }
-    .chart-title {
-      font-weight: 600;
-      font-size: 0.875rem;
-      margin-bottom: 16px;
-      color: var(--slate);
-    }
-    .bar-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 0.8125rem;
-    }
-    .bar-label {
-      width: 120px;
-      flex-shrink: 0;
-      color: var(--slate);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .bar-track {
-      flex: 1;
-      height: 24px;
-      background: var(--off-white);
-      border-radius: 6px;
-      overflow: hidden;
-      margin: 0 12px;
-    }
-    .bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--green), var(--green-light));
-      border-radius: 6px;
-      min-width: 2px;
-      transition: width 0.5s ease;
-    }
-    .bar-count {
-      width: 40px;
-      text-align: right;
-      font-weight: 600;
-      color: var(--charcoal);
-      flex-shrink: 0;
-    }
-    .daily-chart {
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      height: 160px;
-      padding-top: 16px;
-    }
-    .daily-bar-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100%;
-      justify-content: flex-end;
-    }
-    .daily-bar {
-      width: 100%;
-      max-width: 40px;
-      background: linear-gradient(180deg, var(--green-light), var(--green));
-      border-radius: 4px 4px 0 0;
-      min-height: 2px;
-      transition: height 0.5s ease;
-    }
-    .daily-label {
-      font-size: 0.625rem;
-      color: var(--grey);
-      margin-top: 6px;
-      text-align: center;
-    }
-    .daily-count {
-      font-size: 0.625rem;
-      color: var(--slate);
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .loading {
-      text-align: center;
-      padding: 60px;
-      color: var(--grey);
-    }
-    .refresh-btn {
-      padding: 8px 20px;
-      border: 1px solid var(--green);
-      background: var(--white);
-      color: var(--green);
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      transition: all 0.2s;
-      margin-left: auto;
-    }
-    .refresh-btn:hover {
-      background: var(--green);
-      color: var(--white);
-    }
-    .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 32px;
-    }
-    .header-left { flex: 1; }
-    .table-wrap { overflow-x: auto; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8125rem;
-    }
-    th {
-      text-align: left;
-      padding: 10px 12px;
-      border-bottom: 2px solid var(--off-white);
-      color: var(--grey);
-      font-weight: 600;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--off-white);
-      color: var(--slate);
-    }
-    tr:hover td { background: rgba(82,183,136,0.04); }
+
+    /* PAGE SECTIONS */
+    .page{display:none}
+    .page.active{display:block}
   </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- LOGIN GATE -->
-  <div class="login-overlay" id="loginOverlay">
-    <div class="login-box">
-      <h2>VIRAGE Analytics</h2>
-      <p class="login-sub">Acces reserve aux fondateurs</p>
-      <form id="loginForm">
-        <input type="text" class="login-field" id="loginUser" placeholder="Identifiant" autocomplete="username" required>
-        <input type="password" class="login-field" id="loginPass" placeholder="Mot de passe" autocomplete="current-password" required>
-        <button type="submit" class="login-btn">Se connecter</button>
-        <p class="login-error" id="loginError">Identifiant ou mot de passe incorrect</p>
-      </form>
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>VIRAGE Command Center</h2>
+    <p class="login-sub">Espace de pilotage reserve aux fondateurs</p>
+    <form id="loginForm">
+      <input type="text" class="login-field" id="loginUser" placeholder="Identifiant" autocomplete="username" required>
+      <input type="password" class="login-field" id="loginPass" placeholder="Mot de passe" autocomplete="current-password" required>
+      <button type="submit" class="login-btn">Se connecter</button>
+      <p class="login-error" id="loginError">Identifiant ou mot de passe incorrect</p>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app-shell app-hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>VIRAGE</h1>
+      <span>Command Center</span>
     </div>
-  </div>
-
-  <!-- APP (hidden until auth) -->
-  <div id="app" class="app-hidden">
-
-  <div class="header-row">
-    <div class="header-left">
-      <h1>VIRAGE Analytics</h1>
-      <p class="subtitle" id="dateRange">Chargement...</p>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button class="active" data-page="overview"><span class="nav-icon">&#9670;</span>Vue d'ensemble</button>
+      <button data-page="traffic"><span class="nav-icon">&#9656;</span>Trafic &amp; Acquisition</button>
+      <button data-page="audience"><span class="nav-icon">&#9673;</span>Audience</button>
+      <button data-page="crm"><span class="nav-icon">&#9733;</span>CRM Waitlist</button>
+      <button data-page="pro"><span class="nav-icon">&#9879;</span>CRM Pro Sante</button>
+      <button data-page="conversions"><span class="nav-icon">&#9660;</span>Conversions</button>
+      <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
+    </nav>
+    <div class="sidebar-footer">
+      v2.0 &middot; Donnees Supabase<br>Aucun cookie, RGPD-friendly
     </div>
-    <button class="refresh-btn" onclick="loadData()">Actualiser</button>
-  </div>
+  </aside>
 
-  <div class="period-selector">
-    <button class="period-btn active" data-days="7">7 jours</button>
-    <button class="period-btn" data-days="30">30 jours</button>
-    <button class="period-btn" data-days="90">90 jours</button>
-    <button class="period-btn" data-days="0">Tout</button>
-  </div>
+  <!-- MAIN -->
+  <main class="main">
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <h2 id="pageTitle">Vue d'ensemble</h2>
+      <div class="top-bar-actions">
+        <button class="period-btn active" data-days="7">7j</button>
+        <button class="period-btn" data-days="30">30j</button>
+        <button class="period-btn" data-days="90">90j</button>
+        <button class="period-btn" data-days="0">Tout</button>
+        <button class="btn-icon" onclick="loadAllData()" title="Actualiser">&#8635;</button>
+      </div>
+    </div>
 
-  <div id="content">
-    <div class="loading">Chargement des donnees...</div>
-  </div>
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="cards-grid">
+        <div class="card full"><div class="card-title">Visites et visiteurs par jour</div><div class="chart-wrap h250"><canvas id="chartDailyOverview"></canvas></div></div>
+        <div class="card"><div class="card-title">Sources de trafic</div><div class="chart-wrap h200"><canvas id="chartSourcesOverview"></canvas></div></div>
+        <div class="card"><div class="card-title">Inscriptions waitlist</div><div class="chart-wrap h200"><canvas id="chartWaitlistOverview"></canvas></div></div>
+      </div>
+    </div>
 
-  </div><!-- /app -->
+    <!-- TRAFFIC -->
+    <div class="page" id="page-traffic">
+      <div class="cards-grid">
+        <div class="card full"><div class="card-title">Visites par jour <span class="badge" id="badgeTotalViews"></span></div><div class="chart-wrap h250"><canvas id="chartDailyTraffic"></canvas></div></div>
+        <div class="card"><div class="card-title">Top sources (referrers)</div><div class="chart-wrap h250"><canvas id="chartReferrers"></canvas></div></div>
+        <div class="card"><div class="card-title">Campagnes UTM</div><div id="utmTable"></div></div>
+        <div class="card full"><div class="card-title">Heatmap : trafic par heure et jour de la semaine</div><div id="heatmapContainer"></div></div>
+      </div>
+    </div>
 
-  <script>
-    // ============================================================
-    // AUTH GATE — SHA-256 hash comparison (password not in plain text)
-    // ============================================================
-    var AUTH_HASH = '4ddeaa2454fe1f705196dab138b7bba79f155be1d568068421053d84fc3bb371';
-    var AUTH_SESSION_KEY = 'virage_auth';
+    <!-- AUDIENCE -->
+    <div class="page" id="page-audience">
+      <div class="cards-grid">
+        <div class="card"><div class="card-title">Appareils</div><div class="chart-wrap h200"><canvas id="chartDevices"></canvas></div></div>
+        <div class="card"><div class="card-title">Navigateurs</div><div class="chart-wrap h200"><canvas id="chartBrowsers"></canvas></div></div>
+        <div class="card"><div class="card-title">Resolutions ecran</div><div class="chart-wrap h200"><canvas id="chartScreens"></canvas></div></div>
+        <div class="card"><div class="card-title">Nouveaux vs Retours</div><div class="chart-wrap h200"><canvas id="chartNewReturn"></canvas></div></div>
+      </div>
+    </div>
 
-    async function sha256(text) {
-      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-      return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    <!-- CRM WAITLIST -->
+    <div class="page" id="page-crm">
+      <div class="kpi-grid" id="kpiWaitlist"></div>
+      <div class="cards-grid">
+        <div class="card full"><div class="card-title">Inscriptions cumulees <button class="btn-export" onclick="exportCSV('waitlist')">Exporter CSV</button></div><div class="chart-wrap h250"><canvas id="chartWaitlistCumul"></canvas></div></div>
+        <div class="card full"><div class="card-title">Liste des inscrits</div><div class="table-wrap" id="waitlistTable"></div></div>
+      </div>
+    </div>
+
+    <!-- CRM PRO -->
+    <div class="page" id="page-pro">
+      <div class="kpi-grid" id="kpiPro"></div>
+      <div class="cards-grid">
+        <div class="card"><div class="card-title">Par profession</div><div class="chart-wrap h200"><canvas id="chartProProfession"></canvas></div></div>
+        <div class="card"><div class="card-title">Par ville</div><div class="chart-wrap h200"><canvas id="chartProVille"></canvas></div></div>
+        <div class="card full"><div class="card-title">Inscriptions pro cumulees <button class="btn-export" onclick="exportCSV('pro')">Exporter CSV</button></div><div class="chart-wrap h250"><canvas id="chartProCumul"></canvas></div></div>
+        <div class="card full"><div class="card-title">Liste des professionnels inscrits</div><div class="table-wrap" id="proTable"></div></div>
+      </div>
+    </div>
+
+    <!-- CONVERSIONS -->
+    <div class="page" id="page-conversions">
+      <div class="cards-grid">
+        <div class="card full"><div class="card-title">Entonnoir de conversion</div><div id="funnelContainer"></div></div>
+        <div class="card"><div class="card-title">Taux de conversion par jour</div><div class="chart-wrap h250"><canvas id="chartConvDaily"></canvas></div></div>
+        <div class="card"><div class="card-title">Conversion par source</div><div class="chart-wrap h250"><canvas id="chartConvSource"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- LIVE -->
+    <div class="page" id="page-live">
+      <div class="kpi-grid" id="kpiLive"></div>
+      <div class="cards-grid">
+        <div class="card full"><div class="card-title"><span><span class="live-dot"></span>Dernieres visites en direct</span><button class="btn-icon" onclick="loadAllData()">&#8635;</button></div><div class="table-wrap" id="liveTable"></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// AUTH
+// ============================================================
+const AUTH_HASH='4ddeaa2454fe1f705196dab138b7bba79f155be1d568068421053d84fc3bb371';
+async function sha256(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+function unlockApp(){document.getElementById('loginOverlay').style.display='none';document.getElementById('app').classList.remove('app-hidden');loadAllData()}
+if(sessionStorage.getItem('virage_auth')==='ok') unlockApp();
+document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value;if(await sha256(u+':'+p)===AUTH_HASH){sessionStorage.setItem('virage_auth','ok');unlockApp()}else{document.getElementById('loginError').style.display='block';document.getElementById('loginPass').value=''}});
+
+// ============================================================
+// CONFIG
+// ============================================================
+const SB_URL='https://cipxesubpcpsqplcqnus.supabase.co';
+const SB_KEY='sb_publishable_RxZ3ClMgOkAgGO409P--qQ_2ZNZTR9-';
+const HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+let currentDays=7, rawViews=[], rawWaitlist=[], rawPro=[];
+let chartInstances={};
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel'};
+document.getElementById('sidebarNav').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;document.querySelectorAll('.sidebar-nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const pg=btn.dataset.page;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+pg).classList.add('active');document.getElementById('pageTitle').textContent=pageTitles[pg]||'';renderAll()});
+document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentDays=parseInt(btn.dataset.days);renderAll()}));
+
+// ============================================================
+// DATA LOADING
+// ============================================================
+async function sbFetch(table,limit=10000){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}`,{headers:HEADERS});
+  if(!r.ok)throw new Error('HTTP '+r.status);return r.json();
+}
+async function loadAllData(){
+  try{
+    const [v,w,p]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist')]);
+    rawViews=v;rawWaitlist=w;rawPro=p;renderAll();
+  }catch(e){console.error(e)}
+}
+
+function filterByDays(arr){
+  if(currentDays===0)return arr;
+  const cutoff=new Date(Date.now()-currentDays*864e5);
+  return arr.filter(r=>new Date(r.created_at)>=cutoff);
+}
+function prevPeriod(arr){
+  if(currentDays===0)return[];
+  const now=Date.now(),cutoff=new Date(now-currentDays*864e5),prevCutoff=new Date(now-currentDays*2*864e5);
+  return arr.filter(r=>{const d=new Date(r.created_at);return d>=prevCutoff&&d<cutoff});
+}
+
+// ============================================================
+// CHART HELPERS
+// ============================================================
+const C_GREEN='rgba(45,106,79,.8)',C_GREEN_L='rgba(82,183,136,.8)',C_GREEN_BG='rgba(82,183,136,.15)',C_ACCENT='rgba(224,159,62,.8)',C_ACCENT_BG='rgba(224,159,62,.15)',C_RED='rgba(214,64,69,.8)',C_BLUE='rgba(58,134,168,.8)',C_BLUE_BG='rgba(58,134,168,.15)';
+const CHART_COLORS=[C_GREEN,C_ACCENT,'rgba(201,123,90,.8)',C_BLUE,C_RED,'rgba(141,141,160,.8)','rgba(82,183,136,.5)','rgba(26,26,46,.6)'];
+const CHART_BGS=['rgba(45,106,79,.12)','rgba(224,159,62,.12)','rgba(201,123,90,.12)','rgba(58,134,168,.12)','rgba(214,64,69,.12)','rgba(141,141,160,.12)','rgba(82,183,136,.08)','rgba(26,26,46,.08)'];
+
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id]}}
+function createChart(id,config){destroyChart(id);const ctx=document.getElementById(id);if(!ctx)return null;chartInstances[id]=new Chart(ctx,config);return chartInstances[id]}
+
+const defaultScales={x:{grid:{display:false},ticks:{font:{size:10},color:'#8D8DA0'}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10},color:'#8D8DA0'}}};
+const defaultPlugins={legend:{display:false},tooltip:{backgroundColor:'#1A1A2E',titleFont:{size:12,family:'Inter'},bodyFont:{size:11,family:'Inter'},cornerRadius:8,padding:10}};
+
+// ============================================================
+// UTILITY
+// ============================================================
+function groupByDay(arr){const m={};arr.forEach(r=>{const d=(r.created_at||'').substring(0,10);if(!m[d])m[d]={count:0,sessions:new Set()};m[d].count++;if(r.session_id)m[d].sessions.add(r.session_id)});return m}
+function countByField(arr,field,fallback){const m={};arr.forEach(r=>{const k=r[field]||fallback||'Inconnu';m[k]=(m[k]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function trendPct(curr,prev){if(prev===0)return curr>0?{pct:'+100%',cls:'up'}:{pct:'--',cls:'neutral'};const p=Math.round((curr-prev)/prev*100);return{pct:(p>=0?'+':'')+p+'%',cls:p>0?'up':p<0?'down':'neutral'}}
+function fmtDate(iso){const d=new Date(iso);return d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+function escHTML(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll(){
+  const views=filterByDays(rawViews), waitlist=filterByDays(rawWaitlist), pro=filterByDays(rawPro);
+  const prevViews=prevPeriod(rawViews), prevWL=prevPeriod(rawWaitlist), prevPR=prevPeriod(rawPro);
+  renderOverview(views,waitlist,pro,prevViews,prevWL,prevPR);
+  renderTraffic(views);
+  renderAudience(views);
+  renderCRM(waitlist,prevWL);
+  renderPro(pro,prevPR);
+  renderConversions(views,waitlist,pro);
+  renderLive();
+}
+
+// ============================================================
+// 1. OVERVIEW
+// ============================================================
+function renderOverview(views,wl,pro,pv,pwl,ppr){
+  const sessions=new Set(views.map(r=>r.session_id)).size;
+  const pSessions=new Set(pv.map(r=>r.session_id)).size;
+  const t1=trendPct(sessions,pSessions), t2=trendPct(views.length,pv.length), t3=trendPct(wl.length,pwl.length), t4=trendPct(pro.length,ppr.length);
+  const mobile=views.filter(r=>r.device==='mobile').length;
+  const mPct=views.length?Math.round(mobile/views.length*100):0;
+  const convPct=sessions>0?(wl.length/sessions*100).toFixed(1):'0';
+
+  document.getElementById('kpiGrid').innerHTML=
+    kpiHTML('Visiteurs uniques',sessions,t1.pct,t1.cls)+
+    kpiHTML('Pages vues',views.length,t2.pct,t2.cls)+
+    kpiHTML('Inscrits waitlist',wl.length,t3.pct,t3.cls)+
+    kpiHTML('Inscrits pro',pro.length,t4.pct,t4.cls)+
+    kpiHTML('Taux conversion',convPct+'%','visiteur &rarr; inscrit','neutral')+
+    kpiHTML('Mobile',mPct+'%',mobile+' visites','neutral');
+
+  // Daily chart
+  const daily=groupByDay(views);
+  const days=Object.keys(daily).sort();
+  createChart('chartDailyOverview',{type:'bar',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Pages vues',data:days.map(d=>daily[d].count),backgroundColor:C_GREEN_BG,borderColor:C_GREEN,borderWidth:1.5,borderRadius:4},{label:'Visiteurs',data:days.map(d=>daily[d].sessions.size),backgroundColor:C_ACCENT_BG,borderColor:C_ACCENT,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:{...defaultPlugins,legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11,family:'Inter'}}}}}});
+
+  // Sources doughnut
+  const sources=countByField(views,'referrer','Direct').slice(0,6);
+  createChart('chartSourcesOverview',{type:'doughnut',data:{labels:sources.map(s=>s[0]),datasets:[{data:sources.map(s=>s[1]),backgroundColor:CHART_COLORS.slice(0,sources.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{...defaultPlugins,legend:{display:true,position:'right',labels:{boxWidth:10,font:{size:10,family:'Inter'},padding:8}}}}});
+
+  // Waitlist mini chart
+  const wlDaily=groupByDay(wl);
+  const wlDays=Object.keys(wlDaily).sort();
+  let cumul=0;const wlCumul=wlDays.map(d=>{cumul+=wlDaily[d].count;return cumul});
+  createChart('chartWaitlistOverview',{type:'line',data:{labels:wlDays.map(d=>d.substring(5)),datasets:[{label:'Total inscrits',data:wlCumul,borderColor:C_GREEN,backgroundColor:C_GREEN_BG,fill:true,tension:.3,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:defaultPlugins}});
+}
+
+function kpiHTML(label,value,trend,cls){
+  return `<div class="kpi-card"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div><div class="kpi-trend ${cls}">${trend}</div></div>`;
+}
+
+// ============================================================
+// 2. TRAFFIC
+// ============================================================
+function renderTraffic(views){
+  document.getElementById('badgeTotalViews').textContent=views.length+' vues';
+  const daily=groupByDay(views);
+  const days=Object.keys(daily).sort();
+
+  createChart('chartDailyTraffic',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Pages vues',data:days.map(d=>daily[d].count),borderColor:C_GREEN,backgroundColor:C_GREEN_BG,fill:true,tension:.3,pointRadius:3,pointHoverRadius:6},{label:'Visiteurs',data:days.map(d=>daily[d].sessions.size),borderColor:C_ACCENT,backgroundColor:'transparent',borderDash:[5,3],tension:.3,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:defaultScales,plugins:{...defaultPlugins,legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11,family:'Inter'}}}}}});
+
+  // Referrers horizontal bar
+  const refs=countByField(views,'referrer','Direct').slice(0,10);
+  createChart('chartReferrers',{type:'bar',data:{labels:refs.map(r=>r[0]),datasets:[{data:refs.map(r=>r[1]),backgroundColor:CHART_COLORS.slice(0,refs.length),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}},plugins:defaultPlugins}});
+
+  // UTM table
+  const utms={};
+  views.forEach(r=>{if(r.utm_source){const k=r.utm_source+(r.utm_medium?' / '+r.utm_medium:'')+(r.utm_campaign?' / '+r.utm_campaign:'');utms[k]=(utms[k]||0)+1}});
+  const utmArr=Object.entries(utms).sort((a,b)=>b[1]-a[1]);
+  if(utmArr.length===0){document.getElementById('utmTable').innerHTML='<div class="empty">Aucune campagne UTM trackee. Ajoutez ?utm_source=xxx a vos liens.</div>'}
+  else{let h='<table><tr><th>Campagne</th><th>Visites</th></tr>';utmArr.forEach(([k,v])=>{h+=`<tr><td>${escHTML(k)}</td><td><strong>${v}</strong></td></tr>`});h+='</table>';document.getElementById('utmTable').innerHTML=h}
+
+  // Heatmap
+  renderHeatmap(views);
+}
+
+function renderHeatmap(views){
+  const dayNames=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const hours=Array.from({length:24},(_,i)=>i);
+  const grid={};
+  views.forEach(r=>{
+    const d=new Date(r.created_at);
+    const day=(d.getDay()+6)%7; // Mon=0
+    const hr=d.getHours();
+    const key=day+'-'+hr;
+    grid[key]=(grid[key]||0)+1;
+  });
+  const maxVal=Math.max(...Object.values(grid),1);
+
+  let html='<div class="heatmap"><div></div>';
+  for(let h=0;h<24;h+=2) html+=`<div class="heatmap-header">${h}h</div>`;
+  // We show every 2 hours to keep it readable
+  for(let d=0;d<7;d++){
+    html+=`<div class="heatmap-label">${dayNames[d]}</div>`;
+    for(let h=0;h<24;h+=2){
+      const v=(grid[d+'-'+h]||0)+(grid[d+'-'+(h+1)]||0);
+      const intensity=maxVal>0?v/maxVal:0;
+      const bg=intensity===0?'#f0f0f0':`rgba(45,106,79,${(.1+intensity*.8).toFixed(2)})`;
+      const color=intensity>.5?'#fff':'var(--charcoal)';
+      html+=`<div class="heatmap-cell" style="background:${bg};color:${color}" title="${dayNames[d]} ${h}h-${h+2}h : ${v} visites">${v||''}</div>`;
     }
+  }
+  html+='</div>';
+  document.getElementById('heatmapContainer').innerHTML=html;
+}
 
-    function unlockApp() {
-      document.getElementById('loginOverlay').style.display = 'none';
-      document.getElementById('app').classList.remove('app-hidden');
-      loadData();
-    }
+// ============================================================
+// 3. AUDIENCE
+// ============================================================
+function renderAudience(views){
+  // Devices
+  const devs=countByField(views,'device','Inconnu');
+  createChart('chartDevices',{type:'doughnut',data:{labels:devs.map(d=>d[0]),datasets:[{data:devs.map(d=>d[1]),backgroundColor:[C_GREEN,C_ACCENT,C_BLUE],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{...defaultPlugins,legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11,family:'Inter'}}}}}});
 
-    // Check saved session
-    if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'ok') {
-      unlockApp();
-    }
+  // Browsers
+  const browsers=countByField(views,'browser','Inconnu').slice(0,6);
+  createChart('chartBrowsers',{type:'bar',data:{labels:browsers.map(b=>b[0]),datasets:[{data:browsers.map(b=>b[1]),backgroundColor:CHART_COLORS.slice(0,browsers.length),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:defaultPlugins}});
 
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      var user = document.getElementById('loginUser').value.trim();
-      var pass = document.getElementById('loginPass').value;
-      var hash = await sha256(user + ':' + pass);
-      if (hash === AUTH_HASH) {
-        sessionStorage.setItem(AUTH_SESSION_KEY, 'ok');
-        unlockApp();
-      } else {
-        document.getElementById('loginError').style.display = 'block';
-        document.getElementById('loginPass').value = '';
-      }
-    });
+  // Screens
+  const screenBuckets={};
+  views.forEach(r=>{
+    const w=r.screen_width||0;
+    let label;
+    if(w<=375) label='Small (<375)';
+    else if(w<=414) label='Medium (375-414)';
+    else if(w<=768) label='Tablet (414-768)';
+    else if(w<=1440) label='Desktop (768-1440)';
+    else label='Large (1440+)';
+    screenBuckets[label]=(screenBuckets[label]||0)+1;
+  });
+  const screens=Object.entries(screenBuckets).sort((a,b)=>b[1]-a[1]);
+  createChart('chartScreens',{type:'doughnut',data:{labels:screens.map(s=>s[0]),datasets:[{data:screens.map(s=>s[1]),backgroundColor:CHART_COLORS.slice(0,screens.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{...defaultPlugins,legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11,family:'Inter'}}}}}});
 
-    const SUPABASE_URL = 'https://cipxesubpcpsqplcqnus.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_RxZ3ClMgOkAgGO409P--qQ_2ZNZTR9-';
-    let currentDays = 7;
-    let allData = [];
+  // New vs Return
+  const sessionFirst={};
+  [...views].reverse().forEach(r=>{if(r.session_id&&!sessionFirst[r.session_id])sessionFirst[r.session_id]=r.created_at});
+  const allSessionIds=new Set(views.map(r=>r.session_id));
+  // A "new" session is one whose first pageview is within the current period
+  const cutoff=currentDays>0?new Date(Date.now()-currentDays*864e5):new Date(0);
+  let newS=0,retS=0;
+  allSessionIds.forEach(sid=>{
+    // Check if this session has any views BEFORE the period
+    const firstView=new Date(sessionFirst[sid]);
+    if(firstView>=cutoff) newS++; else retS++;
+  });
+  createChart('chartNewReturn',{type:'doughnut',data:{labels:['Nouveaux','Retours'],datasets:[{data:[newS,retS],backgroundColor:[C_GREEN,C_ACCENT],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{...defaultPlugins,legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11,family:'Inter'}}}}}});
+}
 
-    // Period selector
-    document.querySelectorAll('.period-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        currentDays = parseInt(btn.dataset.days);
-        render();
-      });
-    });
+// ============================================================
+// 4. CRM WAITLIST
+// ============================================================
+function renderCRM(wl,prev){
+  const t=trendPct(wl.length,prev.length);
+  document.getElementById('kpiWaitlist').innerHTML=
+    kpiHTML('Total inscrits',rawWaitlist.length,'tous temps','neutral')+
+    kpiHTML('Cette periode',wl.length,t.pct,t.cls)+
+    kpiHTML('Dernier inscrit',wl.length>0?fmtDate(wl[0].created_at):'--','','neutral');
 
-    async function loadData() {
-      try {
-        var url = SUPABASE_URL + '/rest/v1/page_views?select=*&order=created_at.desc&limit=10000';
-        var res = await fetch(url, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY
-          }
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        allData = await res.json();
-        render();
-      } catch(e) {
-        document.getElementById('content').innerHTML =
-          '<div class="loading">Erreur de chargement. Verifiez votre connexion.</div>';
-        console.error(e);
-      }
-    }
+  // Cumulative chart
+  const daily=groupByDay(wl);
+  const days=Object.keys(daily).sort();
+  let cumul=0;
+  createChart('chartWaitlistCumul',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Cumul inscrits',data:days.map(d=>{cumul+=daily[d].count;return cumul}),borderColor:C_GREEN,backgroundColor:C_GREEN_BG,fill:true,tension:.3,pointRadius:3},{label:'Par jour',data:days.map(d=>daily[d].count),type:'bar',backgroundColor:C_ACCENT_BG,borderColor:C_ACCENT,borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:{...defaultPlugins,legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11,family:'Inter'}}}}}});
 
-    function render() {
-      var now = new Date();
-      var data = allData;
-      if (currentDays > 0) {
-        var cutoff = new Date(now.getTime() - currentDays * 86400000);
-        data = allData.filter(function(r) { return new Date(r.created_at) >= cutoff; });
-      }
+  // Table
+  let h='<table><tr><th>Date</th><th>Email</th><th>Source</th></tr>';
+  wl.forEach(r=>{h+=`<tr><td>${fmtDate(r.created_at)}</td><td>${escHTML(r.email)}</td><td><span class="tag tag-green">${escHTML(r.source||'website')}</span></td></tr>`});
+  if(wl.length===0) h+='<tr><td colspan="3" class="empty">Aucun inscrit sur cette periode</td></tr>';
+  h+='</table>';
+  document.getElementById('waitlistTable').innerHTML=h;
+}
 
-      var periodLabel = currentDays > 0
-        ? 'Derniers ' + currentDays + ' jours'
-        : 'Depuis le debut';
-      document.getElementById('dateRange').textContent = periodLabel + ' — ' + data.length + ' page views';
+// ============================================================
+// 5. CRM PRO
+// ============================================================
+function renderPro(pro,prev){
+  const t=trendPct(pro.length,prev.length);
+  const professions=countByField(pro,'profession','Non renseigne');
+  const villes=countByField(pro,'ville','Non renseignee');
 
-      // KPIs
-      var uniqueSessions = new Set(data.map(function(r) { return r.session_id; })).size;
-      var pageViews = data.length;
-      var mobileCount = data.filter(function(r) { return r.device === 'mobile'; }).length;
-      var mobilePercent = pageViews > 0 ? Math.round(mobileCount / pageViews * 100) : 0;
-      var withReferrer = data.filter(function(r) { return r.referrer; }).length;
-      var organicPercent = pageViews > 0 ? Math.round((pageViews - withReferrer) / pageViews * 100) : 0;
+  document.getElementById('kpiPro').innerHTML=
+    kpiHTML('Total pro inscrits',rawPro.length,'tous temps','neutral')+
+    kpiHTML('Cette periode',pro.length,t.pct,t.cls)+
+    kpiHTML('Top profession',professions.length>0?professions[0][0]:'--',professions.length>0?professions[0][1]+' inscrits':'','neutral')+
+    kpiHTML('Top ville',villes.length>0?villes[0][0]:'--',villes.length>0?villes[0][1]+' inscrits':'','neutral');
 
-      // Pages per session
-      var sessionMap = {};
-      data.forEach(function(r) {
-        if (!sessionMap[r.session_id]) sessionMap[r.session_id] = 0;
-        sessionMap[r.session_id]++;
-      });
-      var sessionCounts = Object.values(sessionMap);
-      var avgPages = sessionCounts.length > 0
-        ? (sessionCounts.reduce(function(a,b) { return a+b; }, 0) / sessionCounts.length).toFixed(1)
-        : '0';
+  // Profession chart
+  const topProf=professions.slice(0,8);
+  createChart('chartProProfession',{type:'bar',data:{labels:topProf.map(p=>p[0]),datasets:[{data:topProf.map(p=>p[1]),backgroundColor:CHART_COLORS.slice(0,topProf.length),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}},plugins:defaultPlugins}});
 
-      // Group by day
-      var dailyMap = {};
-      data.forEach(function(r) {
-        var day = r.created_at.substring(0, 10);
-        if (!dailyMap[day]) dailyMap[day] = { views: 0, sessions: new Set() };
-        dailyMap[day].views++;
-        dailyMap[day].sessions.add(r.session_id);
-      });
+  // Ville chart
+  const topVille=villes.slice(0,8);
+  createChart('chartProVille',{type:'bar',data:{labels:topVille.map(v=>v[0]),datasets:[{data:topVille.map(v=>v[1]),backgroundColor:CHART_COLORS.slice(0,topVille.length),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}},plugins:defaultPlugins}});
 
-      var days = Object.keys(dailyMap).sort();
-      var maxViews = Math.max.apply(null, days.map(function(d) { return dailyMap[d].views; }).concat([1]));
+  // Cumul
+  const daily=groupByDay(pro);
+  const days=Object.keys(daily).sort();
+  let cumul=0;
+  createChart('chartProCumul',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Cumul pro',data:days.map(d=>{cumul+=daily[d].count;return cumul}),borderColor:C_ACCENT,backgroundColor:C_ACCENT_BG,fill:true,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:defaultPlugins}});
 
-      // Top referrers
-      var refMap = {};
-      data.forEach(function(r) {
-        var ref = r.referrer || 'Direct';
-        if (!refMap[ref]) refMap[ref] = 0;
-        refMap[ref]++;
-      });
-      var topRefs = Object.entries(refMap).sort(function(a,b) { return b[1] - a[1]; }).slice(0, 8);
-      var maxRef = topRefs.length > 0 ? topRefs[0][1] : 1;
+  // Table
+  let h='<table><tr><th>Date</th><th>Email</th><th>Profession</th><th>Ville</th></tr>';
+  pro.forEach(r=>{h+=`<tr><td>${fmtDate(r.created_at)}</td><td>${escHTML(r.email)}</td><td><span class="tag tag-accent">${escHTML(r.profession)}</span></td><td>${escHTML(r.ville)}</td></tr>`});
+  if(pro.length===0) h+='<tr><td colspan="4" class="empty">Aucun pro inscrit sur cette periode</td></tr>';
+  h+='</table>';
+  document.getElementById('proTable').innerHTML=h;
+}
 
-      // Top browsers
-      var browserMap = {};
-      data.forEach(function(r) {
-        var b = r.browser || 'Inconnu';
-        if (!browserMap[b]) browserMap[b] = 0;
-        browserMap[b]++;
-      });
-      var topBrowsers = Object.entries(browserMap).sort(function(a,b) { return b[1] - a[1]; }).slice(0, 6);
-      var maxBrowser = topBrowsers.length > 0 ? topBrowsers[0][1] : 1;
+// ============================================================
+// 6. CONVERSIONS
+// ============================================================
+function renderConversions(views,wl,pro){
+  const sessions=new Set(views.map(r=>r.session_id)).size;
+  const wlCount=wl.length, proCount=pro.length;
 
-      // Device split
-      var deviceMap = {};
-      data.forEach(function(r) {
-        var d = r.device || 'Inconnu';
-        if (!deviceMap[d]) deviceMap[d] = 0;
-        deviceMap[d]++;
-      });
-      var topDevices = Object.entries(deviceMap).sort(function(a,b) { return b[1] - a[1]; });
-      var maxDevice = topDevices.length > 0 ? topDevices[0][1] : 1;
+  // Funnel
+  const maxFunnel=Math.max(sessions,1);
+  const steps=[
+    {label:'Visiteurs',value:sessions,color:C_GREEN},
+    {label:'Inscrits waitlist',value:wlCount,color:C_ACCENT},
+    {label:'Inscrits pro',value:proCount,color:C_BLUE}
+  ];
+  let fhtml='<div class="funnel">';
+  steps.forEach((s,i)=>{
+    const pct=Math.max(5,s.value/maxFunnel*100);
+    const rate=i>0&&steps[i-1].value>0?(s.value/steps[i-1].value*100).toFixed(1)+'%':'';
+    fhtml+=`<div class="funnel-step"><div class="funnel-label">${s.label}</div><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${pct}%;background:${s.color}">${s.value}</div></div><div class="funnel-value">${rate?'<span class="funnel-rate">'+rate+'</span>':''}</div></div>`;
+  });
+  fhtml+='</div>';
+  document.getElementById('funnelContainer').innerHTML=fhtml;
 
-      // UTM campaigns
-      var utmMap = {};
-      data.forEach(function(r) {
-        if (r.utm_source) {
-          var key = r.utm_source + (r.utm_medium ? ' / ' + r.utm_medium : '');
-          if (r.utm_campaign) key += ' / ' + r.utm_campaign;
-          if (!utmMap[key]) utmMap[key] = 0;
-          utmMap[key]++;
-        }
-      });
-      var topUtm = Object.entries(utmMap).sort(function(a,b) { return b[1] - a[1]; }).slice(0, 8);
-      var maxUtm = topUtm.length > 0 ? topUtm[0][1] : 1;
+  // Daily conversion rate
+  const viewsDaily=groupByDay(views), wlDaily=groupByDay(wl);
+  const allDays=[...new Set([...Object.keys(viewsDaily),...Object.keys(wlDaily)])].sort();
+  const convRates=allDays.map(d=>{
+    const vis=(viewsDaily[d]?viewsDaily[d].sessions.size:0);
+    const ins=(wlDaily[d]?wlDaily[d].count:0);
+    return vis>0?parseFloat((ins/vis*100).toFixed(1)):0;
+  });
+  createChart('chartConvDaily',{type:'line',data:{labels:allDays.map(d=>d.substring(5)),datasets:[{label:'Taux conversion %',data:convRates,borderColor:C_GREEN,backgroundColor:C_GREEN_BG,fill:true,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{...defaultScales,y:{...defaultScales.y,ticks:{...defaultScales.y.ticks,callback:v=>v+'%'}}},plugins:defaultPlugins}});
 
-      // Render
-      var html = '';
+  // Conversion by source
+  const refSessions={}, refConv={};
+  views.forEach(r=>{const ref=r.referrer||'Direct';if(!refSessions[ref])refSessions[ref]=new Set();refSessions[ref].add(r.session_id)});
+  wl.forEach(r=>{const src=r.source||'website';refConv[src]=(refConv[src]||0)+1});
+  // Show conversion for each known referrer
+  const refArr=Object.entries(refSessions).map(([ref,set])=>({ref,sessions:set.size})).sort((a,b)=>b.sessions-a.sessions).slice(0,8);
+  createChart('chartConvSource',{type:'bar',data:{labels:refArr.map(r=>r.ref),datasets:[{label:'Visiteurs',data:refArr.map(r=>r.sessions),backgroundColor:C_GREEN_BG,borderColor:C_GREEN,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:{...defaultPlugins,legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11,family:'Inter'}}}}}});
+}
 
-      // KPI cards
-      html += '<div class="kpi-grid">';
-      html += kpiCard('Visiteurs uniques', uniqueSessions, 'sessions distinctes');
-      html += kpiCard('Pages vues', pageViews, 'total');
-      html += kpiCard('Pages / session', avgPages, 'moyenne');
-      html += kpiCard('Mobile', mobilePercent + '%', mobileCount + ' sur ' + pageViews);
-      html += kpiCard('Trafic direct', organicPercent + '%', 'sans referrer');
-      html += '</div>';
+// ============================================================
+// 7. LIVE
+// ============================================================
+function renderLive(){
+  const now=new Date();
+  const today=rawViews.filter(r=>new Date(r.created_at).toDateString()===now.toDateString());
+  const lastHour=rawViews.filter(r=>new Date(r.created_at)>=new Date(now-36e5));
+  const sessionsToday=new Set(today.map(r=>r.session_id)).size;
 
-      // Daily chart
-      html += '<div class="charts-grid">';
-      html += '<div class="chart-card full"><div class="chart-title">Visites par jour</div>';
-      html += '<div class="daily-chart">';
-      days.forEach(function(d) {
-        var v = dailyMap[d].views;
-        var s = dailyMap[d].sessions.size;
-        var h = Math.max(2, Math.round(v / maxViews * 140));
-        var label = d.substring(5);
-        html += '<div class="daily-bar-wrapper">';
-        html += '<div class="daily-count">' + v + '</div>';
-        html += '<div class="daily-bar" style="height:' + h + 'px" title="' + d + ': ' + v + ' vues, ' + s + ' visiteurs"></div>';
-        html += '<div class="daily-label">' + label + '</div>';
-        html += '</div>';
-      });
-      if (days.length === 0) html += '<div class="loading">Aucune donnee sur cette periode</div>';
-      html += '</div></div>';
+  document.getElementById('kpiLive').innerHTML=
+    kpiHTML("<span class='live-dot'></span>Aujourd'hui",today.length+' vues',sessionsToday+' visiteurs','neutral')+
+    kpiHTML('Derniere heure',lastHour.length+' vues',new Set(lastHour.map(r=>r.session_id)).size+' visiteurs','neutral')+
+    kpiHTML('Derniere visite',rawViews.length>0?fmtDate(rawViews[0].created_at):'--','','neutral');
 
-      // Referrers
-      html += '<div class="chart-card"><div class="chart-title">Sources de trafic</div>';
-      if (topRefs.length === 0) html += '<div class="loading">Aucune donnee</div>';
-      topRefs.forEach(function(r) {
-        html += barRow(r[0], r[1], maxRef);
-      });
-      html += '</div>';
+  const recent=rawViews.slice(0,50);
+  let h='<table><tr><th>Heure</th><th>Page</th><th>Source</th><th>Appareil</th><th>Navigateur</th><th>Ecran</th></tr>';
+  recent.forEach(r=>{
+    const d=new Date(r.created_at);
+    const isToday=d.toDateString()===now.toDateString();
+    const time=isToday?d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):fmtDate(r.created_at);
+    h+=`<tr><td>${time}</td><td>${escHTML(r.page||'/')}</td><td>${escHTML(r.referrer||'Direct')}</td><td><span class="tag ${r.device==='mobile'?'tag-accent':'tag-green'}">${escHTML(r.device)}</span></td><td>${escHTML(r.browser)}</td><td>${r.screen_width||'-'}px</td></tr>`;
+  });
+  h+='</table>';
+  document.getElementById('liveTable').innerHTML=h;
+}
 
-      // Browsers
-      html += '<div class="chart-card"><div class="chart-title">Navigateurs</div>';
-      topBrowsers.forEach(function(r) {
-        html += barRow(r[0], r[1], maxBrowser);
-      });
-      html += '</div>';
-
-      // Devices
-      html += '<div class="chart-card"><div class="chart-title">Appareils</div>';
-      topDevices.forEach(function(r) {
-        html += barRow(r[0], r[1], maxDevice);
-      });
-      html += '</div>';
-
-      // UTM campaigns
-      html += '<div class="chart-card"><div class="chart-title">Campagnes UTM</div>';
-      if (topUtm.length === 0) html += '<div class="loading">Aucune campagne trackee</div>';
-      topUtm.forEach(function(r) {
-        html += barRow(r[0], r[1], maxUtm);
-      });
-      html += '</div>';
-
-      html += '</div>';
-
-      // Recent views table
-      var recent = data.slice(0, 30);
-      html += '<div class="chart-card" style="grid-column:1/-1"><div class="chart-title">Dernieres visites</div>';
-      html += '<div class="table-wrap"><table>';
-      html += '<tr><th>Date</th><th>Page</th><th>Source</th><th>Appareil</th><th>Navigateur</th></tr>';
-      recent.forEach(function(r) {
-        var dt = new Date(r.created_at);
-        var dateStr = dt.toLocaleDateString('fr-FR') + ' ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-        html += '<tr>';
-        html += '<td>' + dateStr + '</td>';
-        html += '<td>' + (r.page || '/') + '</td>';
-        html += '<td>' + (r.referrer || 'Direct') + '</td>';
-        html += '<td>' + (r.device || '-') + '</td>';
-        html += '<td>' + (r.browser || '-') + '</td>';
-        html += '</tr>';
-      });
-      html += '</table></div></div>';
-
-      document.getElementById('content').innerHTML = html;
-    }
-
-    function kpiCard(label, value, sub) {
-      return '<div class="kpi-card">'
-        + '<div class="kpi-label">' + label + '</div>'
-        + '<div class="kpi-value">' + value + '</div>'
-        + '<div class="kpi-sub">' + sub + '</div>'
-        + '</div>';
-    }
-
-    function barRow(label, count, max) {
-      var pct = Math.round(count / max * 100);
-      return '<div class="bar-row">'
-        + '<span class="bar-label" title="' + label + '">' + label + '</span>'
-        + '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>'
-        + '<span class="bar-count">' + count + '</span>'
-        + '</div>';
-    }
-
-  </script>
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV(type){
+  let data,filename,headers;
+  if(type==='waitlist'){
+    data=rawWaitlist;filename='virage-waitlist.csv';headers=['date','email','source'];
+  }else{
+    data=rawPro;filename='virage-pro.csv';headers=['date','email','profession','ville'];
+  }
+  let csv=headers.join(',')+'\n';
+  data.forEach(r=>{
+    const row=type==='waitlist'
+      ?[r.created_at,r.email,r.source||'website']
+      :[r.created_at,r.email,r.profession,r.ville];
+    csv+=row.map(v=>'"'+(v||'').replace(/"/g,'""')+'"').join(',')+'\n';
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
 </body>
 </html>
