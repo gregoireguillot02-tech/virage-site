@@ -120,16 +120,58 @@
     /* EMPTY STATE */
     .empty{text-align:center;padding:40px 20px;color:var(--grey);font-size:.8125rem}
 
+    /* MOBILE NAV */
+    .mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:var(--green-dark);z-index:200;align-items:center;padding:0 16px;justify-content:space-between}
+    .mobile-header h1{font-family:'Outfit',sans-serif;font-size:1rem;color:var(--white);font-weight:700}
+    .mobile-header-actions{display:flex;gap:8px;align-items:center}
+    .mobile-header button{background:none;border:none;color:rgba(255,255,255,.7);font-size:1.25rem;cursor:pointer;padding:6px;border-radius:8px;transition:all .15s;font-family:inherit}
+    .mobile-header button:hover{color:var(--white);background:rgba(255,255,255,.1)}
+    .mobile-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250}
+    .mobile-menu-overlay.open{display:block}
+    .mobile-menu{position:fixed;top:0;right:0;bottom:0;width:260px;background:var(--green-dark);z-index:300;transform:translateX(100%);transition:transform .25s ease;padding:24px 0;display:flex;flex-direction:column}
+    .mobile-menu.open{transform:translateX(0)}
+    .mobile-menu-header{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between}
+    .mobile-menu-header h2{font-family:'Outfit',sans-serif;font-size:1rem;color:var(--white)}
+    .mobile-menu-header button{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.5rem;cursor:pointer;padding:4px}
+    .mobile-menu-nav{flex:1;padding:12px;overflow-y:auto}
+    .mobile-menu-nav button{width:100%;text-align:left;background:none;border:none;color:rgba(255,255,255,.6);padding:12px 14px;border-radius:10px;font-size:.875rem;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+    .mobile-menu-nav button:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .mobile-menu-nav button.active{background:rgba(82,183,136,.2);color:var(--green-light);font-weight:600}
+    .mobile-menu-nav button .nav-icon{width:20px;text-align:center}
+    .mobile-period{padding:12px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.1)}
+    .mobile-period button{padding:6px 14px;border:1px solid rgba(255,255,255,.2);background:none;border-radius:999px;cursor:pointer;font-size:.75rem;font-weight:500;color:rgba(255,255,255,.6);font-family:inherit;transition:all .15s}
+    .mobile-period button.active{background:var(--green-light);color:var(--green-dark);border-color:var(--green-light)}
+
     /* RESPONSIVE */
     @media(max-width:900px){
       .sidebar{display:none}
-      .main{margin-left:0}
+      .mobile-header{display:flex}
+      .main{margin-left:0;padding:72px 16px 24px}
       .cards-grid{grid-template-columns:1fr}
       .card.full,.card.third{grid-column:1}
+      .top-bar{display:none}
+      .kpi-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .kpi-card{padding:14px}
+      .kpi-value{font-size:1.375rem}
+      .kpi-label{font-size:.625rem}
+      .card{padding:16px}
+      .card-title{font-size:.75rem;flex-wrap:wrap;gap:8px}
+      .chart-wrap.h250{height:200px}
+      .chart-wrap.h200{height:180px}
+      .heatmap{grid-template-columns:30px repeat(7,1fr);gap:2px;font-size:.5rem}
+      .heatmap-cell{font-size:.5rem}
+      .funnel-step{gap:8px}
+      .funnel-label{width:70px;font-size:.6875rem}
+      .funnel-bar{height:36px;padding:0 10px;font-size:.75rem}
+      .funnel-value{width:50px;font-size:.75rem}
+      table{font-size:.6875rem}
+      th,td{padding:8px 8px}
+      .login-box{padding:32px 24px;margin:16px}
     }
-    @media(max-width:600px){
-      .main{padding:16px}
-      .kpi-grid{grid-template-columns:1fr 1fr}
+    @media(max-width:380px){
+      .kpi-grid{grid-template-columns:1fr}
+      .main{padding:64px 12px 20px}
+      .cards-grid{gap:10px}
     }
 
     /* PAGE SECTIONS */
@@ -155,6 +197,39 @@
 
 <!-- APP -->
 <div id="app" class="app-shell app-hidden">
+
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header">
+    <h1>VIRAGE</h1>
+    <div class="mobile-header-actions">
+      <button onclick="loadAllData()" title="Actualiser">&#8635;</button>
+      <button onclick="openMobileMenu()" title="Menu">&#9776;</button>
+    </div>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <h2>Command Center</h2>
+      <button onclick="closeMobileMenu()">&times;</button>
+    </div>
+    <nav class="mobile-menu-nav" id="mobileNav">
+      <button class="active" data-page="overview"><span class="nav-icon">&#9670;</span>Vue d'ensemble</button>
+      <button data-page="traffic"><span class="nav-icon">&#9656;</span>Trafic &amp; Acquisition</button>
+      <button data-page="audience"><span class="nav-icon">&#9673;</span>Audience</button>
+      <button data-page="crm"><span class="nav-icon">&#9733;</span>CRM Waitlist</button>
+      <button data-page="pro"><span class="nav-icon">&#9879;</span>CRM Pro Sante</button>
+      <button data-page="conversions"><span class="nav-icon">&#9660;</span>Conversions</button>
+      <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
+    </nav>
+    <div class="mobile-period" id="mobilePeriod">
+      <button class="active" data-days="7">7j</button>
+      <button data-days="30">30j</button>
+      <button data-days="90">90j</button>
+      <button data-days="0">Tout</button>
+    </div>
+  </div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -283,8 +358,34 @@ let chartInstances={};
 // NAVIGATION
 // ============================================================
 const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel'};
-document.getElementById('sidebarNav').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;document.querySelectorAll('.sidebar-nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const pg=btn.dataset.page;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+pg).classList.add('active');document.getElementById('pageTitle').textContent=pageTitles[pg]||'';renderAll()});
-document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentDays=parseInt(btn.dataset.days);renderAll()}));
+
+function navigateTo(pg){
+  document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[data-page="'+pg+'"]').forEach(b=>b.classList.add('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pg).classList.add('active');
+  document.getElementById('pageTitle').textContent=pageTitles[pg]||'';
+  renderAll();
+}
+
+function setPeriod(days){
+  currentDays=days;
+  document.querySelectorAll('.period-btn, .mobile-period button').forEach(b=>{
+    b.classList.toggle('active',parseInt(b.dataset.days)===days);
+  });
+  renderAll();
+}
+
+// Sidebar nav
+document.getElementById('sidebarNav').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;navigateTo(btn.dataset.page)});
+// Desktop period buttons
+document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>setPeriod(parseInt(btn.dataset.days))));
+
+// Mobile menu
+function openMobileMenu(){document.getElementById('mobileMenu').classList.add('open');document.getElementById('mobileMenuOverlay').classList.add('open');document.body.style.overflow='hidden'}
+function closeMobileMenu(){document.getElementById('mobileMenu').classList.remove('open');document.getElementById('mobileMenuOverlay').classList.remove('open');document.body.style.overflow=''}
+document.getElementById('mobileNav').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;navigateTo(btn.dataset.page);closeMobileMenu()});
+document.getElementById('mobilePeriod').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;setPeriod(parseInt(btn.dataset.days));closeMobileMenu()});
 
 // ============================================================
 // DATA LOADING
