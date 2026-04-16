@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://virage.one/sitemap.xml
