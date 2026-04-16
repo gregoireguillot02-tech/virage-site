@@ -1667,6 +1667,247 @@
     .cta-social a:hover { color: var(--color-white); }
 
     /* ===========================
+       SECTION PRO
+       =========================== */
+    .section-pro {
+      padding: var(--space-32) var(--space-6);
+      background: linear-gradient(170deg, #0a1f15 0%, var(--color-primary-dark) 50%, #1a4d38 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-pro .hero-grid-bg { opacity: 0.4; }
+
+    .pro-glow {
+      position: absolute;
+      top: -30%;
+      right: -15%;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(224, 159, 62, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .pro-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-16);
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pro-content { color: var(--color-white); }
+
+    .pro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(224, 159, 62, 0.15);
+      border: 1px solid rgba(224, 159, 62, 0.25);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-accent);
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-6);
+    }
+
+    .pro-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--color-white);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: var(--space-6);
+    }
+
+    .pro-title em {
+      font-style: normal;
+      color: var(--color-accent);
+    }
+
+    .pro-desc {
+      font-size: 1.0625rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.65;
+      margin-bottom: var(--space-8);
+      max-width: 480px;
+    }
+
+    .pro-points {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .pro-point {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: 0.9375rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .pro-point-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      flex-shrink: 0;
+    }
+
+    /* Pro form card */
+    .pro-form-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-10) var(--space-8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .pro-form-title {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-white);
+      margin-bottom: var(--space-2);
+    }
+
+    .pro-form-subtitle {
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: var(--space-6);
+    }
+
+    .pro-form { display: flex; flex-direction: column; gap: var(--space-4); }
+
+    .pro-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .pro-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.02em;
+    }
+
+    .pro-input, .pro-select {
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: var(--color-white);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      outline: none;
+      transition: border-color 250ms var(--ease-apple), background 250ms var(--ease-apple);
+      width: 100%;
+    }
+
+    .pro-input::placeholder { color: rgba(255,255,255,0.25); }
+    .pro-input:focus, .pro-select:focus {
+      border-color: var(--color-accent);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .pro-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .pro-select option {
+      background: var(--color-charcoal);
+      color: var(--color-white);
+    }
+
+    .pro-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    .pro-consent {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    .pro-consent input[type="checkbox"] {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      margin-top: 1px;
+      accent-color: var(--color-accent);
+      cursor: pointer;
+    }
+
+    .pro-consent a { color: rgba(255,255,255,0.6); text-decoration: underline; }
+    .pro-consent a:hover { color: var(--color-white); }
+
+    .pro-submit {
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--color-accent);
+      color: var(--color-charcoal);
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 350ms var(--ease-apple);
+      width: 100%;
+      margin-top: var(--space-2);
+    }
+
+    .pro-submit:hover {
+      transform: translate3d(0, -2px, 0);
+      box-shadow: 0 8px 24px rgba(224, 159, 62, 0.35);
+    }
+
+    .pro-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .pro-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.3);
+      margin-top: var(--space-3);
+      transition: color 300ms var(--ease-apple);
+    }
+    .pro-note.success { color: var(--color-primary-light); }
+    .pro-note.error { color: #ff9b9b; }
+
+    @media (max-width: 1024px) {
+      .pro-inner { grid-template-columns: 1fr; gap: var(--space-8); text-align: center; }
+      .pro-desc { margin-left: auto; margin-right: auto; }
+      .pro-points { align-items: center; }
+    }
+
+    @media (max-width: 768px) {
+      .section-pro { padding: var(--space-20) var(--space-6); }
+      .pro-form-card { padding: var(--space-6); }
+      .pro-row { grid-template-columns: 1fr; }
+    }
+
+    /* ===========================
        FLOATING SOCIAL BAR
        =========================== */
     .social-float {
@@ -2440,6 +2681,73 @@
     </div>
   </section>
 
+  <!-- PRO -->
+  <section class="section-pro" id="pro">
+    <div class="hero-grid-bg"></div>
+    <div class="pro-glow"></div>
+    <div class="pro-inner">
+      <div class="pro-content">
+        <div class="pro-badge reveal">Espace professionnels de santé</div>
+        <h2 class="pro-title reveal reveal-delay-1">Vous accompagnez des patients dans leur sevrage ?<br><em>Construisons ensemble.</em></h2>
+        <p class="pro-desc reveal reveal-delay-2">
+          VIRAGE travaille main dans la main avec les addictologues, tabacologues, médecins et pharmaciens. Si vous souhaitez participer au projet, tester l'outil ou simplement échanger, inscrivez-vous ici.
+        </p>
+        <div class="pro-points reveal reveal-delay-3">
+          <div class="pro-point">
+            <span class="pro-point-dot"></span>
+            Accès prioritaire à la plateforme en bêta
+          </div>
+          <div class="pro-point">
+            <span class="pro-point-dot"></span>
+            Co-construction du contenu médical
+          </div>
+          <div class="pro-point">
+            <span class="pro-point-dot"></span>
+            Intégration dans le réseau de téléconsultation
+          </div>
+        </div>
+      </div>
+
+      <div class="pro-form-card reveal reveal-delay-2">
+        <h3 class="pro-form-title">Rejoindre le réseau VIRAGE</h3>
+        <p class="pro-form-subtitle">Réservé aux professionnels de santé</p>
+        <form class="pro-form" id="proForm">
+          <div class="pro-field">
+            <label class="pro-label" for="proEmail">Email professionnel</label>
+            <input type="email" id="proEmail" class="pro-input" placeholder="prenom.nom@cabinet.fr" required autocomplete="email">
+          </div>
+          <div class="pro-row">
+            <div class="pro-field">
+              <label class="pro-label" for="proProfession">Profession</label>
+              <select id="proProfession" class="pro-select" required>
+                <option value="" disabled selected>Sélectionner</option>
+                <option value="Addictologue">Addictologue</option>
+                <option value="Tabacologue">Tabacologue</option>
+                <option value="Médecin généraliste">Médecin généraliste</option>
+                <option value="Pharmacien">Pharmacien</option>
+                <option value="Infirmier">Infirmier / Infirmière</option>
+                <option value="Psychologue">Psychologue</option>
+                <option value="Psychiatre">Psychiatre</option>
+                <option value="Sage-femme">Sage-femme</option>
+                <option value="Autre professionnel de santé">Autre professionnel de santé</option>
+              </select>
+            </div>
+            <div class="pro-field">
+              <label class="pro-label" for="proVille">Ville</label>
+              <input type="text" id="proVille" class="pro-input" placeholder="Paris, Lyon..." required autocomplete="address-level2">
+            </div>
+          </div>
+          <label class="pro-consent">
+            <input type="checkbox" id="proConsent" required>
+            <span>J'accepte que mes données soient utilisées dans le cadre du projet VIRAGE. <a href="/confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a></span>
+          </label>
+          <button type="submit" class="pro-submit" id="proSubmit">Rejoindre le réseau</button>
+        </form>
+        <p class="pro-note" id="proNote">Vos données ne seront jamais partagées avec des tiers.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- FAQ -->
   <section class="section-faq" id="faq">
     <div class="container">
@@ -2579,7 +2887,7 @@
           <li><a href="#">Blog</a></li>
           <li><a href="#faq">FAQ</a></li>
           <li><a href="#">Presse</a></li>
-          <li><a href="#">Professionnels de santé</a></li>
+          <li><a href="#pro">Professionnels de santé</a></li>
         </ul>
       </div>
       <div>
@@ -2994,6 +3302,94 @@
             waitlistSubmit.style.color = '';
             waitlistSubmit.disabled = false;
             waitlistInput.disabled = false;
+          }, 5000);
+        }
+      });
+    }
+
+    // ============================================================
+    // PRO FORM — Supabase integration
+    // ============================================================
+    const proForm = document.getElementById('proForm');
+    const proSubmit = document.getElementById('proSubmit');
+    const proNote = document.getElementById('proNote');
+    const proEmail = document.getElementById('proEmail');
+    const proProfession = document.getElementById('proProfession');
+    const proVille = document.getElementById('proVille');
+    const proConsent = document.getElementById('proConsent');
+
+    function setProNote(msg, state) {
+      if (!proNote) return;
+      proNote.textContent = msg;
+      proNote.classList.remove('success', 'error');
+      if (state) proNote.classList.add(state);
+    }
+
+    if (proForm) {
+      proForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!proConsent.checked) {
+          setProNote('Merci de cocher la case de consentement.', 'error');
+          return;
+        }
+
+        const email = proEmail.value.trim();
+        const profession = proProfession.value;
+        const ville = proVille.value.trim();
+        if (!email || !profession || !ville) return;
+
+        const originalLabel = proSubmit.textContent;
+        proSubmit.disabled = true;
+        proSubmit.textContent = 'Envoi...';
+        setProNote('');
+
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/pro_waitlist`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              email: email.toLowerCase().trim(),
+              profession: profession,
+              ville: ville,
+              consent_rgpd: true,
+              source: 'website',
+              user_agent: navigator.userAgent
+            })
+          });
+
+          if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            throw new Error(body || `HTTP ${res.status}`);
+          }
+
+          proSubmit.textContent = 'Merci !';
+          proSubmit.style.background = 'var(--color-primary-light)';
+          proSubmit.style.color = '#fff';
+          proEmail.value = '';
+          proProfession.selectedIndex = 0;
+          proVille.value = '';
+          setProNote('Votre inscription est enregistrée. Nous vous recontacterons rapidement.', 'success');
+        } catch (err) {
+          const msg = (err.message || '').toLowerCase();
+          if (msg.includes('duplicate') || msg.includes('unique') || msg.includes('23505')) {
+            proSubmit.textContent = 'Déjà inscrit';
+            setProNote('Cet email est déjà enregistré. Nous reviendrons vers vous.', 'success');
+          } else {
+            proSubmit.textContent = 'Réessayer';
+            setProNote('Une erreur est survenue. Merci de réessayer.', 'error');
+            console.error('Pro form error:', err);
+          }
+        } finally {
+          setTimeout(() => {
+            proSubmit.textContent = originalLabel;
+            proSubmit.style.background = '';
+            proSubmit.style.color = '';
+            proSubmit.disabled = false;
           }, 5000);
         }
       });
