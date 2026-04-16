@@ -236,6 +236,26 @@
     .nav.scrolled .nav-cta { background: var(--color-primary); color: var(--color-white); border-color: var(--color-primary); }
     .nav.scrolled .nav-cta:hover { background: var(--color-primary-light); border-color: var(--color-primary-light); }
 
+    .nav-link-pro {
+      color: var(--color-accent) !important;
+      font-weight: 600 !important;
+      border: 1px solid rgba(224, 159, 62, 0.35);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.8125rem !important;
+      transition: all var(--transition-base);
+    }
+    .nav-link-pro:hover { background: rgba(224, 159, 62, 0.1); border-color: var(--color-accent); }
+    .nav-link-pro::after { display: none !important; }
+    .nav.scrolled .nav-link-pro { color: var(--color-accent) !important; border-color: rgba(224, 159, 62, 0.35); }
+    .nav.scrolled .nav-link-pro:hover { color: #c8892e !important; border-color: #c8892e; background: rgba(224, 159, 62, 0.08); }
+
+    .nav-link-pro-mobile {
+      color: var(--color-accent) !important;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(224, 159, 62, 0.2) !important;
+    }
+
     .nav-hamburger {
       display: none;
       flex-direction: column;
@@ -2213,6 +2233,7 @@
         <li><a href="#testimonials">Témoignages</a></li>
         <li><a href="#team">Équipe</a></li>
         <li><a href="#faq">FAQ</a></li>
+        <li><a href="#pro">Professionnels</a></li>
       </ul>
       <a href="#contact" class="nav-cta nav-cta-desktop">Liste d'attente</a>
       <button class="nav-hamburger" id="hamburger" aria-label="Menu de navigation">
@@ -2229,6 +2250,7 @@
     <a href="#testimonials" onclick="closeMobile()">Témoignages</a>
     <a href="#team" onclick="closeMobile()">Équipe</a>
     <a href="#faq" onclick="closeMobile()">FAQ</a>
+    <a href="#pro" onclick="closeMobile()">Professionnels</a>
     <a href="#contact" class="nav-cta-mobile" onclick="closeMobile()">Rejoindre la liste d'attente</a>
   </div>
 
