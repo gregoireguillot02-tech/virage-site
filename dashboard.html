@@ -604,7 +604,6 @@
 const AUTH_HASH='4ddeaa2454fe1f705196dab138b7bba79f155be1d568068421053d84fc3bb371';
 async function sha256(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 function unlockApp(){document.getElementById('loginOverlay').style.display='none';document.getElementById('app').classList.remove('app-hidden');loadAllData()}
-if(sessionStorage.getItem('virage_auth')==='ok') unlockApp();
 document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value;if(await sha256(u+':'+p)===AUTH_HASH){sessionStorage.setItem('virage_auth','ok');unlockApp()}else{document.getElementById('loginError').style.display='block';document.getElementById('loginPass').value=''}});
 
 // ============================================================
@@ -615,6 +614,9 @@ const SB_KEY='sb_publishable_RxZ3ClMgOkAgGO409P--qQ_2ZNZTR9-';
 const HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 let currentDays=7, rawViews=[], rawWaitlist=[], rawPro=[];
 let chartInstances={};
+
+// Auto-login (apres CONFIG pour eviter erreur d'initialisation)
+if(sessionStorage.getItem('virage_auth')==='ok') unlockApp();
 
 // ============================================================
 // NAVIGATION
