@@ -1025,7 +1025,7 @@ function seedContacts(){
     data.contacts.forEach(c=>{if(c.email)c.id=emailToId(c.email)});
     if(data.contacts.length>0)saveOutreach(data);
   }
-  if(v>=4)return;
+  if(v>=5)return;
   const existing=new Set(data.contacts.map(c=>(c.email||'').toLowerCase()));
   const d='2026-04-17T10:00:00.000Z',d2='2026-04-18T10:00:00.000Z';
   const all=[
@@ -1084,6 +1084,28 @@ function seedContacts(){
     ['Peiffer','G.','peifferg@aol.com','','Dr','',d2],
     ['Alessandri','S.','s.alessandri@ghu-paris.fr','GHU Paris','Dr','GHU Paris',d2],
     ['Chevalier-Latreuille','F.','f.chevalier-latreuille@ch-guillaumeregnier.fr','CH Guillaume Regnier','Dr','CH Guillaume Regnier, Rennes',d2],
+    ['Vorspan','Florence','florence.vorspan@lrb.aphp.fr','APHP Lariboisiere','Dr, Psychiatre Addictologue','Addictologie, Lariboisiere',d2],
+    ['Icick','Romain','romain.icick@aphp.fr','APHP','Dr, Psychiatre','Psychiatrie, addictologie',d2],
+    ['Cavailles','Arnaud','arnaud.cavailles@chu-nantes.fr','CHU Nantes','Dr','CHU Nantes',d2],
+    ['Jutant','Etienne-Marie','etienne-marie.jutant@chu-poitiers.fr','CHU Poitiers','Dr','CHU Poitiers',d2],
+    ['Gentil','A.','algentil@chu-angers.fr','CHU Angers','Dr','CHU Angers',d2],
+    ['Dansou','A.','a.dansou@chu-tours.fr','CHU Tours','Dr','CHU Tours',d2],
+    ['Kinouani','Sherazade','sherazade.kinouani@u-bordeaux.fr','Univ Bordeaux','Dr','Universite de Bordeaux',d2],
+    ['Bouchet-Benezech','Brigitte','brigitte.bouchet-benezech@ch-albi.rss.fr','CH Albi','Dr','CH Albi',d2],
+    ['Herran','E.','eherran@ch-cotebasque.fr','CH Cote Basque','Dr','CH Cote Basque, Bayonne',d2],
+    ['Campagne','G.','gcampagne@ch-cotebasque.fr','CH Cote Basque','Dr','CH Cote Basque, Bayonne',d2],
+    ['Augeraud','Emmanuel','emmanuel.augeraud@ch-pau.fr','CH Pau','Dr','CH Pau',d2],
+    ['Mosset','Thibaud','thibaud.mosset@ch-perpignan.fr','CH Perpignan','Dr','CH Perpignan',d2],
+    ['Weinberg','I.','iweinberg@ch-avignon.fr','CH Avignon','Dr','CH Avignon',d2],
+    ['Zlakomanov','Y.','yzlakomanov@ch-valence.fr','CH Valence','Dr','CH Valence',d2],
+    ['Lecoq','Laetitia','laetitialecoq@ch-metropole-savoie.fr','CH Metropole Savoie','Dr','CH Metropole Savoie, Chambery',d2],
+    ['Courtois','X.','xcourtois@ch-annecygenevois.fr','CH Annecy Genevois','Dr','CH Annecy',d2],
+    ['Rebillard','Matthieu','matthieu.rebillard@ch-stbrieuc.fr','CH Saint-Brieuc','Dr','CH Saint-Brieuc',d2],
+    ['Rigaud','Frederic','frederic.rigaud@ch-angouleme.fr','CH Angouleme','Dr','CH Angouleme',d2],
+    ['Festin','Daniele','daniele.festin@ch-troyes.fr','CH Troyes','Dr','CH Troyes',d2],
+    ['Beurrier','Pascale','pascale.beurrier@ch-ed.fr','CH Epinal','Dr','CH Epinal',d2],
+    ['Velastegui','Sophie','sophie.velastegui@ch-compiegnenoyon.fr','CH Compiegne-Noyon','Dr','CH Compiegne-Noyon',d2],
+    ['Leboulanger','David','david.leboulanger@chlaval.fr','CH Laval','Dr','CH Laval',d2],
   ];
   all.forEach(c=>{
     if(existing.has(c[2].toLowerCase()))return;
@@ -1091,7 +1113,7 @@ function seedContacts(){
     data.contacts.push({id:cid,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'addictologue',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:aid,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
   });
   saveOutreach(data);
-  localStorage.setItem('virage_seed_v','4');
+  localStorage.setItem('virage_seed_v','5');
 }
 seedContacts();
 function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
