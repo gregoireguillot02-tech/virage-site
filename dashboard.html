@@ -1014,6 +1014,29 @@ const ACTIVITE_LABELS={email_envoye:'Email envoye',email_recu:'Email recu',appel
 // --- LocalStorage CRUD ---
 function getOutreach(){try{return JSON.parse(localStorage.getItem(OUTREACH_KEY))||{contacts:[]}}catch(e){return{contacts:[]}}}
 function saveOutreach(data){localStorage.setItem(OUTREACH_KEY,JSON.stringify(data))}
+
+// --- Seed initial contacts ---
+function seedIfEmpty(){
+  const data=getOutreach();if(data.contacts&&data.contacts.length>0)return;
+  const d='2026-04-17T10:00:00.000Z';
+  function mk(id,nom,prenom,email,org,role,cat,statut,notes,actType,actDate){
+    return{id:'c_seed_'+id,nom,prenom,organisation:org,role,email,telephone:'',linkedin:'',categorie:cat,statut,notes,created_at:actDate||d,updated_at:actDate||d,activites:actType?[{id:'a_seed_'+id,date:actDate||d,type:actType,sujet:'Prise de contact VIRAGE',notes:''}]:[]}
+  }
+  saveOutreach({contacts:[
+    mk(1,'Benyamina','Amine','amine.benyamina@aphp.fr','APHP Paul Brousse','Professeur, Addictologue','addictologue','contacte','Vision globale, portes institutionnelles','email_envoye'),
+    mk(2,'Karila','Laurent','laurent.karila@aphp.fr','APHP Paul Brousse','Professeur, Addictologue','addictologue','contacte','Vulgarisation, cible jeune, podcast','email_envoye'),
+    mk(3,'Lejoyeux','Michel','michel.lejoyeux@aphp.fr','APHP Bichat','Professeur, Psychiatre Addictologue','addictologue','contacte','Psychiatrie positive, motivation','email_envoye'),
+    mk(4,'Bellivier','Frank','secretariat.mafw@aphp.fr','APHP Fernand-Widal','Professeur, Psychiatre','addictologue','contacte','Institutionnel, politique de sante','email_envoye'),
+    mk(5,'Aubin','Henri-Jean','henri-jean.aubin@aphp.fr','APHP','Professeur, Addictologue','addictologue','contacte','Rigueur scientifique, publications','email_envoye'),
+    mk(6,'Le Faou','Anne-Laurence','anne-laurence.lefaou@aphp.fr','APHP','Docteur, Tabacologue','addictologue','contacte','SFT, tabacologie, parcours de sevrage','email_envoye'),
+    mk(7,'Adler','Marion','marion.adler@aphp.fr','APHP','Docteur, Tabacologue','addictologue','contacte','Vapotage, terrain, patients jeunes','email_envoye'),
+    mk(8,'Berlin','Ivan','ivan.berlin@psl.aphp.fr','APHP Pitie-Salpetriere','Docteur, Pharmacologue','addictologue','contacte','DIU tabaco, pharmacologie, NRT','email_envoye'),
+    mk(9,'Blaise','Mario','mario.blaise@ghu-paris.fr','GHU Paris / Marmottan','Docteur, Addictologue','addictologue','contacte','Marmottan, accueil usagers, humanisme','email_envoye'),
+    mk(10,'Delile','Jean-Michel','jm.delile@ceid.asso.fr','CEID Bordeaux','Docteur, Addictologue','addictologue','contacte','CEID, accompagnement terrain Bordeaux','email_envoye'),
+    mk(11,'Auriacombe','Marc','marc.auriacombe@u-bordeaux.fr','Universite / CHU Bordeaux','Professeur, Addictologue','addictologue','contacte','Recherche addiction, CHU Bordeaux','email_envoye'),
+  ]});
+}
+seedIfEmpty();
 function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
 
 function addContact(c){
