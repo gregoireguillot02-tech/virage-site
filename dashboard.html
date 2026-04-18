@@ -1025,7 +1025,7 @@ function seedContacts(){
     data.contacts.forEach(c=>{if(c.email)c.id=emailToId(c.email)});
     if(data.contacts.length>0)saveOutreach(data);
   }
-  if(v>=3)return;
+  if(v>=4)return;
   const existing=new Set(data.contacts.map(c=>(c.email||'').toLowerCase()));
   const d='2026-04-17T10:00:00.000Z',d2='2026-04-18T10:00:00.000Z';
   const all=[
@@ -1067,6 +1067,23 @@ function seedContacts(){
     ['Naassila','Mickael','mickael.naassila@u-picardie.fr','Univ Picardie','Pr, Chercheur','Recherche neurobiologie des addictions',d2],
     ['Bonnet','Nicolas','nicolas.bonnet@respadd.org','RESPADD','Directeur','Reseau de prevention des addictions',d2],
     ['Airagnes','Guillaume','guillaume.airagnes@ofdt.fr','OFDT','Dr','Observatoire drogues et tendances',d2],
+    ['Franchitto','N.','franchitto.n@chu-toulouse.fr','CHU Toulouse','Dr, Addictologue','Addictologie, CHU Toulouse',d2],
+    ['Lalanne','Laurence','laurence.lalanne@chru-strasbourg.fr','CHRU Strasbourg','Dr, Addictologue','Addictologie, CHRU Strasbourg',d2],
+    ['Donnadieu-Rigole','H.','h-donnadieu_rigole@chu-montpellier.fr','CHU Montpellier','Dr, Addictologue','Addictologie, CHU Montpellier',d2],
+    ['Baguet','Alexandre','alexandre.baguet@chu-rouen.fr','CHU Rouen','Dr, Addictologue','Addictologie, CHU Rouen',d2],
+    ['Gohier','B.','BeGohier@chu-angers.fr','CHU Angers','Dr','CHU Angers',d2],
+    ['Ballon','Nicolas','nicolas.ballon@univ-tours.fr','Univ Tours','Dr, Addictologue','Addictologie, Tours',d2],
+    ['Trojak','Benoit','benoit.trojak@chu-dijon.fr','CHU Dijon','Dr, Addictologue','Addictologie, CHU Dijon',d2],
+    ['Nubukpo','Philippe','philippe.nubukpo@ch-esquirol-limoges.fr','CH Esquirol Limoges','Dr, Psychiatre','Psychiatrie, addictologie Limoges',d2],
+    ['Gay','Aurelia','aurelia.gay@chu-st-etienne.fr','CHU Saint-Etienne','Dr, Addictologue','Addictologie, Saint-Etienne',d2],
+    ['Guillou','Morgane','morgane.guillou@chu-brest.fr','CHU Brest','Dr, Addictologue','Addictologie, CHU Brest',d2],
+    ['Janvier','Caroline','caroline.janvier@ch-cayenne.fr','CH Cayenne','Dr','CH Cayenne',d2],
+    ['Moirand','Romain','romain.moirand@chu-rennes.fr','CHU Rennes','Dr, Addictologue','Addictologie, CHU Rennes',d2],
+    ['Durlach','Vincent','vincent.durlach@univ-reims.fr','Univ Reims','Pr','Addictologie, Reims',d2],
+    ['Cutarella','C.','cutarellac@gmail.com','','Dr','',d2],
+    ['Peiffer','G.','peifferg@aol.com','','Dr','',d2],
+    ['Alessandri','S.','s.alessandri@ghu-paris.fr','GHU Paris','Dr','GHU Paris',d2],
+    ['Chevalier-Latreuille','F.','f.chevalier-latreuille@ch-guillaumeregnier.fr','CH Guillaume Regnier','Dr','CH Guillaume Regnier, Rennes',d2],
   ];
   all.forEach(c=>{
     if(existing.has(c[2].toLowerCase()))return;
@@ -1074,7 +1091,7 @@ function seedContacts(){
     data.contacts.push({id:cid,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'addictologue',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:aid,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
   });
   saveOutreach(data);
-  localStorage.setItem('virage_seed_v','3');
+  localStorage.setItem('virage_seed_v','4');
 }
 seedContacts();
 function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
