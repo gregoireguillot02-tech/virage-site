@@ -653,7 +653,7 @@ document.getElementById('mobilePeriod').addEventListener('click',e=>{const btn=e
 // DATA LOADING
 // ============================================================
 async function sbFetch(table,limit=10000){
-  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}&_t=${Date.now()}`,{headers:HEADERS,cache:'no-store'});
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}`,{headers:HEADERS,cache:'no-store'});
   if(!r.ok)throw new Error('HTTP '+r.status);return r.json();
 }
 async function loadAllData(){
