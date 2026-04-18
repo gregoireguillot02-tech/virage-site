@@ -1015,14 +1015,19 @@ const ACTIVITE_LABELS={email_envoye:'Email envoye',email_recu:'Email recu',appel
 function getOutreach(){try{return JSON.parse(localStorage.getItem(OUTREACH_KEY))||{contacts:[]}}catch(e){return{contacts:[]}}}
 function saveOutreach(data){localStorage.setItem(OUTREACH_KEY,JSON.stringify(data))}
 
-// --- Seed contacts (version-aware, no duplicates) ---
+// --- Seed contacts (version-aware, unique IDs, no duplicates) ---
+function emailToId(email){return 'c_'+email.toLowerCase().replace(/[^a-z0-9]/g,'_')}
 function seedContacts(){
   const data=getOutreach();
   const v=parseInt(localStorage.getItem('virage_seed_v')||'0');
-  if(v>=2)return;
+  // v3: fix duplicate IDs by migrating to email-based IDs
+  if(v<3){
+    data.contacts.forEach(c=>{if(c.email)c.id=emailToId(c.email)});
+    if(data.contacts.length>0)saveOutreach(data);
+  }
+  if(v>=3)return;
   const existing=new Set(data.contacts.map(c=>(c.email||'').toLowerCase()));
   const d='2026-04-17T10:00:00.000Z',d2='2026-04-18T10:00:00.000Z';
-  // [nom,prenom,email,org,role,notes,date]
   const all=[
     ['Benyamina','Amine','amine.benyamina@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vision globale, portes institutionnelles',d],
     ['Karila','Laurent','laurent.karila@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vulgarisation, cible jeune, podcast',d],
@@ -1063,14 +1068,13 @@ function seedContacts(){
     ['Bonnet','Nicolas','nicolas.bonnet@respadd.org','RESPADD','Directeur','Reseau de prevention des addictions',d2],
     ['Airagnes','Guillaume','guillaume.airagnes@ofdt.fr','OFDT','Dr','Observatoire drogues et tendances',d2],
   ];
-  let n=0;
-  all.forEach((c,i)=>{
+  all.forEach(c=>{
     if(existing.has(c[2].toLowerCase()))return;
-    data.contacts.push({id:'c_seed_'+i,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'addictologue',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:'a_seed_'+i,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
-    n++;
+    const cid=emailToId(c[2]),aid='a_'+cid.substring(2);
+    data.contacts.push({id:cid,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'addictologue',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:aid,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
   });
-  if(n>0)saveOutreach(data);
-  localStorage.setItem('virage_seed_v','2');
+  saveOutreach(data);
+  localStorage.setItem('virage_seed_v','3');
 }
 seedContacts();
 function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
