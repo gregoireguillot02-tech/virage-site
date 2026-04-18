@@ -653,14 +653,15 @@ document.getElementById('mobilePeriod').addEventListener('click',e=>{const btn=e
 // DATA LOADING
 // ============================================================
 async function sbFetch(table,limit=10000){
-  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}`,{headers:HEADERS,cache:'no-store'});
-  if(!r.ok)throw new Error('HTTP '+r.status);return r.json();
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}`,{headers:HEADERS});
+  if(!r.ok)throw new Error(table+' HTTP '+r.status);return r.json();
 }
 async function loadAllData(){
   try{
     const [v,w,p]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist')]);
-    rawViews=v;rawWaitlist=w;rawPro=p;renderAll();
-  }catch(e){console.error(e)}
+    rawViews=v;rawWaitlist=w;rawPro=p;
+    try{renderAll()}catch(re){console.error('Render error:',re);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur rendu : '+re.message+'</div>'}
+  }catch(e){console.error('Fetch error:',e);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur chargement : '+e.message+'</div>'}
 }
 
 function filterByDays(arr){
