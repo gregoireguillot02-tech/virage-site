@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VIRAGE Command Center</title>
   <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
@@ -177,6 +180,104 @@
     /* PAGE SECTIONS */
     .page{display:none}
     .page.active{display:block}
+
+    /* SIDEBAR SECTIONS */
+    .nav-section{font-size:.5625rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:20px 12px 6px;font-weight:700}
+
+    /* FILTER BAR */
+    .filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+    .filter-search{flex:1;min-width:200px;padding:9px 14px;border:1px solid #ddd;border-radius:8px;font-size:.8125rem;font-family:inherit;transition:border-color .2s;background:var(--white)}
+    .filter-search:focus{outline:none;border-color:var(--green-light)}
+    .filter-select{padding:9px 14px;border:1px solid #ddd;border-radius:8px;font-size:.8125rem;font-family:inherit;background:var(--white);cursor:pointer;min-width:150px}
+    .filter-select:focus{outline:none;border-color:var(--green-light)}
+    .btn-primary{padding:9px 20px;background:var(--green);color:var(--white);border:none;border-radius:8px;font-size:.8125rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s;white-space:nowrap}
+    .btn-primary:hover{background:var(--green-light)}
+
+    /* PIPELINE ROW */
+    .pipeline-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .pipeline-card{flex:1;min-width:100px;background:var(--white);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow);border-left:3px solid var(--grey-light);text-align:center;cursor:pointer;transition:all .15s}
+    .pipeline-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+    .pipeline-card .pc-count{font-family:'Outfit',sans-serif;font-size:1.375rem;font-weight:700;line-height:1}
+    .pipeline-card .pc-label{font-size:.5625rem;text-transform:uppercase;letter-spacing:.04em;color:var(--grey);margin-top:3px}
+    .pipeline-card.active{background:var(--green-pale)}
+
+    /* STATUS SELECT */
+    .status-select{padding:4px 8px;border:1px solid #eee;border-radius:6px;font-size:.6875rem;font-weight:600;font-family:inherit;cursor:pointer;background:var(--white)}
+    .status-select:focus{outline:none;border-color:var(--green-light)}
+    .st-a_contacter{color:var(--grey)}.st-contacte{color:var(--blue)}.st-relance{color:var(--accent)}.st-reponse{color:var(--green-light)}.st-rdv_planifie{color:var(--green)}.st-en_discussion{color:var(--green-dark)}.st-partenariat{color:#8B6914}.st-refus{color:var(--red)}.st-en_pause{color:var(--grey-light)}
+
+    /* CATEGORY TAGS */
+    .cat-tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.625rem;font-weight:600;background:var(--green-pale);color:var(--green)}
+    .cat-investisseur{background:var(--accent-light);color:#8B6914}.cat-mutuelle{background:#E8F4FD;color:var(--blue)}.cat-institution{background:#F3E8FD;color:#7B3FA0}.cat-incubateur{background:#FDE8E8;color:var(--red)}.cat-avocat{background:#FFF1D0;color:#8B6914}
+
+    /* RELANCE DOT */
+    .relance-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:4px;animation:pulse 1.5s infinite}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--white);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .modal-lg{max-width:800px}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--off-white)}
+    .modal-header h3{font-family:'Outfit',sans-serif;font-size:1.125rem;color:var(--charcoal)}
+    .modal-header button{background:none;border:none;font-size:1.5rem;color:var(--grey);cursor:pointer;padding:4px;line-height:1}
+    .modal-header button:hover{color:var(--charcoal)}
+    .modal-body{padding:24px}
+    .modal-footer{padding:16px 24px;border-top:1px solid var(--off-white);display:flex;gap:8px;justify-content:flex-end}
+
+    /* FORM */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-group{display:flex;flex-direction:column;gap:4px}
+    .form-group.full{grid-column:1/-1}
+    .form-label{font-size:.6875rem;font-weight:600;color:var(--grey);text-transform:uppercase;letter-spacing:.04em}
+    .form-input,.form-select,.form-textarea{padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:.8125rem;font-family:inherit;transition:border-color .2s}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--green-light)}
+    .form-textarea{min-height:80px;resize:vertical}
+    .form-select{cursor:pointer;background:var(--white)}
+
+    /* TIMELINE */
+    .timeline{position:relative;padding-left:24px}
+    .timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:#eee}
+    .timeline-item{position:relative;padding-bottom:16px}
+    .timeline-item:last-child{padding-bottom:0}
+    .timeline-dot{position:absolute;left:-20px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--green-light);border:2px solid var(--white)}
+    .timeline-date{font-size:.6875rem;color:var(--grey);font-weight:600}
+    .timeline-type{font-size:.6875rem;color:var(--green);font-weight:600;margin-left:8px}
+    .timeline-subject{font-size:.8125rem;color:var(--charcoal);font-weight:500;margin-top:2px}
+    .timeline-notes{font-size:.75rem;color:var(--slate);margin-top:2px}
+
+    /* SMALL BUTTONS */
+    .btn-sm{padding:4px 10px;border:1px solid #ddd;background:var(--white);border-radius:6px;font-size:.6875rem;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s;color:var(--slate)}
+    .btn-sm:hover{border-color:var(--green-light);color:var(--green)}
+    .btn-sm.danger{color:var(--red);border-color:transparent}
+    .btn-sm.danger:hover{border-color:var(--red);background:rgba(214,64,69,.05)}
+
+    /* DETAIL MODAL */
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .detail-info dt{font-size:.625rem;text-transform:uppercase;letter-spacing:.04em;color:var(--grey);font-weight:600;margin-top:10px}
+    .detail-info dt:first-child{margin-top:0}
+    .detail-info dd{color:var(--charcoal);font-weight:500;margin-top:2px;font-size:.8125rem}
+    .detail-activities h4{font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;color:var(--grey);font-weight:600;margin-bottom:12px}
+
+    /* BACKUP BUTTONS */
+    .backup-bar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .backup-bar .btn-sm{font-size:.625rem}
+
+    @media(max-width:900px){
+      .filter-bar{flex-direction:column}
+      .filter-search{min-width:100%}
+      .filter-select{width:100%}
+      .pipeline-row{gap:6px}
+      .pipeline-card{min-width:calc(33% - 6px);padding:10px 8px}
+      .pipeline-card .pc-count{font-size:1rem}
+      .pipeline-card .pc-label{font-size:.5rem}
+      .form-grid{grid-template-columns:1fr}
+      .form-group.full{grid-column:1}
+      .modal{margin:10px;max-height:calc(100vh - 20px)}
+      .detail-grid{grid-template-columns:1fr}
+      .detail-activities{border-top:1px solid #eee;padding-top:16px;margin-top:16px}
+      .nav-section-mobile{font-size:.5625rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:16px 14px 4px;font-weight:700}
+    }
   </style>
 </head>
 <body>
@@ -215,6 +316,7 @@
       <button onclick="closeMobileMenu()">&times;</button>
     </div>
     <nav class="mobile-menu-nav" id="mobileNav">
+      <div class="nav-section-mobile">KPI &amp; Data</div>
       <button class="active" data-page="overview"><span class="nav-icon">&#9670;</span>Vue d'ensemble</button>
       <button data-page="traffic"><span class="nav-icon">&#9656;</span>Trafic &amp; Acquisition</button>
       <button data-page="audience"><span class="nav-icon">&#9673;</span>Audience</button>
@@ -222,6 +324,8 @@
       <button data-page="pro"><span class="nav-icon">&#9879;</span>CRM Pro Sante</button>
       <button data-page="conversions"><span class="nav-icon">&#9660;</span>Conversions</button>
       <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
+      <div class="nav-section-mobile">Demarchage</div>
+      <button data-page="demarchage"><span class="nav-icon">&#9993;</span>Pipeline contacts</button>
     </nav>
     <div class="mobile-period" id="mobilePeriod">
       <button class="active" data-days="7">7j</button>
@@ -238,6 +342,7 @@
       <span>Command Center</span>
     </div>
     <nav class="sidebar-nav" id="sidebarNav">
+      <div class="nav-section">KPI &amp; Data</div>
       <button class="active" data-page="overview"><span class="nav-icon">&#9670;</span>Vue d'ensemble</button>
       <button data-page="traffic"><span class="nav-icon">&#9656;</span>Trafic &amp; Acquisition</button>
       <button data-page="audience"><span class="nav-icon">&#9673;</span>Audience</button>
@@ -245,9 +350,11 @@
       <button data-page="pro"><span class="nav-icon">&#9879;</span>CRM Pro Sante</button>
       <button data-page="conversions"><span class="nav-icon">&#9660;</span>Conversions</button>
       <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
+      <div class="nav-section">Demarchage</div>
+      <button data-page="demarchage"><span class="nav-icon">&#9993;</span>Pipeline contacts</button>
     </nav>
     <div class="sidebar-footer">
-      v2.0 &middot; Donnees Supabase<br>Aucun cookie, RGPD-friendly
+      v3.0 &middot; Data + CRM<br>Aucun cookie, RGPD-friendly
     </div>
   </aside>
 
@@ -332,7 +439,162 @@
       </div>
     </div>
 
+    <!-- DEMARCHAGE -->
+    <div class="page" id="page-demarchage">
+      <div class="kpi-grid" id="kpiDemarchage"></div>
+      <div class="pipeline-row" id="pipelineRow"></div>
+      <div class="filter-bar">
+        <input type="text" class="filter-search" id="searchDemarchage" placeholder="Rechercher nom, email, organisation..." oninput="renderDemarchage()">
+        <select class="filter-select" id="filterCategorie" onchange="renderDemarchage()">
+          <option value="">Toutes categories</option>
+          <option value="addictologue">Addictologue</option>
+          <option value="medecin">Medecin generaliste</option>
+          <option value="pharmacien">Pharmacien</option>
+          <option value="mutuelle">Mutuelle / Assurance</option>
+          <option value="investisseur">Investisseur</option>
+          <option value="institution">Institution publique</option>
+          <option value="incubateur">Incubateur / Accelerateur</option>
+          <option value="avocat">Avocat / Juridique</option>
+          <option value="partenaire">Partenaire</option>
+          <option value="autre">Autre</option>
+        </select>
+        <select class="filter-select" id="filterStatut" onchange="renderDemarchage()">
+          <option value="">Tous statuts</option>
+          <option value="a_contacter">A contacter</option>
+          <option value="contacte">Contacte</option>
+          <option value="relance">Relance envoyee</option>
+          <option value="reponse">Reponse recue</option>
+          <option value="rdv_planifie">RDV planifie</option>
+          <option value="en_discussion">En discussion</option>
+          <option value="partenariat">Partenariat</option>
+          <option value="refus">Refus</option>
+          <option value="en_pause">En pause</option>
+        </select>
+        <button class="btn-primary" onclick="openContactModal()">+ Nouveau contact</button>
+      </div>
+      <div class="cards-grid">
+        <div class="card full">
+          <div class="card-title">Contacts <span class="badge" id="badgeContactCount"></span>
+            <div style="display:flex;gap:6px">
+              <button class="btn-export" onclick="exportOutreachCSV()">Exporter CSV</button>
+            </div>
+          </div>
+          <div class="table-wrap" id="demarchageTable"></div>
+          <div class="backup-bar">
+            <button class="btn-sm" onclick="exportOutreachJSON()">&#128190; Sauvegarder (JSON)</button>
+            <button class="btn-sm" onclick="document.getElementById('importJSON').click()">&#128194; Importer (JSON)</button>
+            <input type="file" id="importJSON" accept=".json" style="display:none" onchange="importOutreachJSON(event)">
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
+
+  <!-- MODAL : AJOUTER/MODIFIER CONTACT -->
+  <div class="modal-overlay" id="contactModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="contactModalTitle">Ajouter un contact</h3>
+        <button onclick="closeModal('contactModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="contactForm" onsubmit="event.preventDefault();saveContact()">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Nom *</label><input type="text" class="form-input" name="nom" required placeholder="Dupont"></div>
+            <div class="form-group"><label class="form-label">Prenom</label><input type="text" class="form-input" name="prenom" placeholder="Jean"></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" name="email" placeholder="jean@exemple.fr"></div>
+            <div class="form-group"><label class="form-label">Telephone</label><input type="tel" class="form-input" name="telephone" placeholder="06 12 34 56 78"></div>
+            <div class="form-group"><label class="form-label">Organisation</label><input type="text" class="form-input" name="organisation" placeholder="CHU Bordeaux"></div>
+            <div class="form-group"><label class="form-label">Role / Poste</label><input type="text" class="form-input" name="role" placeholder="Addictologue"></div>
+            <div class="form-group"><label class="form-label">LinkedIn</label><input type="url" class="form-input" name="linkedin" placeholder="https://linkedin.com/in/..."></div>
+            <div class="form-group">
+              <label class="form-label">Categorie</label>
+              <select class="form-select" name="categorie">
+                <option value="">-- Choisir --</option>
+                <option value="addictologue">Addictologue</option>
+                <option value="medecin">Medecin generaliste</option>
+                <option value="pharmacien">Pharmacien</option>
+                <option value="mutuelle">Mutuelle / Assurance</option>
+                <option value="investisseur">Investisseur</option>
+                <option value="institution">Institution publique</option>
+                <option value="incubateur">Incubateur / Accelerateur</option>
+                <option value="avocat">Avocat / Juridique</option>
+                <option value="partenaire">Partenaire</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Statut</label>
+              <select class="form-select" name="statut">
+                <option value="a_contacter">A contacter</option>
+                <option value="contacte">Contacte</option>
+                <option value="relance">Relance envoyee</option>
+                <option value="reponse">Reponse recue</option>
+                <option value="rdv_planifie">RDV planifie</option>
+                <option value="en_discussion">En discussion</option>
+                <option value="partenariat">Partenariat</option>
+                <option value="refus">Refus</option>
+                <option value="en_pause">En pause</option>
+              </select>
+            </div>
+            <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" name="notes" placeholder="Contexte, informations utiles..."></textarea></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('contactModal')">Annuler</button>
+        <button class="btn-primary" onclick="saveContact()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : LOGGER ACTIVITE -->
+  <div class="modal-overlay" id="activityModal">
+    <div class="modal" style="max-width:440px">
+      <div class="modal-header">
+        <h3>Logger une activite</h3>
+        <button onclick="closeModal('activityModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="activityForm" onsubmit="event.preventDefault();saveActivity()">
+          <div class="form-grid" style="grid-template-columns:1fr">
+            <div class="form-group">
+              <label class="form-label">Type *</label>
+              <select class="form-select" name="act_type" required>
+                <option value="email_envoye">Email envoye</option>
+                <option value="email_recu">Email recu</option>
+                <option value="appel_sortant">Appel sortant</option>
+                <option value="appel_entrant">Appel entrant</option>
+                <option value="linkedin">Message LinkedIn</option>
+                <option value="rdv">RDV</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Date</label><input type="datetime-local" class="form-input" name="act_date"></div>
+            <div class="form-group"><label class="form-label">Sujet</label><input type="text" class="form-input" name="act_sujet" placeholder="Ex: Prise de contact initiale"></div>
+            <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" name="act_notes" placeholder="Details de l'echange..."></textarea></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('activityModal')">Annuler</button>
+        <button class="btn-primary" onclick="saveActivity()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : FICHE CONTACT DETAIL -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>Fiche contact</h3>
+        <button onclick="closeModal('detailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="detailContent"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -357,7 +619,7 @@ let chartInstances={};
 // ============================================================
 // NAVIGATION
 // ============================================================
-const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel'};
+const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',demarchage:'Pipeline contacts'};
 
 function navigateTo(pg){
   document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button').forEach(b=>b.classList.remove('active'));
@@ -391,7 +653,7 @@ document.getElementById('mobilePeriod').addEventListener('click',e=>{const btn=e
 // DATA LOADING
 // ============================================================
 async function sbFetch(table,limit=10000){
-  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}`,{headers:HEADERS});
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}&_t=${Date.now()}`,{headers:HEADERS,cache:'no-store'});
   if(!r.ok)throw new Error('HTTP '+r.status);return r.json();
 }
 async function loadAllData(){
@@ -447,6 +709,7 @@ function renderAll(){
   renderPro(pro,prevPR);
   renderConversions(views,waitlist,pro);
   renderLive();
+  renderDemarchage();
 }
 
 // ============================================================
@@ -735,6 +998,264 @@ function exportCSV(type){
   const a=document.createElement('a');a.href=url;a.download=filename;a.click();
   URL.revokeObjectURL(url);
 }
+
+// ============================================================
+// OUTREACH / DEMARCHAGE CRM
+// ============================================================
+const OUTREACH_KEY='virage_outreach';
+const STATUT_LABELS={a_contacter:'A contacter',contacte:'Contacte',relance:'Relance envoyee',reponse:'Reponse recue',rdv_planifie:'RDV planifie',en_discussion:'En discussion',partenariat:'Partenariat',refus:'Refus',en_pause:'En pause'};
+const STATUT_COLORS={a_contacter:'#8D8DA0',contacte:'#3A86A8',relance:'#E09F3E',reponse:'#52B788',rdv_planifie:'#2D6A4F',en_discussion:'#1B4332',partenariat:'#B8860B',refus:'#D64045',en_pause:'#C8C8D4'};
+const CATEGORIE_LABELS={addictologue:'Addictologue',medecin:'Medecin',pharmacien:'Pharmacien',mutuelle:'Mutuelle',investisseur:'Investisseur',institution:'Institution',incubateur:'Incubateur',avocat:'Avocat',partenaire:'Partenaire',autre:'Autre'};
+const ACTIVITE_LABELS={email_envoye:'Email envoye',email_recu:'Email recu',appel_sortant:'Appel sortant',appel_entrant:'Appel entrant',linkedin:'Message LinkedIn',rdv:'RDV',autre:'Autre'};
+
+// --- LocalStorage CRUD ---
+function getOutreach(){try{return JSON.parse(localStorage.getItem(OUTREACH_KEY))||{contacts:[]}}catch(e){return{contacts:[]}}}
+function saveOutreach(data){localStorage.setItem(OUTREACH_KEY,JSON.stringify(data))}
+function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
+
+function addContact(c){
+  const data=getOutreach();
+  c.id=genId();c.created_at=new Date().toISOString();c.updated_at=new Date().toISOString();c.activites=[];
+  data.contacts.unshift(c);saveOutreach(data);renderDemarchage();
+}
+function updateContact(id,updates){
+  const data=getOutreach();const idx=data.contacts.findIndex(c=>c.id===id);
+  if(idx===-1)return;Object.assign(data.contacts[idx],updates,{updated_at:new Date().toISOString()});
+  saveOutreach(data);renderDemarchage();
+}
+function deleteContact(id){
+  if(!confirm('Supprimer ce contact et tout son historique ?'))return;
+  const data=getOutreach();data.contacts=data.contacts.filter(c=>c.id!==id);
+  saveOutreach(data);renderDemarchage();
+  closeModal('detailModal');
+}
+function addActivityToContact(contactId,activity){
+  const data=getOutreach();const contact=data.contacts.find(c=>c.id===contactId);
+  if(!contact)return;
+  activity.id='a_'+Date.now();activity.date=activity.date||new Date().toISOString();
+  if(!contact.activites)contact.activites=[];
+  contact.activites.unshift(activity);
+  // Auto-update statut
+  if(activity.type==='email_envoye'&&contact.statut==='a_contacter')contact.statut='contacte';
+  else if((activity.type==='email_recu'||activity.type==='appel_entrant')&&(contact.statut==='contacte'||contact.statut==='relance'))contact.statut='reponse';
+  else if(activity.type==='rdv'&&contact.statut!=='en_discussion'&&contact.statut!=='partenariat')contact.statut='rdv_planifie';
+  contact.updated_at=new Date().toISOString();
+  saveOutreach(data);renderDemarchage();
+}
+
+// --- Filtering ---
+function getFilteredContacts(){
+  let contacts=getOutreach().contacts||[];
+  const search=(document.getElementById('searchDemarchage')||{}).value||'';
+  const catF=(document.getElementById('filterCategorie')||{}).value||'';
+  const statF=(document.getElementById('filterStatut')||{}).value||'';
+  if(search){const q=search.toLowerCase();contacts=contacts.filter(c=>(c.nom||'').toLowerCase().includes(q)||(c.prenom||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q)||(c.organisation||'').toLowerCase().includes(q)||(c.role||'').toLowerCase().includes(q))}
+  if(catF)contacts=contacts.filter(c=>c.categorie===catF);
+  if(statF)contacts=contacts.filter(c=>c.statut===statF);
+  return contacts;
+}
+function needsRelance(c){
+  if(!['contacte','relance'].includes(c.statut))return false;
+  const last=(c.activites||[]).find(a=>['email_envoye','appel_sortant','linkedin'].includes(a.type));
+  if(!last)return false;
+  return(Date.now()-new Date(last.date).getTime())/864e5>=7;
+}
+function getLastContactDate(c){return(c.activites&&c.activites.length>0)?c.activites[0].date:null}
+
+// --- Render ---
+function renderDemarchage(){
+  const contacts=getFilteredContacts();
+  renderDemarchageKPIs();
+  renderPipeline();
+  renderDemarchageTable(contacts);
+}
+
+function renderDemarchageKPIs(){
+  const all=getOutreach().contacts||[];
+  const total=all.length;
+  const emailsSent=all.reduce((n,c)=>n+(c.activites||[]).filter(a=>a.type==='email_envoye').length,0);
+  const enAttente=all.filter(c=>['contacte','relance'].includes(c.statut)).length;
+  const reponses=all.filter(c=>['reponse','rdv_planifie','en_discussion','partenariat'].includes(c.statut)).length;
+  const rdv=all.filter(c=>c.statut==='rdv_planifie').length;
+  const relances=all.filter(c=>needsRelance(c)).length;
+  const tauxR=enAttente+reponses>0?Math.round(reponses/(enAttente+reponses)*100):0;
+  document.getElementById('kpiDemarchage').innerHTML=
+    kpiHTML('Total contacts',total,'','neutral')+
+    kpiHTML('Emails envoyes',emailsSent,'','neutral')+
+    kpiHTML('En attente',enAttente,relances>0?'<span class="relance-dot"></span>'+relances+' a relancer':'a jour',relances>0?'down':'up')+
+    kpiHTML('Reponses',reponses,tauxR+'% taux de reponse',tauxR>30?'up':'neutral')+
+    kpiHTML('RDV planifies',rdv,'','neutral')+
+    kpiHTML('Partenariats',all.filter(c=>c.statut==='partenariat').length,'','up');
+}
+
+function renderPipeline(){
+  const all=getOutreach().contacts||[];
+  const counts={};Object.keys(STATUT_LABELS).forEach(s=>counts[s]=0);
+  all.forEach(c=>{if(counts[c.statut]!==undefined)counts[c.statut]++});
+  const statF=(document.getElementById('filterStatut')||{}).value||'';
+  let html='';
+  Object.entries(STATUT_LABELS).forEach(([key,label])=>{
+    const active=statF===key;
+    html+=`<div class="pipeline-card${active?' active':''}" style="border-left-color:${STATUT_COLORS[key]}" onclick="document.getElementById('filterStatut').value='${active?'':key}';renderDemarchage()"><div class="pc-count st-${key}">${counts[key]}</div><div class="pc-label">${label}</div></div>`;
+  });
+  document.getElementById('pipelineRow').innerHTML=html;
+}
+
+function renderDemarchageTable(contacts){
+  document.getElementById('badgeContactCount').textContent=contacts.length+' affiche'+(contacts.length!==1?'s':'');
+  if(contacts.length===0){
+    document.getElementById('demarchageTable').innerHTML='<div class="empty">Aucun contact pour ces filtres.<div style="margin-top:12px"><button class="btn-primary" onclick="openContactModal()">+ Ajouter un contact</button></div></div>';
+    return;
+  }
+  let h='<table><tr><th style="width:28px"></th><th>Contact</th><th>Organisation</th><th>Categorie</th><th>Statut</th><th>Dernier contact</th><th>Actions</th></tr>';
+  contacts.forEach(c=>{
+    const relance=needsRelance(c);
+    const lastDate=getLastContactDate(c);
+    const catClass='cat-'+(c.categorie||'autre');
+    const fullName=c.prenom?c.prenom+' '+c.nom:c.nom;
+    h+=`<tr onclick="openDetailModal('${c.id}')" style="cursor:pointer">`;
+    h+=`<td>${relance?'<span class="relance-dot" title="Relance necessaire (7j+)"></span>':''}</td>`;
+    h+=`<td><strong>${escHTML(fullName)}</strong>${c.role?'<br><span style="font-size:.6875rem;color:var(--grey)">'+escHTML(c.role)+'</span>':''}</td>`;
+    h+=`<td>${escHTML(c.organisation||'')}</td>`;
+    h+=`<td><span class="cat-tag ${catClass}">${CATEGORIE_LABELS[c.categorie]||c.categorie||'--'}</span></td>`;
+    h+=`<td><select class="status-select st-${c.statut}" onchange="event.stopPropagation();updateContact('${c.id}',{statut:this.value})" onclick="event.stopPropagation()">`;
+    Object.entries(STATUT_LABELS).forEach(([k,v])=>{h+=`<option value="${k}"${c.statut===k?' selected':''}>${v}</option>`});
+    h+=`</select></td>`;
+    h+=`<td>${lastDate?fmtDate(lastDate):'<span style="color:var(--grey)">Jamais</span>'}</td>`;
+    h+=`<td onclick="event.stopPropagation()" style="white-space:nowrap"><button class="btn-sm" onclick="openActivityModal('${c.id}')" title="Logger une activite">+ Activite</button> <button class="btn-sm danger" onclick="deleteContact('${c.id}')" title="Supprimer">&times;</button></td>`;
+    h+=`</tr>`;
+  });
+  h+='</table>';
+  document.getElementById('demarchageTable').innerHTML=h;
+}
+
+// --- Modals ---
+let editingContactId=null,activityContactId=null;
+
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow=''}
+
+function openContactModal(contactId){
+  editingContactId=contactId||null;
+  const form=document.getElementById('contactForm');
+  document.getElementById('contactModalTitle').textContent=contactId?'Modifier le contact':'Ajouter un contact';
+  if(contactId){
+    const c=getOutreach().contacts.find(x=>x.id===contactId);if(!c)return;
+    form.nom.value=c.nom||'';form.prenom.value=c.prenom||'';form.email.value=c.email||'';
+    form.telephone.value=c.telephone||'';form.organisation.value=c.organisation||'';
+    form.role.value=c.role||'';form.linkedin.value=c.linkedin||'';
+    form.categorie.value=c.categorie||'';form.statut.value=c.statut||'a_contacter';form.notes.value=c.notes||'';
+  }else{form.reset();form.statut.value='a_contacter'}
+  openModal('contactModal');
+}
+function saveContact(){
+  const form=document.getElementById('contactForm');
+  const d={nom:form.nom.value.trim(),prenom:form.prenom.value.trim(),email:form.email.value.trim(),telephone:form.telephone.value.trim(),organisation:form.organisation.value.trim(),role:form.role.value.trim(),linkedin:form.linkedin.value.trim(),categorie:form.categorie.value,statut:form.statut.value,notes:form.notes.value.trim()};
+  if(!d.nom){alert('Le nom est requis.');return}
+  if(editingContactId){updateContact(editingContactId,d)}else{addContact(d)}
+  closeModal('contactModal');
+}
+
+function openActivityModal(contactId){
+  activityContactId=contactId;
+  const form=document.getElementById('activityForm');form.reset();
+  form.act_date.value=new Date().toISOString().substring(0,16);
+  openModal('activityModal');
+}
+function saveActivity(){
+  const form=document.getElementById('activityForm');
+  const a={type:form.act_type.value,sujet:form.act_sujet.value.trim(),notes:form.act_notes.value.trim(),date:new Date(form.act_date.value).toISOString()};
+  addActivityToContact(activityContactId,a);
+  closeModal('activityModal');
+  if(document.getElementById('detailModal').classList.contains('open'))openDetailModal(activityContactId);
+}
+
+function openDetailModal(contactId){
+  const c=getOutreach().contacts.find(x=>x.id===contactId);if(!c)return;
+  const fullName=c.prenom?c.prenom+' '+c.nom:c.nom;
+  let html='<div class="detail-grid"><div class="detail-info"><dl>';
+  html+=`<dt>Nom</dt><dd>${escHTML(fullName)}</dd>`;
+  if(c.role)html+=`<dt>Role</dt><dd>${escHTML(c.role)}</dd>`;
+  if(c.organisation)html+=`<dt>Organisation</dt><dd>${escHTML(c.organisation)}</dd>`;
+  if(c.email)html+=`<dt>Email</dt><dd><a href="mailto:${escHTML(c.email)}" style="color:var(--green)">${escHTML(c.email)}</a></dd>`;
+  if(c.telephone)html+=`<dt>Telephone</dt><dd><a href="tel:${escHTML(c.telephone)}" style="color:var(--green)">${escHTML(c.telephone)}</a></dd>`;
+  if(c.linkedin)html+=`<dt>LinkedIn</dt><dd><a href="${escHTML(c.linkedin)}" target="_blank" rel="noopener" style="color:var(--green)">Voir le profil</a></dd>`;
+  html+=`<dt>Categorie</dt><dd><span class="cat-tag cat-${c.categorie||'autre'}">${CATEGORIE_LABELS[c.categorie]||c.categorie||'Non definie'}</span></dd>`;
+  html+=`<dt>Statut</dt><dd style="font-weight:600" class="st-${c.statut}">${STATUT_LABELS[c.statut]||c.statut}</dd>`;
+  if(c.notes)html+=`<dt>Notes</dt><dd>${escHTML(c.notes)}</dd>`;
+  html+=`<dt>Cree le</dt><dd>${fmtDate(c.created_at)}</dd>`;
+  html+=`</dl><div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">`;
+  html+=`<button class="btn-primary" onclick="closeModal('detailModal');openActivityModal('${c.id}')">+ Activite</button>`;
+  html+=`<button class="btn-sm" onclick="closeModal('detailModal');openContactModal('${c.id}')">Modifier</button>`;
+  html+=`<button class="btn-sm danger" onclick="deleteContact('${c.id}')">Supprimer</button>`;
+  html+=`</div></div>`;
+  // Timeline
+  html+=`<div class="detail-activities"><h4>Historique (${(c.activites||[]).length})</h4>`;
+  if(!c.activites||c.activites.length===0){
+    html+='<div class="empty" style="padding:20px 0">Aucune activite enregistree</div>';
+  }else{
+    html+='<div class="timeline">';
+    c.activites.forEach(a=>{
+      html+=`<div class="timeline-item"><div class="timeline-dot"></div>`;
+      html+=`<div class="timeline-date">${fmtDate(a.date)} <span class="timeline-type">${ACTIVITE_LABELS[a.type]||a.type}</span></div>`;
+      if(a.sujet)html+=`<div class="timeline-subject">${escHTML(a.sujet)}</div>`;
+      if(a.notes)html+=`<div class="timeline-notes">${escHTML(a.notes)}</div>`;
+      html+=`</div>`;
+    });
+    html+='</div>';
+  }
+  html+='</div></div>';
+  document.getElementById('detailContent').innerHTML=html;
+  openModal('detailModal');
+}
+
+// --- Export / Import ---
+function exportOutreachCSV(){
+  const contacts=getFilteredContacts();
+  const headers=['nom','prenom','email','telephone','organisation','role','categorie','statut','notes','nb_activites','dernier_contact','created_at'];
+  let csv=headers.join(',')+'\n';
+  contacts.forEach(c=>{
+    const lastDate=getLastContactDate(c);
+    const row=[c.nom,c.prenom,c.email,c.telephone,c.organisation,c.role,c.categorie,c.statut,c.notes,(c.activites||[]).length,lastDate||'',c.created_at];
+    csv+=row.map(v=>'"'+((v||'')+'').replace(/"/g,'""')+'"').join(',')+'\n';
+  });
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='virage-demarchage.csv';a.click();URL.revokeObjectURL(url);
+}
+
+function exportOutreachJSON(){
+  const data=getOutreach();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='virage-demarchage-backup.json';a.click();URL.revokeObjectURL(url);
+}
+
+function importOutreachJSON(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const imported=JSON.parse(e.target.result);
+      if(!imported.contacts||!Array.isArray(imported.contacts)){alert('Format invalide.');return}
+      const current=getOutreach();
+      const existingIds=new Set(current.contacts.map(c=>c.id));
+      let added=0;
+      imported.contacts.forEach(c=>{
+        if(!existingIds.has(c.id)){current.contacts.push(c);added++}
+      });
+      saveOutreach(current);
+      renderDemarchage();
+      alert(added+' contact(s) importe(s). '+(imported.contacts.length-added)+' doublon(s) ignore(s).');
+    }catch(err){alert('Erreur de lecture du fichier.')}
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+// --- Keyboard ---
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){['contactModal','activityModal','detailModal'].forEach(id=>closeModal(id))}
+});
 </script>
 </body>
 </html>
