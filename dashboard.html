@@ -1015,28 +1015,64 @@ const ACTIVITE_LABELS={email_envoye:'Email envoye',email_recu:'Email recu',appel
 function getOutreach(){try{return JSON.parse(localStorage.getItem(OUTREACH_KEY))||{contacts:[]}}catch(e){return{contacts:[]}}}
 function saveOutreach(data){localStorage.setItem(OUTREACH_KEY,JSON.stringify(data))}
 
-// --- Seed initial contacts ---
-function seedIfEmpty(){
-  const data=getOutreach();if(data.contacts&&data.contacts.length>0)return;
-  const d='2026-04-17T10:00:00.000Z';
-  function mk(id,nom,prenom,email,org,role,cat,statut,notes,actType,actDate){
-    return{id:'c_seed_'+id,nom,prenom,organisation:org,role,email,telephone:'',linkedin:'',categorie:cat,statut,notes,created_at:actDate||d,updated_at:actDate||d,activites:actType?[{id:'a_seed_'+id,date:actDate||d,type:actType,sujet:'Prise de contact VIRAGE',notes:''}]:[]}
-  }
-  saveOutreach({contacts:[
-    mk(1,'Benyamina','Amine','amine.benyamina@aphp.fr','APHP Paul Brousse','Professeur, Addictologue','addictologue','contacte','Vision globale, portes institutionnelles','email_envoye'),
-    mk(2,'Karila','Laurent','laurent.karila@aphp.fr','APHP Paul Brousse','Professeur, Addictologue','addictologue','contacte','Vulgarisation, cible jeune, podcast','email_envoye'),
-    mk(3,'Lejoyeux','Michel','michel.lejoyeux@aphp.fr','APHP Bichat','Professeur, Psychiatre Addictologue','addictologue','contacte','Psychiatrie positive, motivation','email_envoye'),
-    mk(4,'Bellivier','Frank','secretariat.mafw@aphp.fr','APHP Fernand-Widal','Professeur, Psychiatre','addictologue','contacte','Institutionnel, politique de sante','email_envoye'),
-    mk(5,'Aubin','Henri-Jean','henri-jean.aubin@aphp.fr','APHP','Professeur, Addictologue','addictologue','contacte','Rigueur scientifique, publications','email_envoye'),
-    mk(6,'Le Faou','Anne-Laurence','anne-laurence.lefaou@aphp.fr','APHP','Docteur, Tabacologue','addictologue','contacte','SFT, tabacologie, parcours de sevrage','email_envoye'),
-    mk(7,'Adler','Marion','marion.adler@aphp.fr','APHP','Docteur, Tabacologue','addictologue','contacte','Vapotage, terrain, patients jeunes','email_envoye'),
-    mk(8,'Berlin','Ivan','ivan.berlin@psl.aphp.fr','APHP Pitie-Salpetriere','Docteur, Pharmacologue','addictologue','contacte','DIU tabaco, pharmacologie, NRT','email_envoye'),
-    mk(9,'Blaise','Mario','mario.blaise@ghu-paris.fr','GHU Paris / Marmottan','Docteur, Addictologue','addictologue','contacte','Marmottan, accueil usagers, humanisme','email_envoye'),
-    mk(10,'Delile','Jean-Michel','jm.delile@ceid.asso.fr','CEID Bordeaux','Docteur, Addictologue','addictologue','contacte','CEID, accompagnement terrain Bordeaux','email_envoye'),
-    mk(11,'Auriacombe','Marc','marc.auriacombe@u-bordeaux.fr','Universite / CHU Bordeaux','Professeur, Addictologue','addictologue','contacte','Recherche addiction, CHU Bordeaux','email_envoye'),
-  ]});
+// --- Seed contacts (version-aware, no duplicates) ---
+function seedContacts(){
+  const data=getOutreach();
+  const v=parseInt(localStorage.getItem('virage_seed_v')||'0');
+  if(v>=2)return;
+  const existing=new Set(data.contacts.map(c=>(c.email||'').toLowerCase()));
+  const d='2026-04-17T10:00:00.000Z',d2='2026-04-18T10:00:00.000Z';
+  // [nom,prenom,email,org,role,notes,date]
+  const all=[
+    ['Benyamina','Amine','amine.benyamina@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vision globale, portes institutionnelles',d],
+    ['Karila','Laurent','laurent.karila@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vulgarisation, cible jeune, podcast',d],
+    ['Lejoyeux','Michel','michel.lejoyeux@aphp.fr','APHP Bichat','Pr, Psychiatre Addictologue','Psychiatrie positive, motivation',d],
+    ['Bellivier','Frank','secretariat.mafw@aphp.fr','APHP Fernand-Widal','Pr, Psychiatre','Institutionnel, politique de sante',d],
+    ['Aubin','Henri-Jean','henri-jean.aubin@aphp.fr','APHP','Pr, Addictologue','Rigueur scientifique, publications',d],
+    ['Le Faou','Anne-Laurence','anne-laurence.lefaou@aphp.fr','APHP','Dr, Tabacologue','SFT, tabacologie, parcours de sevrage',d],
+    ['Adler','Marion','marion.adler@aphp.fr','APHP','Dr, Tabacologue','Vapotage, terrain, patients jeunes',d],
+    ['Berlin','Ivan','ivan.berlin@psl.aphp.fr','APHP Pitie-Salpetriere','Dr, Pharmacologue','DIU tabaco, pharmacologie, NRT',d],
+    ['Blaise','Mario','mario.blaise@ghu-paris.fr','GHU Paris / Marmottan','Dr, Addictologue','Marmottan, accueil usagers, humanisme',d],
+    ['Delile','Jean-Michel','jm.delile@ceid.asso.fr','CEID Bordeaux','Dr, Addictologue','CEID, accompagnement terrain Bordeaux',d],
+    ['Auriacombe','Marc','marc.auriacombe@u-bordeaux.fr','CHU / Univ Bordeaux','Pr, Addictologue','Recherche addiction, CHU Bordeaux',d],
+    ['Dautzenberg','Bertrand','b.dautzenberg@ofta-asso.fr','OFTA','Pr, Pneumologue Tabacologue','OFTA, prevention tabagisme',d2],
+    ['Guichenez','Philippe','philippe.guichenez@ch-beziers.fr','CH Beziers','Dr, Tabacologue','Tabacologie, CH Beziers',d2],
+    ['Lancon','Christophe','secretariat.psy.lancon@ap-hm.fr','AP-HM Marseille','Pr, Psychiatre Addictologue','Psychiatrie, addictologie Marseille',d2],
+    ['Authier','Nicolas','nauthier@chu-clermontferrand.fr','CHU Clermont-Ferrand','Dr, Pharmacologue','Pharmacologie, addictologie Clermont',d2],
+    ['Dematteis','Maurice','Maurice.Dematteis@univ-grenoble-alpes.fr','Univ Grenoble Alpes','Pr, Addictologue','Addictologie CHU Grenoble',d2],
+    ['Cottencin','Olivier','olivier.cottencin@chru-lille.fr','CHRU Lille','Pr, Psychiatre Addictologue','Addictologie, CHRU Lille',d2],
+    ['Dervaux','Alain','alaindervaux@wanadoo.fr','','Dr, Psychiatre Addictologue','Psychiatrie, addictologie',d2],
+    ['Underner','Mike','mike.underner@orange.fr','CHU Poitiers','Dr, Tabacologue','Tabacologie, CHU Poitiers',d2],
+    ['Borgne','A.','aborgne@tabac.fr','Alliance contre le tabac','','Prevention tabac, institution',d2],
+    ['Vanderschueren','M.','vanderschueren-m@chu-caen.fr','CHU Caen','Dr','CHU Caen',d2],
+    ['Perriot','Jean','jean.perriot@cg63.fr','Dispensaire Emile Roux','Dr, Tabacologue','Tabacologie, Clermont-Ferrand',d2],
+    ['Romo','Lucia','lucia.romo_desprez@parisnanterre.fr','Univ Paris Nanterre','Pr, Psychologue','Psychologie des addictions, recherche',d2],
+    ['Gallopel-Morvan','Karine','karine.gallopel-morvan@ehesp.fr','EHESP','Pr, Recherche sante publique','Marketing social, prevention tabac',d2],
+    ['Greillier','Laurent','laurent.greillier@ap-hm.fr','AP-HM Marseille','Dr, Pneumologue','Pneumologie, AP-HM',d2],
+    ['Fatseas','Melina','melina.fatseas@u-bordeaux.fr','Univ / CHU Bordeaux','Dr, Addictologue','Addictologie, recherche Bordeaux',d2],
+    ['Serre','Fuschia','fuschia.serre@u-bordeaux.fr','Univ / CHU Bordeaux','Dr, Addictologue','Recherche addictions Bordeaux',d2],
+    ['Baillet','Emmanuelle','emmanuelle.baillet.1@u-bordeaux.fr','Univ Bordeaux','Dr','Universite de Bordeaux',d2],
+    ['Paillou','V.','v.paillou@ceid-addiction.com','CEID Bordeaux','','CEID, addictions Bordeaux',d2],
+    ['Reiller','B.','b.reiller@ceid-addiction.com','CEID Bordeaux','','CEID, addictions Bordeaux',d2],
+    ['Cleirec','G.','g.cleirec@hopitaldubouscat.com','Hopital du Bouscat','Dr','Addictologie, Bouscat',d2],
+    ['Lajzerowicz','N.','N.LAJZEROWICZ@hopitaldubouscat.com','Hopital du Bouscat','Dr','Addictologie, Bouscat',d2],
+    ['Castera','Philippe','philippe.castera@wanadoo.fr','','Dr, Addictologue','Addictologie, Bordeaux',d2],
+    ['Ostermann','Gerard','gerard.ostermann@wanadoo.fr','','Dr, Interniste Psychotherapeute','Psychotherapie, addictions',d2],
+    ['Brousse','G.','gbrousse@chu-clermontferrand.fr','CHU Clermont-Ferrand','Dr','CHU Clermont-Ferrand',d2],
+    ['Naassila','Mickael','mickael.naassila@u-picardie.fr','Univ Picardie','Pr, Chercheur','Recherche neurobiologie des addictions',d2],
+    ['Bonnet','Nicolas','nicolas.bonnet@respadd.org','RESPADD','Directeur','Reseau de prevention des addictions',d2],
+    ['Airagnes','Guillaume','guillaume.airagnes@ofdt.fr','OFDT','Dr','Observatoire drogues et tendances',d2],
+  ];
+  let n=0;
+  all.forEach((c,i)=>{
+    if(existing.has(c[2].toLowerCase()))return;
+    data.contacts.push({id:'c_seed_'+i,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'addictologue',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:'a_seed_'+i,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
+    n++;
+  });
+  if(n>0)saveOutreach(data);
+  localStorage.setItem('virage_seed_v','2');
 }
-seedIfEmpty();
+seedContacts();
 function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
 
 function addContact(c){
