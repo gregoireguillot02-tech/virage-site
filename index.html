@@ -1724,8 +1724,43 @@
       transform: translate3d(0, -4px, 0);
       border-color: var(--color-primary-pale);
     }
-    .testimonial-avatar { transition: transform 400ms var(--ease-apple); }
-    .testimonial-card:hover .testimonial-avatar { transform: scale(1.06); }
+    .testimonial-card:hover .testimonial-avatar { transform: scale(1.06); transition: transform 400ms var(--ease-apple); }
+
+    .testimonials-extra {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+      max-width: 1100px;
+      margin: var(--space-6) auto 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 600ms var(--ease-apple), opacity 400ms var(--ease-apple), margin 400ms var(--ease-apple);
+    }
+    .testimonials-extra.expanded {
+      max-height: 600px;
+      opacity: 1;
+    }
+    .testimonials-toggle {
+      display: block;
+      margin: var(--space-8) auto 0;
+      padding: 10px 24px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--color-primary-pale);
+      background: transparent;
+      color: var(--color-primary);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    .testimonials-toggle:hover { background: var(--color-primary-pale); color: var(--color-primary-dark); }
+
+    @media (max-width: 768px) {
+      .testimonials-extra { grid-template-columns: 1fr; max-width: 480px; }
+      .testimonials-extra.expanded { max-height: 1600px; }
+    }
 
     .testimonial-stars {
       display: flex;
@@ -1758,7 +1793,22 @@
       border-radius: 50%;
       object-fit: cover;
       background: var(--color-grey-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--color-white);
+      flex-shrink: 0;
+      user-select: none;
     }
+    .testimonial-avatar--green { background: var(--color-primary); }
+    .testimonial-avatar--light { background: var(--color-primary-light); }
+    .testimonial-avatar--accent { background: var(--color-accent); }
+    .testimonial-avatar--terra { background: var(--color-terracotta); }
+    .testimonial-avatar--slate { background: var(--color-slate); }
+    .testimonial-avatar--info { background: var(--color-info); }
 
     .testimonial-name {
       font-weight: 600;
@@ -3187,7 +3237,7 @@
           </div>
           <p class="testimonial-text">J'ai essayé plein d'apps pour arrêter de fumer. Elles me faisaient toutes culpabiliser. Avec VIRAGE, j'ai l'impression de parler à un pote qui comprend ce que je traverse. Ça change tout.</p>
           <div class="testimonial-author">
-            <img src="https://i.pravatar.cc/84?img=33" alt="Photo de Lucas" class="testimonial-avatar" loading="lazy" width="84" height="84">
+            <div class="testimonial-avatar testimonial-avatar--green" aria-hidden="true">LM</div>
             <div>
               <p class="testimonial-name">Lucas M.</p>
               <p class="testimonial-meta">24 ans, Paris — <span class="counter-animate" data-target="21" data-duration="1800">0</span> jours sans fumer</p>
@@ -3205,7 +3255,7 @@
           </div>
           <p class="testimonial-text">Le compteur d'économies m'a convaincu. Voir que j'économisais 50 euros par semaine, concrètement, c'est plus motivant que n'importe quel discours santé. Je vapotais depuis 3 ans.</p>
           <div class="testimonial-author">
-            <img src="https://i.pravatar.cc/84?img=47" alt="Photo de Sarah" class="testimonial-avatar" loading="lazy" width="84" height="84">
+            <div class="testimonial-avatar testimonial-avatar--accent" aria-hidden="true">SK</div>
             <div>
               <p class="testimonial-name">Sarah K.</p>
               <p class="testimonial-meta">22 ans, Lyon — <span class="counter-animate" data-target="35" data-duration="1800">0</span> jours sans vaper</p>
@@ -3223,15 +3273,16 @@
           </div>
           <p class="testimonial-text">Je vapotais depuis le lycée, c'était devenu un réflexe. Le coach IA ne m'a jamais jugé. Il m'a juste aidé à comprendre pourquoi je vapotais et à trouver des alternatives. C'est subtil mais ça marche.</p>
           <div class="testimonial-author">
-            <img src="https://i.pravatar.cc/84?img=12" alt="Photo de Mehdi" class="testimonial-avatar" loading="lazy" width="84" height="84">
+            <div class="testimonial-avatar testimonial-avatar--light" aria-hidden="true">MB</div>
             <div>
               <p class="testimonial-name">Mehdi B.</p>
               <p class="testimonial-meta">27 ans, Bordeaux, <span class="counter-animate" data-target="14" data-duration="1800">0</span> jours sans vapoter</p>
             </div>
           </div>
         </div>
-
-        <div class="testimonial-card reveal reveal-delay-1">
+      </div>
+      <div class="testimonials-extra" id="testimonialsExtra">
+        <div class="testimonial-card">
           <div class="testimonial-stars">
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -3241,7 +3292,7 @@
           </div>
           <p class="testimonial-text">Avoir le compteur, le coach et la possibilité de consulter un tabacologue au même endroit, ça simplifie tout. Plus besoin de gérer trois trucs différents. C'est fluide.</p>
           <div class="testimonial-author">
-            <img src="https://i.pravatar.cc/84?img=26" alt="Photo de Emma" class="testimonial-avatar" loading="lazy" width="84" height="84">
+            <div class="testimonial-avatar testimonial-avatar--terra" aria-hidden="true">EL</div>
             <div>
               <p class="testimonial-name">Emma L.</p>
               <p class="testimonial-meta">20 ans, Marseille — <span class="counter-animate" data-target="7" data-duration="1600">0</span> jours sans fumer</p>
@@ -3249,7 +3300,7 @@
           </div>
         </div>
 
-        <div class="testimonial-card reveal reveal-delay-2">
+        <div class="testimonial-card">
           <div class="testimonial-stars">
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -3259,7 +3310,7 @@
           </div>
           <p class="testimonial-text">Le système de récompenses est addictif (dans le bon sens). Chaque badge débloqué me donne envie de continuer. J'en suis à 45 jours et je n'ai jamais tenu aussi longtemps.</p>
           <div class="testimonial-author">
-            <img src="https://i.pravatar.cc/84?img=52" alt="Photo de Antoine" class="testimonial-avatar" loading="lazy" width="84" height="84">
+            <div class="testimonial-avatar testimonial-avatar--slate" aria-hidden="true">AD</div>
             <div>
               <p class="testimonial-name">Antoine D.</p>
               <p class="testimonial-meta">29 ans, Nantes — <span class="counter-animate" data-target="45" data-duration="1800">0</span> jours sans fumer</p>
@@ -3267,7 +3318,7 @@
           </div>
         </div>
 
-        <div class="testimonial-card reveal reveal-delay-3">
+        <div class="testimonial-card">
           <div class="testimonial-stars">
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -3277,7 +3328,7 @@
           </div>
           <p class="testimonial-text">Ma copine m'a inscrit pour rire. 2 mois plus tard j'ai arrêté la cigarette. Le coach m'envoyait un message pile quand j'en avais besoin. C'est bluffant.</p>
           <div class="testimonial-author">
-            <img src="https://i.pravatar.cc/84?img=59" alt="Photo de Theo" class="testimonial-avatar" loading="lazy" width="84" height="84">
+            <div class="testimonial-avatar testimonial-avatar--info" aria-hidden="true">TR</div>
             <div>
               <p class="testimonial-name">Theo R.</p>
               <p class="testimonial-meta">26 ans, Toulouse — <span class="counter-animate" data-target="62" data-duration="1800">0</span> jours sans fumer</p>
@@ -3285,6 +3336,7 @@
           </div>
         </div>
       </div>
+      <button class="testimonials-toggle" id="testimonialsToggle">Voir plus de retours</button>
     </div>
   </section>
 
@@ -4099,6 +4151,18 @@
             proSubmit.disabled = false;
           }, 5000);
         }
+      });
+    }
+
+    // ============================================================
+    // TESTIMONIALS TOGGLE
+    // ============================================================
+    const testimonialsToggle = document.getElementById('testimonialsToggle');
+    const testimonialsExtra = document.getElementById('testimonialsExtra');
+    if (testimonialsToggle && testimonialsExtra) {
+      testimonialsToggle.addEventListener('click', () => {
+        const expanded = testimonialsExtra.classList.toggle('expanded');
+        testimonialsToggle.textContent = expanded ? 'Voir moins' : 'Voir plus de retours';
       });
     }
 
