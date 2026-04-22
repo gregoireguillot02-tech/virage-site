@@ -3648,15 +3648,15 @@
       <!-- Giant stats -->
       <div class="stats-hero">
         <div class="stat-giant reveal">
-          <p class="stat-giant-number"><span class="counter-animate" data-target="75000" data-duration="2000">0</span></p>
+          <p class="stat-giant-number"><span class="counter-animate" data-target="75000" data-duration="1200">0</span></p>
           <p class="stat-giant-label">deces par an lies au tabac</p>
         </div>
-        <div class="stat-giant reveal reveal-delay-1">
-          <p class="stat-giant-number"><span class="counter-animate" data-target="32" data-duration="1600">0</span><span class="stat-giant-suffix">%</span></p>
+        <div class="stat-giant reveal">
+          <p class="stat-giant-number"><span class="counter-animate" data-target="32" data-duration="1000">0</span><span class="stat-giant-suffix">%</span></p>
           <p class="stat-giant-label">des 18-24 ans vapotent</p>
         </div>
-        <div class="stat-giant reveal reveal-delay-2">
-          <p class="stat-giant-number"><span class="counter-animate" data-target="900" data-duration="1800">0</span><span class="stat-giant-suffix"> M&euro;</span></p>
+        <div class="stat-giant reveal">
+          <p class="stat-giant-number"><span class="counter-animate" data-target="900" data-duration="1100">0</span><span class="stat-giant-suffix"> M&euro;</span></p>
           <p class="stat-giant-label">par an en couts de sante</p>
         </div>
       </div>
@@ -4493,25 +4493,67 @@
     // ============================================================
     function animateCounter(el) {
       const target = parseInt(el.dataset.target, 10);
-      const duration = parseInt(el.dataset.duration || '2500', 10);
+      const duration = parseInt(el.dataset.duration || '1200', 10);
+      const formatted = target >= 1000 ? target.toLocaleString('fr-FR') : String(target);
+
       if (prefersReduced) {
-        el.textContent = target >= 1000 ? target.toLocaleString('fr-FR') : target;
+        el.textContent = formatted;
         return;
       }
-      const start = performance.now();
-      el.classList.add('counting');
 
-      function step(now) {
-        const elapsed = now - start;
-        const t = Math.min(elapsed / duration, 1);
-        // easeOutQuart
-        const eased = 1 - Math.pow(1 - t, 4);
-        const current = Math.round(target * eased);
-        el.textContent = target >= 1000 ? current.toLocaleString('fr-FR') : current;
-        if (t < 1) requestAnimationFrame(step);
-        else el.classList.remove('counting');
+      // Typewriter style: rapid count then reveal digits left to right
+      const chars = formatted.replace(/\s/g, ' ').split('');
+      el.textContent = '';
+      let revealed = 0;
+
+      function revealNext() {
+        if (revealed >= chars.length) return;
+        el.textContent = formatted.substring(0, revealed + 1);
+        revealed++;
+        // Each digit appears with a slight scramble effect
+        const remaining = chars.length - revealed;
+        if (remaining > 0) {
+          // Show random digits for unrevealed positions
+          let display = formatted.substring(0, revealed);
+          const scrambleCount = 3;
+          let scrambleStep = 0;
+
+          function scramble() {
+            let tail = '';
+            for (let j = revealed; j < chars.length; j++) {
+              if (chars[j] === ' ') { tail += ' '; continue; }
+              tail += Math.floor(Math.random() * 10);
+            }
+            el.textContent = display + tail;
+            scrambleStep++;
+            if (scrambleStep < scrambleCount) {
+              setTimeout(scramble, 40);
+            } else {
+              setTimeout(revealNext, 30);
+            }
+          }
+          scramble();
+        }
       }
-      requestAnimationFrame(step);
+
+      // Start with all scrambled
+      let initScrambles = 0;
+      const initTotal = 5;
+      function initScramble() {
+        let s = '';
+        for (let j = 0; j < chars.length; j++) {
+          if (chars[j] === ' ') { s += ' '; continue; }
+          s += Math.floor(Math.random() * 10);
+        }
+        el.textContent = s;
+        initScrambles++;
+        if (initScrambles < initTotal) {
+          setTimeout(initScramble, 60);
+        } else {
+          revealNext();
+        }
+      }
+      initScramble();
     }
 
     const counterObserver = new IntersectionObserver((entries) => {
@@ -4521,7 +4563,7 @@
           counterObserver.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.4 });
+    }, { threshold: 0.1 });
 
     document.querySelectorAll('.counter-animate').forEach(el => {
       // Phone counters trigger earlier (visible on load)
