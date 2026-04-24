@@ -530,7 +530,9 @@
         <div class="card full"><div class="card-title">Evolution du cash</div><div class="chart-wrap h250"><canvas id="chartCash"></canvas></div></div>
         <div class="card"><div class="card-title">Revenus vs Depenses (6 derniers mois)</div><div class="chart-wrap h250"><canvas id="chartRevExp"></canvas></div></div>
         <div class="card"><div class="card-title">Depenses par categorie (3 derniers mois)</div><div class="chart-wrap h250"><canvas id="chartExpCat"></canvas></div></div>
+        <div class="card full"><div class="card-title">Balance Gregoire / Paul</div><div id="balanceRecap"></div></div>
         <div class="card full"><div class="card-title">Avances co-fondateurs (a rembourser en CC associe)</div><div id="cofoundersRecap"></div></div>
+        <div class="card full"><div class="card-title">Depenses recurrentes (abonnements) <span class="badge" id="badgeRecCount"></span><div style="display:flex;gap:6px"><button class="btn-sm" onclick="openRecurringModal()">+ Nouveau</button><button class="btn-primary" onclick="generateRecurringForMonth()">Generer les depenses du mois</button></div></div><div class="table-wrap" id="recurringTable"></div></div>
         <div class="card full"><div class="card-title">Pipeline financement <span class="badge" id="badgeFinCount"></span></div><div class="table-wrap" id="financementTable"></div></div>
         <div class="card full"><div class="card-title">Transactions <span class="badge" id="badgeTxCount"></span> <div style="display:flex;gap:6px"><button class="btn-export" onclick="exportTransactionsCSV()">Export CSV (format Excel)</button></div></div><div class="table-wrap" id="transactionsTable"></div></div>
       </div>
@@ -673,6 +675,70 @@
       <div class="modal-footer">
         <button class="btn-sm" onclick="closeModal('financementModal')">Annuler</button>
         <button class="btn-primary" onclick="saveFinancement()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : DEPENSE RECURRENTE -->
+  <div class="modal-overlay" id="recurringModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="recModalTitle">Nouvelle depense recurrente</h3>
+        <button onclick="closeModal('recurringModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="recurringForm" onsubmit="event.preventDefault();saveRecurring()">
+          <div class="form-grid">
+            <div class="form-group full"><label class="form-label">Description *</label><input type="text" class="form-input" name="rec_description" required placeholder="Abonnement Supabase Pro"></div>
+            <div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" name="rec_fournisseur" placeholder="Supabase"></div>
+            <div class="form-group">
+              <label class="form-label">Categorie *</label>
+              <select class="form-select" name="rec_categorie" required>
+                <option value="juridique">Juridique</option>
+                <option value="comptable">Comptable</option>
+                <option value="banque">Banque</option>
+                <option value="hebergement">Hebergement / Domaine</option>
+                <option value="saas" selected>SaaS / Abonnements</option>
+                <option value="api_ia">API IA (Claude, OpenAI)</option>
+                <option value="marketing">Marketing / Publicite</option>
+                <option value="design">Identite de marque / Design</option>
+                <option value="deplacements">Deplacements</option>
+                <option value="restauration">Restauration pro</option>
+                <option value="fournitures">Fournitures</option>
+                <option value="materiel">Materiel informatique</option>
+                <option value="formation">Formation</option>
+                <option value="evenement">Salon / Evenement</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Paye par *</label>
+              <select class="form-select" name="rec_paye_par" required>
+                <option value="gregoire">Gregoire</option>
+                <option value="paul">Paul</option>
+                <option value="societe">Societe</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Montant TTC (EUR) *</label><input type="number" step="0.01" class="form-input" name="rec_ttc" required placeholder="24.00" oninput="computeRecHT()"></div>
+            <div class="form-group"><label class="form-label">TVA (EUR)</label><input type="number" step="0.01" class="form-input" name="rec_tva" placeholder="4.00" oninput="computeRecHT()"></div>
+            <div class="form-group"><label class="form-label">HT (EUR, auto)</label><input type="number" step="0.01" class="form-input" name="rec_ht" readonly style="background:#f7f7fa"></div>
+            <div class="form-group">
+              <label class="form-label">Frequence *</label>
+              <select class="form-select" name="rec_frequence" required>
+                <option value="mensuel">Mensuelle</option>
+                <option value="annuel">Annuelle</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Jour du mois (1-28)</label><input type="number" min="1" max="28" class="form-input" name="rec_jour" value="1"></div>
+            <div class="form-group"><label class="form-label">Date de debut</label><input type="date" class="form-input" name="rec_date_debut"></div>
+            <div class="form-group"><label class="form-label">Date de fin (optionnel)</label><input type="date" class="form-input" name="rec_date_fin"></div>
+            <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" name="rec_notes"></textarea></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('recurringModal')">Annuler</button>
+        <button class="btn-primary" onclick="saveRecurring()">Enregistrer</button>
       </div>
     </div>
   </div>
@@ -1572,8 +1638,9 @@ const TX_CAT_LABELS={juridique:'Juridique',comptable:'Comptable',banque:'Banque'
 const PAYEUR_LABELS={gregoire:'Gregoire',paul:'Paul',societe:'Societe'};
 function computeHT(){const f=document.getElementById('transactionForm');const ttc=parseFloat(f.tx_ttc.value)||0;const tva=parseFloat(f.tx_tva.value)||0;f.tx_ht.value=ttc>0?(ttc-tva).toFixed(2):''}
 
-function getFinance(){try{return JSON.parse(localStorage.getItem(FINANCE_KEY))||{cash:[],transactions:[],financements:[]}}catch(e){return{cash:[],transactions:[],financements:[]}}}
+function getFinance(){try{const d=JSON.parse(localStorage.getItem(FINANCE_KEY))||{};return{cash:d.cash||[],transactions:d.transactions||[],financements:d.financements||[],recurring:d.recurring||[]}}catch(e){return{cash:[],transactions:[],financements:[],recurring:[]}}}
 function saveFinance(d){localStorage.setItem(FINANCE_KEY,JSON.stringify(d))}
+function computeRecHT(){const f=document.getElementById('recurringForm');const ttc=parseFloat(f.rec_ttc.value)||0;const tva=parseFloat(f.rec_tva.value)||0;f.rec_ht.value=ttc>0?(ttc-tva).toFixed(2):''}
 
 function seedFinanceIfEmpty(){
   const v=parseInt(localStorage.getItem('virage_finance_seed_v')||'0');
@@ -1731,31 +1798,170 @@ function renderFinance(){
   renderCashChart();
   renderRevExpChart();
   renderExpCatChart();
+  renderBalance();
   renderCofoundersRecap();
+  renderRecurringTable();
   renderFinancementTable();
   renderTransactionsTable();
 }
 
-function renderCofoundersRecap(){
+function getCofoundersTotals(){
   const data=getFinance();
-  const byPayeur={gregoire:{ttc:0,ht:0,nb:0},paul:{ttc:0,ht:0,nb:0},societe:{ttc:0,ht:0,nb:0}};
+  const r={gregoire:{ttc:0,ht:0,nb:0},paul:{ttc:0,ht:0,nb:0},societe:{ttc:0,ht:0,nb:0}};
   data.transactions.forEach(t=>{
     if(t.type!=='expense')return;
-    const p=t.paye_par||'societe';if(!byPayeur[p])return;
-    byPayeur[p].ttc+=t.ttc||t.montant||0;
-    byPayeur[p].ht+=t.ht||0;
-    byPayeur[p].nb++;
+    const p=t.paye_par||'societe';if(!r[p])return;
+    r[p].ttc+=t.ttc||t.montant||0;
+    r[p].ht+=t.ht||0;
+    r[p].nb++;
   });
+  return r;
+}
+
+function renderBalance(){
+  const totals=getCofoundersTotals();
+  const g=totals.gregoire.ttc,p=totals.paul.ttc;
+  const total=g+p;
+  const fairShare=total/2;
+  const diff=(g-p)/2; // si >0 : Paul doit a Greg, si <0 : Greg doit a Paul
+  let debiteur,crediteur,montant;
+  if(Math.abs(diff)<0.01){debiteur=null;crediteur=null;montant=0}
+  else if(diff>0){debiteur='Paul';crediteur='Gregoire';montant=diff}
+  else{debiteur='Gregoire';crediteur='Paul';montant=-diff}
+
+  let h='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:12px">';
+  h+='<div style="text-align:center;padding:16px;background:var(--off-white);border-radius:12px"><div style="font-size:.6875rem;text-transform:uppercase;color:var(--grey);font-weight:600">Gregoire a paye</div><div class="amount" style="font-size:1.5rem;margin-top:4px">'+fmtEUR(g)+'</div><div style="font-size:.75rem;color:var(--grey);margin-top:4px">'+totals.gregoire.nb+' depenses</div></div>';
+  h+='<div style="text-align:center;padding:16px;background:var(--off-white);border-radius:12px"><div style="font-size:.6875rem;text-transform:uppercase;color:var(--grey);font-weight:600">Paul a paye</div><div class="amount" style="font-size:1.5rem;margin-top:4px">'+fmtEUR(p)+'</div><div style="font-size:.75rem;color:var(--grey);margin-top:4px">'+totals.paul.nb+' depenses</div></div>';
+  h+='<div style="text-align:center;padding:16px;background:var(--off-white);border-radius:12px"><div style="font-size:.6875rem;text-transform:uppercase;color:var(--grey);font-weight:600">Part equitable (50/50)</div><div class="amount" style="font-size:1.5rem;margin-top:4px">'+fmtEUR(fairShare)+'</div><div style="font-size:.75rem;color:var(--grey);margin-top:4px">chacun</div></div>';
+  h+='</div>';
+
+  if(!debiteur){
+    h+='<div style="text-align:center;padding:20px;background:var(--green-pale);border-radius:12px;border-left:4px solid var(--green)"><div style="font-family:Outfit,sans-serif;font-size:1.125rem;font-weight:700;color:var(--green-dark)">&check; Balance equilibree</div><div style="font-size:.8125rem;color:var(--green);margin-top:4px">Vous avez avance le meme montant chacun.</div></div>';
+  } else {
+    const color=crediteur==='Gregoire'?'var(--green)':'var(--accent)';
+    const bg=crediteur==='Gregoire'?'var(--green-pale)':'var(--accent-light)';
+    h+='<div style="text-align:center;padding:20px;background:'+bg+';border-radius:12px;border-left:4px solid '+color+'">';
+    h+='<div style="font-family:Outfit,sans-serif;font-size:1.375rem;font-weight:700;color:var(--charcoal)">'+debiteur+' doit <span style="color:'+color+'">'+fmtEUR(montant)+'</span> a '+crediteur+'</div>';
+    h+='<div style="font-size:.8125rem;color:var(--slate);margin-top:6px">Pour equilibrer les avances personnelles (repartition 50/50).</div>';
+    h+='</div>';
+  }
+  document.getElementById('balanceRecap').innerHTML=h;
+}
+
+function renderCofoundersRecap(){
+  const totals=getCofoundersTotals();
   let h='<table style="max-width:700px"><tr><th>Co-fondateur</th><th style="text-align:right">TTC avance</th><th style="text-align:right">HT</th><th style="text-align:right">Nb depenses</th></tr>';
   ['gregoire','paul'].forEach(p=>{
-    const s=byPayeur[p];
+    const s=totals[p];
     h+='<tr><td><strong>'+PAYEUR_LABELS[p]+'</strong></td><td class="amount" style="text-align:right">'+fmtEUR(s.ttc)+'</td><td style="text-align:right;color:var(--grey)">'+fmtEUR(s.ht)+'</td><td style="text-align:right">'+s.nb+'</td></tr>';
   });
-  const total=byPayeur.gregoire.ttc+byPayeur.paul.ttc;
-  h+='<tr style="background:var(--green-pale);font-weight:700"><td>TOTAL A REMBOURSER</td><td class="amount positive" style="text-align:right">'+fmtEUR(total)+'</td><td style="text-align:right">'+fmtEUR(byPayeur.gregoire.ht+byPayeur.paul.ht)+'</td><td style="text-align:right">'+(byPayeur.gregoire.nb+byPayeur.paul.nb)+'</td></tr>';
+  const total=totals.gregoire.ttc+totals.paul.ttc;
+  h+='<tr style="background:var(--green-pale);font-weight:700"><td>TOTAL A REMBOURSER</td><td class="amount positive" style="text-align:right">'+fmtEUR(total)+'</td><td style="text-align:right">'+fmtEUR(totals.gregoire.ht+totals.paul.ht)+'</td><td style="text-align:right">'+(totals.gregoire.nb+totals.paul.nb)+'</td></tr>';
   h+='</table>';
   h+='<div style="font-size:.75rem;color:var(--grey);margin-top:8px">Montants a rembourser aux co-fondateurs apres constitution de la societe (compte courant d\'associe).</div>';
   document.getElementById('cofoundersRecap').innerHTML=h;
+}
+
+// --- RECURRING TEMPLATES ---
+let editingRecId=null;
+function openRecurringModal(recId){
+  editingRecId=recId||null;
+  const form=document.getElementById('recurringForm');form.reset();
+  document.getElementById('recModalTitle').textContent=recId?'Modifier la recurrence':'Nouvelle depense recurrente';
+  if(recId){
+    const r=getFinance().recurring.find(x=>x.id===recId);if(!r)return;
+    form.rec_description.value=r.description||'';form.rec_fournisseur.value=r.fournisseur||'';
+    form.rec_categorie.value=r.categorie||'saas';form.rec_paye_par.value=r.paye_par||'societe';
+    form.rec_ttc.value=r.ttc||0;form.rec_tva.value=r.tva||0;form.rec_ht.value=r.ht||'';
+    form.rec_frequence.value=r.frequence||'mensuel';form.rec_jour.value=r.jour||1;
+    form.rec_date_debut.value=r.date_debut||'';form.rec_date_fin.value=r.date_fin||'';
+    form.rec_notes.value=r.notes||'';
+  }else{form.rec_date_debut.value=new Date().toISOString().substring(0,10)}
+  openModal('recurringModal');
+}
+function saveRecurring(){
+  const f=document.getElementById('recurringForm');
+  const ttc=parseFloat(f.rec_ttc.value)||0;const tva=parseFloat(f.rec_tva.value)||0;
+  const ht=ttc>0?(ttc-tva):0;
+  if(!f.rec_description.value.trim()){alert('Description requise.');return}
+  const r={id:editingRecId||('r_'+Date.now()),description:f.rec_description.value.trim(),fournisseur:f.rec_fournisseur.value.trim(),categorie:f.rec_categorie.value,paye_par:f.rec_paye_par.value,ttc,tva,ht,frequence:f.rec_frequence.value,jour:parseInt(f.rec_jour.value)||1,date_debut:f.rec_date_debut.value,date_fin:f.rec_date_fin.value,notes:f.rec_notes.value.trim(),active:true,updated_at:new Date().toISOString()};
+  const data=getFinance();
+  if(editingRecId){const i=data.recurring.findIndex(x=>x.id===editingRecId);if(i>=0){r.created_at=data.recurring[i].created_at;r.active=data.recurring[i].active!==false;data.recurring[i]=r}}
+  else{r.created_at=new Date().toISOString();data.recurring.unshift(r)}
+  saveFinance(data);closeModal('recurringModal');renderFinance();
+}
+function deleteRecurring(id){
+  if(!confirm('Supprimer cette depense recurrente ?'))return;
+  const data=getFinance();data.recurring=data.recurring.filter(r=>r.id!==id);
+  saveFinance(data);renderFinance();
+}
+function toggleRecurring(id){
+  const data=getFinance();const r=data.recurring.find(x=>x.id===id);
+  if(!r)return;r.active=!r.active;saveFinance(data);renderFinance();
+}
+
+function generateRecurringForMonth(targetMonth){
+  // targetMonth au format YYYY-MM, defaut = mois actuel
+  const month=targetMonth||new Date().toISOString().substring(0,7);
+  const data=getFinance();
+  const activeRecs=data.recurring.filter(r=>r.active!==false);
+  if(activeRecs.length===0){alert('Aucune depense recurrente active.');return}
+  let added=0,skipped=0;
+  activeRecs.forEach(r=>{
+    if(r.frequence==='annuel'){
+      // skip if last generated was this year
+      const year=month.substring(0,4);
+      const lastY=(r.last_generated||'').substring(0,4);
+      if(lastY===year){skipped++;return}
+    }
+    // verifier que date_debut est avant ce mois, et date_fin apres (si definie)
+    if(r.date_debut&&r.date_debut.substring(0,7)>month){skipped++;return}
+    if(r.date_fin&&r.date_fin.substring(0,7)<month){skipped++;return}
+    // verifier pas deja genere pour ce mois
+    const existingTx=data.transactions.find(t=>t.recurring_id===r.id&&(t.date||'').substring(0,7)===month);
+    if(existingTx){skipped++;return}
+    // creer la transaction
+    const day=Math.min(r.jour||1,28);
+    const date=month+'-'+(day<10?'0'+day:day);
+    data.transactions.unshift({
+      id:'t_rec_'+Date.now()+'_'+Math.random().toString(36).substr(2,4),
+      date,num_piece:'',type:'expense',paye_par:r.paye_par,fournisseur:r.fournisseur,
+      categorie:r.categorie,description:r.description+' (auto)',
+      ttc:r.ttc,tva:r.tva,ht:r.ht,montant:r.ttc,
+      justificatif:'',notes:r.notes,recurring_id:r.id,
+      created_at:new Date().toISOString()
+    });
+    r.last_generated=month;
+    added++;
+  });
+  saveFinance(data);renderFinance();
+  alert(added+' transaction(s) creee(s). '+skipped+' ignoree(s) (deja existante ou hors periode).');
+}
+
+function renderRecurringTable(){
+  const data=getFinance();
+  document.getElementById('badgeRecCount').textContent=data.recurring.length+' modele'+(data.recurring.length>1?'s':'');
+  if(data.recurring.length===0){
+    document.getElementById('recurringTable').innerHTML='<div class="empty">Aucune depense recurrente configuree.<div style="margin-top:12px"><button class="btn-primary" onclick="openRecurringModal()">+ Configurer un abonnement</button></div></div>';
+    return;
+  }
+  const total=data.recurring.filter(r=>r.active!==false&&r.frequence==='mensuel').reduce((s,r)=>s+(r.ttc||0),0);
+  let h='<table><tr><th>Description</th><th>Fournisseur</th><th>Categorie</th><th>Paye par</th><th>Frequence</th><th style="text-align:right">TTC</th><th>Actif</th><th>Actions</th></tr>';
+  data.recurring.forEach(r=>{
+    h+='<tr style="opacity:'+(r.active===false?'.5':'1')+'">';
+    h+='<td><strong>'+escHTML(r.description)+'</strong>'+(r.jour?'<br><span style="font-size:.625rem;color:var(--grey)">Le '+r.jour+' du mois</span>':'')+'</td>';
+    h+='<td>'+escHTML(r.fournisseur||'--')+'</td>';
+    h+='<td><span class="tx-cat '+r.categorie+'">'+(TX_CAT_LABELS[r.categorie]||r.categorie)+'</span></td>';
+    h+='<td><span class="cat-tag">'+(PAYEUR_LABELS[r.paye_par]||r.paye_par)+'</span></td>';
+    h+='<td>'+(r.frequence==='mensuel'?'Mensuel':'Annuel')+'</td>';
+    h+='<td class="amount" style="text-align:right">'+fmtEUR(r.ttc||0)+'</td>';
+    h+='<td><label style="cursor:pointer"><input type="checkbox" onchange="toggleRecurring(\''+r.id+'\')"'+(r.active!==false?' checked':'')+'></label></td>';
+    h+='<td style="white-space:nowrap"><button class="btn-sm" onclick="openRecurringModal(\''+r.id+'\')">Modifier</button> <button class="btn-sm danger" onclick="deleteRecurring(\''+r.id+'\')">&times;</button></td>';
+    h+='</tr>';
+  });
+  h+='<tr style="background:var(--green-pale);font-weight:700"><td colspan="5">Total mensuel (abonnements actifs)</td><td class="amount positive" style="text-align:right">'+fmtEUR(total)+'</td><td colspan="2"></td></tr>';
+  h+='</table>';
+  document.getElementById('recurringTable').innerHTML=h;
 }
 
 function renderFinanceKPIs(){
@@ -1900,7 +2106,7 @@ function importFinanceJSON(event){
 
 // --- Keyboard ---
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){['contactModal','activityModal','detailModal','cashModal','transactionModal','financementModal'].forEach(id=>closeModal(id))}
+  if(e.key==='Escape'){['contactModal','activityModal','detailModal','cashModal','transactionModal','financementModal','recurringModal'].forEach(id=>closeModal(id))}
 });
 </script>
 </body>
