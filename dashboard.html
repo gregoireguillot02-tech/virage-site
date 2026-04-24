@@ -362,12 +362,33 @@
     .chat-messages{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
     .chat-welcome{text-align:center;padding:40px 20px;color:var(--grey);font-size:.875rem}
     .chat-welcome h4{font-family:'Outfit',sans-serif;font-size:1.125rem;color:var(--ink);margin-bottom:6px}
-    .msg{display:flex;flex-direction:column;max-width:78%;gap:2px}
-    .msg-user{align-self:flex-end;align-items:flex-end}
-    .msg-assistant{align-self:flex-start}
-    .msg-bubble{padding:12px 16px;border-radius:14px;font-size:.875rem;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
-    .msg-user .msg-bubble{background:var(--green);color:#FFF;border-bottom-right-radius:4px}
+    .msg{display:flex;flex-direction:column;gap:2px}
+    .msg-user{align-self:flex-end;align-items:flex-end;max-width:80%}
+    .msg-assistant{align-self:flex-start;max-width:92%;width:92%}
+    .msg-bubble{padding:14px 18px;border-radius:14px;font-size:.875rem;line-height:1.6;word-wrap:break-word;overflow-wrap:break-word}
+    .msg-user .msg-bubble{background:var(--green);color:#FFF;border-bottom-right-radius:4px;white-space:pre-wrap}
     .msg-assistant .msg-bubble{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-bottom-left-radius:4px}
+    /* Markdown rendering dans les bulles assistant et dans les delegations */
+    .md-body h1,.md-body h2,.md-body h3,.md-body h4{font-family:'Outfit',sans-serif;font-weight:700;letter-spacing:-.01em;line-height:1.3;margin:16px 0 8px}
+    .md-body h1{font-size:1.125rem;color:var(--green-dark)}
+    .md-body h2{font-size:1rem;color:var(--ink);border-bottom:1px solid var(--border);padding-bottom:4px}
+    .md-body h3{font-size:.9375rem;color:var(--ink)}
+    .md-body h4{font-size:.875rem;color:var(--slate);text-transform:uppercase;letter-spacing:.04em}
+    .md-body h1:first-child,.md-body h2:first-child,.md-body h3:first-child,.md-body h4:first-child,.md-body p:first-child{margin-top:0}
+    .md-body p{margin:8px 0}
+    .md-body p:last-child{margin-bottom:0}
+    .md-body strong{font-weight:700;color:var(--ink)}
+    .md-body em{font-style:italic}
+    .md-body ul,.md-body ol{margin:8px 0;padding-left:20px}
+    .md-body li{margin:3px 0;line-height:1.5}
+    .md-body li::marker{color:var(--green)}
+    .md-body code{background:var(--surface-alt);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:.8125rem;font-family:'SF Mono',Menlo,Consolas,monospace;color:var(--green-dark)}
+    .md-body pre{background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:12px;overflow-x:auto;margin:10px 0;font-size:.75rem}
+    .md-body pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--ink)}
+    .md-body hr{border:none;border-top:1px solid var(--border);margin:12px 0}
+    .md-body a{color:var(--green);text-decoration:underline}
+    .md-body a:hover{color:var(--green-dark)}
+    .md-body blockquote{border-left:3px solid var(--green);background:var(--green-pale);padding:6px 12px;margin:8px 0;border-radius:0 6px 6px 0;color:var(--slate)}
     .msg-meta{font-size:.625rem;color:var(--grey);padding:0 8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
     .msg-meta .author-chip{background:var(--surface-alt);padding:1px 6px;border-radius:4px;font-weight:600}
     .msg-meta .token-chip{background:rgba(82,183,136,.1);color:var(--green);padding:1px 6px;border-radius:4px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -375,21 +396,32 @@
     .chat-footer-stats .stat-group{display:flex;gap:12px;align-items:center}
     .chat-footer-stats .stat-group strong{color:var(--ink);font-variant-numeric:tabular-nums}
 
-    /* DELEGATIONS (trace du Manager) */
-    .delegation-trace{margin:12px 0;padding:12px 14px;background:var(--surface-alt);border:1px solid var(--border);border-radius:12px;border-left:3px solid var(--agent-color,var(--green))}
-    .delegation-trace-header{font-size:.6875rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:8px;cursor:pointer}
-    .delegation-trace-header::before{content:'\\25B8';transition:transform var(--trans-fast);color:var(--grey)}
-    .delegation-trace.open .delegation-trace-header::before{transform:rotate(90deg)}
-    .delegation-list{display:none;flex-direction:column;gap:10px}
-    .delegation-trace.open .delegation-list{display:flex}
-    .deleg-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px}
-    .deleg-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-    .deleg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid var(--deleg-color,var(--green));background:var(--surface-alt);flex-shrink:0}
+    /* DELEGATIONS : vrai design "rapport d'equipe" */
+    .orchestration{margin:0 0 16px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,var(--surface) 0%,var(--surface-alt) 100%)}
+    .orch-header{padding:14px 18px;background:linear-gradient(135deg,var(--green-dark) 0%,var(--green) 100%);color:#FFF;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .orch-header .orch-title{font-family:'Outfit',sans-serif;font-size:.9375rem;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+    .orch-header .orch-count{background:rgba(255,255,255,.18);padding:2px 10px;border-radius:999px;font-size:.6875rem;font-weight:600;letter-spacing:.03em}
+    .orch-pins{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+    .orch-pin{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);padding:3px 10px 3px 3px;border-radius:999px;font-size:.75rem;font-weight:600;color:#FFF}
+    .orch-pin-avatar{width:22px;height:22px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,.9);flex-shrink:0}
+    .orch-pin-avatar img{width:100%;height:100%;object-fit:cover}
+    .orch-toggle{margin-left:auto;background:rgba(255,255,255,.15);color:#FFF;border:none;padding:5px 12px;border-radius:999px;font-size:.6875rem;font-weight:600;cursor:pointer;font-family:inherit}
+    .orch-toggle:hover{background:rgba(255,255,255,.25)}
+    .orch-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+    .orch-body.collapsed{display:none}
+    .deleg-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;border-left:3px solid var(--deleg-color,var(--green))}
+    .deleg-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+    .deleg-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid var(--deleg-color,var(--green));background:var(--surface-alt);flex-shrink:0;box-shadow:0 2px 4px rgba(10,14,22,.08)}
     .deleg-avatar img{width:100%;height:100%;object-fit:cover}
-    .deleg-agent-name{font-family:'Outfit',sans-serif;font-size:.8125rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
-    .deleg-task{font-size:.75rem;color:var(--grey);margin-bottom:8px;font-style:italic;padding-left:36px}
-    .deleg-response{font-size:.8125rem;color:var(--ink);line-height:1.5;white-space:pre-wrap;padding-left:36px}
-    .deleg-tokens{font-size:.625rem;color:var(--grey);margin-top:6px;padding-left:36px;font-variant-numeric:tabular-nums}
+    .deleg-header-info{flex:1;min-width:0}
+    .deleg-agent-name{font-family:'Outfit',sans-serif;font-size:.875rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+    .deleg-agent-meta{font-size:.625rem;color:var(--grey);margin-top:1px;font-variant-numeric:tabular-nums}
+    .deleg-task{font-size:.75rem;color:var(--slate);margin-bottom:10px;padding:8px 10px;background:var(--surface-alt);border-radius:6px;border-left:2px solid var(--grey-light);line-height:1.4}
+    .deleg-task::before{content:'Mission confiee : ';font-weight:700;color:var(--grey);text-transform:uppercase;font-size:.625rem;letter-spacing:.06em;display:block;margin-bottom:3px}
+    .deleg-response{font-size:.8125rem;color:var(--ink);line-height:1.55;max-width:100%;overflow-x:auto}
+    .deleg-response p{margin:6px 0}
+    .synthesis-header{font-family:'Outfit',sans-serif;font-size:.6875rem;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.08em;margin:4px 0 8px;display:flex;align-items:center;gap:8px}
+    .synthesis-header::before,.synthesis-header::after{content:'';flex:1;height:1px;background:var(--border)}
     .msg-typing{display:flex;gap:4px;padding:16px}
     .msg-typing span{width:8px;height:8px;border-radius:50%;background:var(--grey-light);animation:typingBounce 1.2s infinite}
     .msg-typing span:nth-child(2){animation-delay:.15s}
@@ -2113,26 +2145,103 @@ async function loadConversation(convId){
   }catch(e){msgs.innerHTML='<div class="chat-welcome">Erreur de chargement</div>'}
 }
 
+// Parseur markdown leger (gere : headings, bold, italic, listes, code, hr, links, paragraphes)
+function mdToHTML(md){
+  if(!md)return '';
+  // Escape HTML d'abord
+  let h=md.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Code blocks (avant inline code)
+  h=h.replace(/```(\w*)\n([\s\S]*?)```/g,(_,l,c)=>`<pre><code>${c.replace(/\n$/,'')}</code></pre>`);
+  // Headings
+  h=h.replace(/^#### (.+)$/gm,'<h4>$1</h4>');
+  h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  // Horizontal rule
+  h=h.replace(/^[-_*]{3,}$/gm,'<hr>');
+  // Bold (**text**)
+  h=h.replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>');
+  // Italic (*text*) sans toucher aux **
+  h=h.replace(/(^|[^*])\*([^*\n]+)\*([^*]|$)/g,'$1<em>$2</em>$3');
+  // Inline code
+  h=h.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  // Links
+  h=h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // Listes : regroupe les lignes consecutives
+  const lines=h.split('\n');
+  const out=[];
+  let inUL=false,inOL=false;
+  for(const line of lines){
+    const ul=line.match(/^[-*+] (.+)$/);
+    const ol=line.match(/^\d+\. (.+)$/);
+    if(ul){
+      if(!inUL){if(inOL){out.push('</ol>');inOL=false}inUL=true;out.push('<ul>')}
+      out.push(`<li>${ul[1]}</li>`);
+    }else if(ol){
+      if(!inOL){if(inUL){out.push('</ul>');inUL=false}inOL=true;out.push('<ol>')}
+      out.push(`<li>${ol[1]}</li>`);
+    }else{
+      if(inUL){out.push('</ul>');inUL=false}
+      if(inOL){out.push('</ol>');inOL=false}
+      out.push(line);
+    }
+  }
+  if(inUL)out.push('</ul>');
+  if(inOL)out.push('</ol>');
+  h=out.join('\n');
+  // Paragraphes : bloc separe par double newline
+  const blocks=h.split(/\n{2,}/);
+  h=blocks.map(b=>{
+    b=b.trim();
+    if(!b)return '';
+    if(/^<(h[1-6]|ul|ol|pre|hr|blockquote|table)/.test(b))return b;
+    return `<p>${b.replace(/\n/g,'<br>')}</p>`;
+  }).join('\n');
+  return h;
+}
+
 function renderDelegationTrace(trace){
   if(!trace||!Array.isArray(trace)||trace.length===0)return '';
-  let h=`<div class="delegation-trace open" onclick="event.target.closest('.delegation-trace').classList.toggle('open')">`;
-  h+=`<div class="delegation-trace-header">&#9889; Orchestration : ${trace.length} delegation${trace.length>1?'s':''}</div>`;
-  h+=`<div class="delegation-list" onclick="event.stopPropagation()">`;
+  const totalTokens=trace.reduce((s,d)=>s+(d.tokens_in||0)+(d.tokens_out||0),0);
+  const totalCost=trace.reduce((s,d)=>s+tokensToEUR(d.tokens_in,d.tokens_out),0);
+  let h=`<div class="orchestration">`;
+  // Header avec pins des agents consultes
+  h+=`<div class="orch-header">`;
+  h+=`<div class="orch-title">&#9889; Orchestration</div>`;
+  h+=`<span class="orch-count">${trace.length} agent${trace.length>1?'s':''} consulte${trace.length>1?'s':''}</span>`;
+  h+=`<div class="orch-pins">`;
+  trace.forEach(d=>{
+    const agent=AGENTS.find(a=>a.id===d.agent);
+    const avatar=agent?agent.avatar:'';
+    const name=d.agent_name||(agent?agent.name:d.agent);
+    h+=`<span class="orch-pin"><span class="orch-pin-avatar"><img src="${avatar}"></span>${escHTML(name)}</span>`;
+  });
+  h+=`</div>`;
+  h+=`<button class="orch-toggle" onclick="this.closest('.orchestration').querySelector('.orch-body').classList.toggle('collapsed');this.textContent=this.textContent.trim()==='Masquer'?'Detail':'Masquer'">Masquer</button>`;
+  h+=`</div>`;
+  // Body : detail de chaque delegation
+  h+=`<div class="orch-body">`;
   trace.forEach(d=>{
     const agent=AGENTS.find(a=>a.id===d.agent);
     const color=agent?agent.color:'#52B788';
     const avatar=agent?agent.avatar:'';
     const name=d.agent_name||(agent?agent.name:d.agent);
+    const role=agent?agent.role:'';
     const tokens=(d.tokens_in||0)+(d.tokens_out||0);
     const cost=tokensToEUR(d.tokens_in,d.tokens_out);
     h+=`<div class="deleg-card" style="--deleg-color:${color}">`;
-    h+=`<div class="deleg-header"><div class="deleg-avatar" style="--deleg-color:${color}"><img src="${avatar}"></div><div class="deleg-agent-name">${escHTML(name)}</div></div>`;
-    h+=`<div class="deleg-task">&#9876; ${escHTML(d.task)}</div>`;
-    h+=`<div class="deleg-response">${escHTML(d.response)}</div>`;
-    h+=`<div class="deleg-tokens">${fmtTokens(tokens)} tokens &middot; ${fmtCost(cost)}</div>`;
+    h+=`<div class="deleg-header">`;
+    h+=`<div class="deleg-avatar"><img src="${avatar}"></div>`;
+    h+=`<div class="deleg-header-info"><div class="deleg-agent-name">${escHTML(name)}</div><div class="deleg-agent-meta">${escHTML(role)} &middot; ${fmtTokens(tokens)} tk &middot; ${fmtCost(cost)}</div></div>`;
+    h+=`</div>`;
+    h+=`<div class="deleg-task">${escHTML(d.task)}</div>`;
+    h+=`<div class="deleg-response md-body">${mdToHTML(d.response)}</div>`;
     h+=`</div>`;
   });
-  h+=`</div></div>`;
+  h+=`</div>`;
+  h+=`</div>`;
+  // Header synthesis
+  h+=`<div class="synthesis-header">Synthese du Manager</div>`;
   return h;
 }
 
@@ -2157,9 +2266,10 @@ function renderChatMessages(msgs){
     // Trace de delegations (Manager uniquement)
     const trace=m.metadata&&m.metadata.trace?m.metadata.trace:null;
     const traceHTML=trace?renderDelegationTrace(trace):'';
+    const bubbleContent=m.role==='assistant'?`<div class="md-body">${mdToHTML(m.content)}</div>`:escHTML(m.content);
     h+=`<div class="msg ${cls}">`;
     if(traceHTML)h+=traceHTML;
-    h+=`<div class="msg-bubble">${escHTML(m.content)}</div>`;
+    h+=`<div class="msg-bubble">${bubbleContent}</div>`;
     h+=`<div class="msg-meta">${author}<span>${fmtDate(m.created_at)}</span>${tokens}</div>`;
     h+=`</div>`;
   });
@@ -2215,13 +2325,9 @@ async function sendChatMessage(){
       container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble" style="color:var(--red)">Erreur : ${escHTML(data.error||'inconnue')}</div></div>`);
     }else{
       currentConversationId=data.conversation_id;
-      const u=data.usage||{};
-      const tIn=u.input_tokens||0,tOut=u.output_tokens||0;
-      const costHTML=(tIn||tOut)?`<span class="token-chip" title="in: ${tIn} / out: ${tOut}">${fmtTokens(tIn+tOut)} tk &middot; ${fmtCost(tokensToEUR(tIn,tOut))}</span>`:'';
-      container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble">${escHTML(data.content)}</div><div class="msg-meta"><span class="author-chip">${escHTML(data.agent.name)}</span><span>maintenant</span>${costHTML}</div></div>`);
-      // Recharger les messages pour avoir les stats exactes
-      if(currentConversationId){loadConversation(currentConversationId)}
+      // Pas de rendu optimiste ici : on recharge tout pour avoir les delegations complete + tokens + metadata
       await loadAllConversations();renderConvList();
+      await loadConversation(currentConversationId);
     }
     container.scrollTop=container.scrollHeight;
   }catch(e){
