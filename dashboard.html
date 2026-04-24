@@ -2333,7 +2333,7 @@ function renderChatMessages(msgs){
       h+=`<p style="font-size:.75rem;color:var(--grey);max-width:440px;margin:0 auto">Demarre en choisissant une question, ou ecris ton message.</p>`;
       if(agent.suggestions){
         h+='<div class="chat-suggestions">';
-        agent.suggestions.forEach(s=>{h+=`<button class="suggestion-chip" onclick="document.getElementById('chatInput').value=${JSON.stringify(s).replace(/'/g,"&#39;")};document.getElementById('chatInput').focus()">${escHTML(s)}</button>`});
+        agent.suggestions.forEach((s,i)=>{h+=`<button class="suggestion-chip" data-suggestion-idx="${i}">${escHTML(s)}</button>`});
         h+='</div>';
       }
     }
@@ -2441,12 +2441,29 @@ async function sendChatMessage(){
   }
 }
 
-// Textarea autogrow + Enter to send
+// Textarea autogrow + Enter to send + suggestion chips
 document.addEventListener('DOMContentLoaded',()=>{
   const input=document.getElementById('chatInput');
   if(input){
     input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,160)+'px'});
     input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage()}});
+  }
+  const chatMsgs=document.getElementById('chatMessages');
+  if(chatMsgs){
+    chatMsgs.addEventListener('click',e=>{
+      const chip=e.target.closest('.suggestion-chip');
+      if(!chip)return;
+      const idx=parseInt(chip.dataset.suggestionIdx);
+      const agent=AGENTS.find(a=>a.id===currentAgentId);
+      if(!agent||!agent.suggestions||isNaN(idx))return;
+      const s=agent.suggestions[idx];
+      if(!s)return;
+      const i=document.getElementById('chatInput');
+      i.value=s;
+      i.focus();
+      // Auto-trigger height recompute
+      i.style.height='auto';i.style.height=Math.min(i.scrollHeight,160)+'px';
+    });
   }
 });
 
