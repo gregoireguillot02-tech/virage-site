@@ -2269,17 +2269,23 @@ function renderPilote360(views,waitlist,pro,pv,pwl,ppr){
   const rdv=contacts.filter(c=>c.statut==='rdv_planifie').length;
   const relances=contacts.filter(c=>typeof needsRelance==='function'&&needsRelance(c)).length;
 
-  // HERO : 4 gros KPI (temps reel / cumul / conversion)
+  // HERO : 4 gros KPI (journee / cumul / conversion)
   const now=Date.now();
-  const liveSessions=new Set(rawViews.filter(r=>new Date(r.created_at).getTime()>now-30*60*1000).map(r=>r.session_id)).size;
+  const startOfDay=new Date();startOfDay.setHours(0,0,0,0);
+  const todaySessions=new Set(rawViews.filter(r=>new Date(r.created_at).getTime()>=startOfDay.getTime()).map(r=>r.session_id)).size;
+  const todayPageViews=rawViews.filter(r=>new Date(r.created_at).getTime()>=startOfDay.getTime()).length;
   const liveLast5min=new Set(rawViews.filter(r=>new Date(r.created_at).getTime()>now-5*60*1000).map(r=>r.session_id)).size;
+  // Hier (meme plage horaire) pour tendance
+  const startOfYesterday=new Date(startOfDay);startOfYesterday.setDate(startOfYesterday.getDate()-1);
+  const yesterdaySessions=new Set(rawViews.filter(r=>{const t=new Date(r.created_at).getTime();return t>=startOfYesterday.getTime()&&t<startOfDay.getTime()}).map(r=>r.session_id)).size;
+  const todayTrend=trendPct(todaySessions,yesterdaySessions);
   const totalSessions=new Set(rawViews.map(r=>r.session_id)).size;
   const convTotal=totalSessions>0?(rawWaitlist.length/totalSessions*100).toFixed(1):'0';
   const t1=trendPct(sessions,pSessions),t2=trendPct(waitlist.length,pwl.length);
   const hero=document.getElementById('kpi360Hero');
   if(hero){
     hero.innerHTML=
-      kpiHTML('Visiteurs live (30 min)','<span style="display:inline-flex;align-items:center;gap:8px">'+liveSessions+(liveLast5min>0?'<span class="live-dot"></span>':'')+'</span>',liveLast5min>0?liveLast5min+' dans les 5 dernieres min':'aucun depuis 5 min',liveLast5min>0?'up':'neutral','spark360_visits')+
+      kpiHTML("Visiteurs aujourd'hui",'<span style="display:inline-flex;align-items:center;gap:8px">'+todaySessions+(liveLast5min>0?'<span class="live-dot"></span>':'')+'</span>',liveLast5min>0?liveLast5min+" live &middot; "+todayTrend.pct+" vs hier":todayTrend.pct+' vs hier ('+todayPageViews+' pages vues)',liveLast5min>0?'up':todayTrend.cls,'spark360_visits')+
       kpiHTML('Waitlist users (cumul)',rawWaitlist.length,'+'+waitlist.length+' cette periode',waitlist.length>0?'up':'neutral','spark360_wl')+
       kpiHTML('Waitlist pros (cumul)',rawPro.length,'+'+pro.length+' cette periode',pro.length>0?'up':'neutral','spark360_pro')+
       kpiHTML('Taux de conversion',convTotal+'%','visiteur &rarr; inscrit (tout)','neutral',null);
