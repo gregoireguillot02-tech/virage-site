@@ -4,13 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VIRAGE Command Center</title>
-  <meta name="robots" content="noindex, nofollow">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <!-- Headers securite (audit 2026-04-24). A completer avec vrais headers HTTP cote hebergeur -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://cipxesubpcpsqplcqnus.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Referrer-Policy" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <!-- TODO securite : pinner un SRI sur Chart.js (integrity="sha384-...") une fois la version figee -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     :root {
       /* Brand */
@@ -311,8 +317,8 @@
     .agent-avatar{width:120px;height:120px;border-radius:50%;margin:0 auto 14px;position:relative;background:linear-gradient(145deg,var(--green-pale) 0%,var(--surface-alt) 100%);overflow:visible;display:flex;align-items:center;justify-content:center;animation:floatIdle 3.5s ease-in-out infinite;transform-style:preserve-3d;will-change:transform}
     .agent-avatar::before{content:'';position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--agent-color,var(--green)) 0%,transparent 70%);opacity:.25;filter:blur(8px);z-index:-1;transition:opacity var(--trans)}
     .agent-card:hover .agent-avatar::before{opacity:.5}
-    .agent-avatar .avatar-inner{width:100%;height:100%;border-radius:50%;overflow:hidden;border:3px solid var(--agent-color,var(--green));background:var(--surface-alt);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -8px 16px rgba(10,14,22,.1),0 6px 14px rgba(10,14,22,.12)}
-    .agent-avatar img{width:100%;height:100%;object-fit:cover}
+    .agent-avatar .avatar-inner{width:100%;height:100%;border-radius:50%;overflow:hidden;border:3px solid var(--agent-color,var(--green));background:radial-gradient(circle at 50% 35%,#F5F9F3 0%,#E3EEE0 100%);display:flex;align-items:flex-end;justify-content:center;box-shadow:inset 0 -8px 16px rgba(10,14,22,.06),0 6px 14px rgba(10,14,22,.12);position:relative}
+    .agent-avatar img{width:130%;height:130%;object-fit:contain;object-position:center 70%;margin-bottom:-15%}
     .agent-avatar .fallback{font-size:3rem;filter:drop-shadow(0 2px 4px rgba(10,14,22,.15))}
     .agent-avatar::after{content:'';position:absolute;bottom:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--green-light);border:3px solid var(--surface);box-shadow:0 0 0 0 rgba(82,183,136,.4);animation:pulseRing 2s ease-out infinite;z-index:2}
     @keyframes floatIdle{0%,100%{transform:translateY(0) rotate(-1deg)}25%{transform:translateY(-4px) rotate(.5deg)}50%{transform:translateY(-8px) rotate(1deg)}75%{transform:translateY(-3px) rotate(-.5deg)}}
@@ -428,6 +434,9 @@
   <div class="login-box">
     <h2>VIRAGE Command Center</h2>
     <p class="login-sub">Espace de pilotage reserve aux fondateurs</p>
+    <p style="font-size:.72rem;line-height:1.45;color:#B45309;background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:10px 12px;margin:0 0 16px;text-align:left">
+      <strong>Avis securite :</strong> cette auth est cote-client, donc informative uniquement. Ne pas stocker d'identifiants sensibles ici. Migration vers un hebergement prive + Supabase Auth planifiee (cf. AUDIT-SECURITE-2026-04-24.md).
+    </p>
     <form id="loginForm">
       <input type="text" class="login-field" id="loginUser" placeholder="Identifiant" autocomplete="username" required>
       <input type="password" class="login-field" id="loginPass" placeholder="Mot de passe" autocomplete="current-password" required>
@@ -1623,7 +1632,32 @@ function getOutreach(){try{return JSON.parse(localStorage.getItem(OUTREACH_KEY))
 function saveOutreach(data){localStorage.setItem(OUTREACH_KEY,JSON.stringify(data))}
 
 // --- Seed contacts (version-aware, unique IDs, no duplicates) ---
+// SECURITE 2026-04-24 : la liste complete des contacts pros a ete retiree du HTML
+// public (risque RGPD + fuite concurrentielle via virage.one/dashboard.html).
+// Les contacts sont desormais importables via le bouton "Importer CRM JSON"
+// depuis le fichier 07-Admin-Juridique/crm-demarchage-backup.json (hors repo).
 function emailToId(email){return 'c_'+email.toLowerCase().replace(/[^a-z0-9]/g,'_')}
+async function importOutreachFromFile(file){
+  try{
+    const txt=await file.text();
+    const j=JSON.parse(txt);
+    const list=Array.isArray(j)?j:(j.contacts||[]);
+    const data=getOutreach();
+    const existing=new Set(data.contacts.map(c=>(c.email||'').toLowerCase()));
+    let added=0;
+    list.forEach(c=>{
+      const em=(c.email||'').toLowerCase();
+      if(!em||existing.has(em))return;
+      const cid=emailToId(em),aid='a_'+cid.substring(2);
+      const dt=c.date||c.created_at||new Date().toISOString();
+      data.contacts.push({id:cid,nom:c.nom||'',prenom:c.prenom||'',email:c.email,organisation:c.organisation||'',role:c.role||'',telephone:c.telephone||'',linkedin:c.linkedin||'',categorie:c.categorie||'autre',statut:c.statut||'contacte',notes:c.notes||'',created_at:dt,updated_at:dt,activites:[{id:aid,date:dt,type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
+      added++;
+    });
+    saveOutreach(data);
+    alert(added+' contact(s) importe(s). Total : '+data.contacts.length);
+    location.reload();
+  }catch(e){alert('Erreur import JSON : '+e.message)}
+}
 function seedContacts(){
   const data=getOutreach();
   const v=parseInt(localStorage.getItem('virage_seed_v')||'0');
@@ -1632,113 +1666,9 @@ function seedContacts(){
     data.contacts.forEach(c=>{if(c.email)c.id=emailToId(c.email)});
     if(data.contacts.length>0)saveOutreach(data);
   }
-  if(v>=6)return;
-  const existing=new Set(data.contacts.map(c=>(c.email||'').toLowerCase()));
-  const d='2026-04-17T10:00:00.000Z',d2='2026-04-18T10:00:00.000Z',d3='2026-04-18T18:00:00.000Z';
-  const all=[
-    ['Benyamina','Amine','amine.benyamina@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vision globale, portes institutionnelles',d],
-    ['Karila','Laurent','laurent.karila@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vulgarisation, cible jeune, podcast',d],
-    ['Lejoyeux','Michel','michel.lejoyeux@aphp.fr','APHP Bichat','Pr, Psychiatre Addictologue','Psychiatrie positive, motivation',d],
-    ['Bellivier','Frank','secretariat.mafw@aphp.fr','APHP Fernand-Widal','Pr, Psychiatre','Institutionnel, politique de sante',d],
-    ['Aubin','Henri-Jean','henri-jean.aubin@aphp.fr','APHP','Pr, Addictologue','Rigueur scientifique, publications',d],
-    ['Le Faou','Anne-Laurence','anne-laurence.lefaou@aphp.fr','APHP','Dr, Tabacologue','SFT, tabacologie, parcours de sevrage',d],
-    ['Adler','Marion','marion.adler@aphp.fr','APHP','Dr, Tabacologue','Vapotage, terrain, patients jeunes',d],
-    ['Berlin','Ivan','ivan.berlin@psl.aphp.fr','APHP Pitie-Salpetriere','Dr, Pharmacologue','DIU tabaco, pharmacologie, NRT',d],
-    ['Blaise','Mario','mario.blaise@ghu-paris.fr','GHU Paris / Marmottan','Dr, Addictologue','Marmottan, accueil usagers, humanisme',d],
-    ['Delile','Jean-Michel','jm.delile@ceid.asso.fr','CEID Bordeaux','Dr, Addictologue','CEID, accompagnement terrain Bordeaux',d],
-    ['Auriacombe','Marc','marc.auriacombe@u-bordeaux.fr','CHU / Univ Bordeaux','Pr, Addictologue','Recherche addiction, CHU Bordeaux',d],
-    ['Dautzenberg','Bertrand','b.dautzenberg@ofta-asso.fr','OFTA','Pr, Pneumologue Tabacologue','OFTA, prevention tabagisme',d2],
-    ['Guichenez','Philippe','philippe.guichenez@ch-beziers.fr','CH Beziers','Dr, Tabacologue','Tabacologie, CH Beziers',d2],
-    ['Lancon','Christophe','secretariat.psy.lancon@ap-hm.fr','AP-HM Marseille','Pr, Psychiatre Addictologue','Psychiatrie, addictologie Marseille',d2],
-    ['Authier','Nicolas','nauthier@chu-clermontferrand.fr','CHU Clermont-Ferrand','Dr, Pharmacologue','Pharmacologie, addictologie Clermont',d2],
-    ['Dematteis','Maurice','Maurice.Dematteis@univ-grenoble-alpes.fr','Univ Grenoble Alpes','Pr, Addictologue','Addictologie CHU Grenoble',d2],
-    ['Cottencin','Olivier','olivier.cottencin@chru-lille.fr','CHRU Lille','Pr, Psychiatre Addictologue','Addictologie, CHRU Lille',d2],
-    ['Dervaux','Alain','alaindervaux@wanadoo.fr','','Dr, Psychiatre Addictologue','Psychiatrie, addictologie',d2],
-    ['Underner','Mike','mike.underner@orange.fr','CHU Poitiers','Dr, Tabacologue','Tabacologie, CHU Poitiers',d2],
-    ['Borgne','A.','aborgne@tabac.fr','Alliance contre le tabac','','Prevention tabac, institution',d2],
-    ['Vanderschueren','M.','vanderschueren-m@chu-caen.fr','CHU Caen','Dr','CHU Caen',d2],
-    ['Perriot','Jean','jean.perriot@cg63.fr','Dispensaire Emile Roux','Dr, Tabacologue','Tabacologie, Clermont-Ferrand',d2],
-    ['Romo','Lucia','lucia.romo_desprez@parisnanterre.fr','Univ Paris Nanterre','Pr, Psychologue','Psychologie des addictions, recherche',d2],
-    ['Gallopel-Morvan','Karine','karine.gallopel-morvan@ehesp.fr','EHESP','Pr, Recherche sante publique','Marketing social, prevention tabac',d2],
-    ['Greillier','Laurent','laurent.greillier@ap-hm.fr','AP-HM Marseille','Dr, Pneumologue','Pneumologie, AP-HM',d2],
-    ['Fatseas','Melina','melina.fatseas@u-bordeaux.fr','Univ / CHU Bordeaux','Dr, Addictologue','Addictologie, recherche Bordeaux',d2],
-    ['Serre','Fuschia','fuschia.serre@u-bordeaux.fr','Univ / CHU Bordeaux','Dr, Addictologue','Recherche addictions Bordeaux',d2],
-    ['Baillet','Emmanuelle','emmanuelle.baillet.1@u-bordeaux.fr','Univ Bordeaux','Dr','Universite de Bordeaux',d2],
-    ['Paillou','V.','v.paillou@ceid-addiction.com','CEID Bordeaux','','CEID, addictions Bordeaux',d2],
-    ['Reiller','B.','b.reiller@ceid-addiction.com','CEID Bordeaux','','CEID, addictions Bordeaux',d2],
-    ['Cleirec','G.','g.cleirec@hopitaldubouscat.com','Hopital du Bouscat','Dr','Addictologie, Bouscat',d2],
-    ['Lajzerowicz','N.','N.LAJZEROWICZ@hopitaldubouscat.com','Hopital du Bouscat','Dr','Addictologie, Bouscat',d2],
-    ['Castera','Philippe','philippe.castera@wanadoo.fr','','Dr, Addictologue','Addictologie, Bordeaux',d2],
-    ['Ostermann','Gerard','gerard.ostermann@wanadoo.fr','','Dr, Interniste Psychotherapeute','Psychotherapie, addictions',d2],
-    ['Brousse','G.','gbrousse@chu-clermontferrand.fr','CHU Clermont-Ferrand','Dr','CHU Clermont-Ferrand',d2],
-    ['Naassila','Mickael','mickael.naassila@u-picardie.fr','Univ Picardie','Pr, Chercheur','Recherche neurobiologie des addictions',d2],
-    ['Bonnet','Nicolas','nicolas.bonnet@respadd.org','RESPADD','Directeur','Reseau de prevention des addictions',d2],
-    ['Airagnes','Guillaume','guillaume.airagnes@ofdt.fr','OFDT','Dr','Observatoire drogues et tendances',d2],
-    ['Franchitto','N.','franchitto.n@chu-toulouse.fr','CHU Toulouse','Dr, Addictologue','Addictologie, CHU Toulouse',d2],
-    ['Lalanne','Laurence','laurence.lalanne@chru-strasbourg.fr','CHRU Strasbourg','Dr, Addictologue','Addictologie, CHRU Strasbourg',d2],
-    ['Donnadieu-Rigole','H.','h-donnadieu_rigole@chu-montpellier.fr','CHU Montpellier','Dr, Addictologue','Addictologie, CHU Montpellier',d2],
-    ['Baguet','Alexandre','alexandre.baguet@chu-rouen.fr','CHU Rouen','Dr, Addictologue','Addictologie, CHU Rouen',d2],
-    ['Gohier','B.','BeGohier@chu-angers.fr','CHU Angers','Dr','CHU Angers',d2],
-    ['Ballon','Nicolas','nicolas.ballon@univ-tours.fr','Univ Tours','Dr, Addictologue','Addictologie, Tours',d2],
-    ['Trojak','Benoit','benoit.trojak@chu-dijon.fr','CHU Dijon','Dr, Addictologue','Addictologie, CHU Dijon',d2],
-    ['Nubukpo','Philippe','philippe.nubukpo@ch-esquirol-limoges.fr','CH Esquirol Limoges','Dr, Psychiatre','Psychiatrie, addictologie Limoges',d2],
-    ['Gay','Aurelia','aurelia.gay@chu-st-etienne.fr','CHU Saint-Etienne','Dr, Addictologue','Addictologie, Saint-Etienne',d2],
-    ['Guillou','Morgane','morgane.guillou@chu-brest.fr','CHU Brest','Dr, Addictologue','Addictologie, CHU Brest',d2],
-    ['Janvier','Caroline','caroline.janvier@ch-cayenne.fr','CH Cayenne','Dr','CH Cayenne',d2],
-    ['Moirand','Romain','romain.moirand@chu-rennes.fr','CHU Rennes','Dr, Addictologue','Addictologie, CHU Rennes',d2],
-    ['Durlach','Vincent','vincent.durlach@univ-reims.fr','Univ Reims','Pr','Addictologie, Reims',d2],
-    ['Cutarella','C.','cutarellac@gmail.com','','Dr','',d2],
-    ['Peiffer','G.','peifferg@aol.com','','Dr','',d2],
-    ['Alessandri','S.','s.alessandri@ghu-paris.fr','GHU Paris','Dr','GHU Paris',d2],
-    ['Chevalier-Latreuille','F.','f.chevalier-latreuille@ch-guillaumeregnier.fr','CH Guillaume Regnier','Dr','CH Guillaume Regnier, Rennes',d2],
-    ['Vorspan','Florence','florence.vorspan@lrb.aphp.fr','APHP Lariboisiere','Dr, Psychiatre Addictologue','Addictologie, Lariboisiere',d2],
-    ['Icick','Romain','romain.icick@aphp.fr','APHP','Dr, Psychiatre','Psychiatrie, addictologie',d2],
-    ['Cavailles','Arnaud','arnaud.cavailles@chu-nantes.fr','CHU Nantes','Dr','CHU Nantes',d2],
-    ['Jutant','Etienne-Marie','etienne-marie.jutant@chu-poitiers.fr','CHU Poitiers','Dr','CHU Poitiers',d2],
-    ['Gentil','A.','algentil@chu-angers.fr','CHU Angers','Dr','CHU Angers',d2],
-    ['Dansou','A.','a.dansou@chu-tours.fr','CHU Tours','Dr','CHU Tours',d2],
-    ['Kinouani','Sherazade','sherazade.kinouani@u-bordeaux.fr','Univ Bordeaux','Dr','Universite de Bordeaux',d2],
-    ['Bouchet-Benezech','Brigitte','brigitte.bouchet-benezech@ch-albi.rss.fr','CH Albi','Dr','CH Albi',d2],
-    ['Herran','E.','eherran@ch-cotebasque.fr','CH Cote Basque','Dr','CH Cote Basque, Bayonne',d2],
-    ['Campagne','G.','gcampagne@ch-cotebasque.fr','CH Cote Basque','Dr','CH Cote Basque, Bayonne',d2],
-    ['Augeraud','Emmanuel','emmanuel.augeraud@ch-pau.fr','CH Pau','Dr','CH Pau',d2],
-    ['Mosset','Thibaud','thibaud.mosset@ch-perpignan.fr','CH Perpignan','Dr','CH Perpignan',d2],
-    ['Weinberg','I.','iweinberg@ch-avignon.fr','CH Avignon','Dr','CH Avignon',d2],
-    ['Zlakomanov','Y.','yzlakomanov@ch-valence.fr','CH Valence','Dr','CH Valence',d2],
-    ['Lecoq','Laetitia','laetitialecoq@ch-metropole-savoie.fr','CH Metropole Savoie','Dr','CH Metropole Savoie, Chambery',d2],
-    ['Courtois','X.','xcourtois@ch-annecygenevois.fr','CH Annecy Genevois','Dr','CH Annecy',d2],
-    ['Rebillard','Matthieu','matthieu.rebillard@ch-stbrieuc.fr','CH Saint-Brieuc','Dr','CH Saint-Brieuc',d2],
-    ['Rigaud','Frederic','frederic.rigaud@ch-angouleme.fr','CH Angouleme','Dr','CH Angouleme',d2],
-    ['Festin','Daniele','daniele.festin@ch-troyes.fr','CH Troyes','Dr','CH Troyes',d2],
-    ['Beurrier','Pascale','pascale.beurrier@ch-ed.fr','CH Epinal','Dr','CH Epinal',d2],
-    ['Velastegui','Sophie','sophie.velastegui@ch-compiegnenoyon.fr','CH Compiegne-Noyon','Dr','CH Compiegne-Noyon',d2],
-    ['Leboulanger','David','david.leboulanger@chlaval.fr','CH Laval','Dr','CH Laval',d2],
-    ['Journe','Bruno','brunojourne@me.com','','Dr, Addictologue','Addictologue liberal Paris',d3],
-    ['Kerner','Laurent','kernerlaurent@gmail.com','','Dr, Addictologue','Addictologue liberal Paris',d3],
-    ['Galera','Olivier','o.galera@clinique-saint-orens.fr','Clinique Saint-Orens (Elsan)','Dr, Tabacologue','Vice-president SFT, createur programme STEP',d3],
-    ['Kammerer','Etienne','et.kammerer@wanadoo.fr','ADDICTOLIB','Dr, Addictologue','President ADDICTOLIB (reseau addictologues liberaux)',d3],
-    ['Bourdoncle','Romain','romain.bourdoncle@administration.gov.pf','CPSA Papeete','Dr, Addictologue','Chef service addictologie Polynesie',d3],
-  ];
-  all.forEach(c=>{
-    if(existing.has(c[2].toLowerCase()))return;
-    const cid=emailToId(c[2]),aid='a_'+cid.substring(2);
-    data.contacts.push({id:cid,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'addictologue',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:aid,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
-  });
-  // v6: Addictions France regional contacts
-  const instit=[
-    ['Addictions France','Bretagne','bretagne@addictions-france.org','Addictions France Bretagne','Direction regionale','Delegation regionale Bretagne',d3],
-    ['Addictions France','Normandie','normandie@addictions-france.org','Addictions France Normandie','Direction regionale','Delegation regionale Normandie',d3],
-    ['Addictions France','Grand Est','grandest@addictions-france.org','Addictions France Grand Est','Direction regionale','Delegation regionale Grand Est',d3],
-    ['Addictions France','AURA','aura@addictions-france.org','Addictions France AURA','Direction regionale','Delegation regionale Auvergne-Rhone-Alpes',d3],
-    ['Guitet','Valerie','valerie.guitet@addictions-france.org','Addictions France Pays de la Loire','Directrice regionale','Directrice regionale Pays de la Loire',d3],
-  ];
-  instit.forEach(c=>{
-    if(existing.has(c[2].toLowerCase()))return;
-    const cid=emailToId(c[2]),aid='a_'+cid.substring(2);
-    data.contacts.push({id:cid,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'institution',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:aid,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
-  });
-  saveOutreach(data);
-  localStorage.setItem('virage_seed_v','6');
+  // v7 (2026-04-24) : plus de seed hardcode. Import via fichier JSON prive uniquement.
+  if(v>=7)return;
+  localStorage.setItem('virage_seed_v','7');
 }
 seedContacts();
 function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
@@ -1969,14 +1899,29 @@ function importOutreachJSON(event){
       if(!imported.contacts||!Array.isArray(imported.contacts)){alert('Format invalide.');return}
       const current=getOutreach();
       const existingIds=new Set(current.contacts.map(c=>c.id));
-      let added=0;
+      const existingEmails=new Set(current.contacts.map(c=>(c.email||'').toLowerCase()));
+      let added=0,skipped=0;
       imported.contacts.forEach(c=>{
-        if(!existingIds.has(c.id)){current.contacts.push(c);added++}
+        const email=(c.email||'').toLowerCase();
+        // Normalisation : si pas d'id, on le genere depuis l'email (compatibilite crm-demarchage-backup.json)
+        const id=c.id||(email?emailToId(email):('c_'+Date.now()+'_'+Math.random().toString(36).substr(2,5)));
+        if(existingIds.has(id)||(email&&existingEmails.has(email))){skipped++;return}
+        const dt=c.created_at||c.date||new Date().toISOString();
+        const aid='a_'+id.substring(2);
+        current.contacts.push({
+          id:id,nom:c.nom||'',prenom:c.prenom||'',email:c.email||'',
+          organisation:c.organisation||'',role:c.role||'',telephone:c.telephone||'',linkedin:c.linkedin||'',
+          categorie:c.categorie||'autre',statut:c.statut||'contacte',notes:c.notes||'',
+          created_at:dt,updated_at:c.updated_at||dt,
+          activites:Array.isArray(c.activites)?c.activites:[{id:aid,date:dt,type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]
+        });
+        existingIds.add(id);if(email)existingEmails.add(email);
+        added++;
       });
       saveOutreach(current);
       renderDemarchage();
-      alert(added+' contact(s) importe(s). '+(imported.contacts.length-added)+' doublon(s) ignore(s).');
-    }catch(err){alert('Erreur de lecture du fichier.')}
+      alert(added+' contact(s) importe(s). '+skipped+' doublon(s) ignore(s).');
+    }catch(err){alert('Erreur de lecture du fichier : '+err.message)}
   };
   reader.readAsText(file);
   event.target.value='';
