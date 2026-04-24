@@ -296,6 +296,92 @@
     .backup-bar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
     .backup-bar .btn-sm{font-size:.625rem}
 
+    /* AGENT HUB */
+    .agents-intro{margin-bottom:32px;text-align:center;padding:16px 0}
+    .agents-intro h3{font-family:'Outfit',sans-serif;font-size:1.75rem;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin-bottom:8px;background:linear-gradient(135deg,var(--green-dark) 0%,var(--green-light) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .agents-intro p{font-size:.9375rem;color:var(--grey);line-height:1.5;max-width:640px;margin:0 auto}
+    .agents-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;perspective:1400px;padding:10px 0}
+    .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px 20px 22px;cursor:pointer;transition:border-color var(--trans),box-shadow var(--trans);text-align:center;position:relative;overflow:hidden;transform-style:preserve-3d}
+    .agent-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--agent-color,var(--green));opacity:0;transition:opacity var(--trans)}
+    .agent-card:hover{border-color:var(--agent-color,var(--border-strong));box-shadow:0 20px 40px -12px rgba(10,14,22,.15),0 8px 16px -4px rgba(10,14,22,.08)}
+    .agent-card:hover::before{opacity:1}
+    .agent-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(82,183,136,.08) 0%,transparent 50%);opacity:0;transition:opacity var(--trans);pointer-events:none}
+    .agent-card:hover::after{opacity:1}
+    .agent-card-inner{transform-style:preserve-3d;transition:transform .4s cubic-bezier(.2,.8,.3,1)}
+    .agent-avatar{width:120px;height:120px;border-radius:50%;margin:0 auto 14px;position:relative;background:linear-gradient(145deg,var(--green-pale) 0%,var(--surface-alt) 100%);overflow:visible;display:flex;align-items:center;justify-content:center;animation:floatIdle 3.5s ease-in-out infinite;transform-style:preserve-3d;will-change:transform}
+    .agent-avatar::before{content:'';position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--agent-color,var(--green)) 0%,transparent 70%);opacity:.25;filter:blur(8px);z-index:-1;transition:opacity var(--trans)}
+    .agent-card:hover .agent-avatar::before{opacity:.5}
+    .agent-avatar .avatar-inner{width:100%;height:100%;border-radius:50%;overflow:hidden;border:3px solid var(--agent-color,var(--green));background:var(--surface-alt);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -8px 16px rgba(10,14,22,.1),0 6px 14px rgba(10,14,22,.12)}
+    .agent-avatar img{width:100%;height:100%;object-fit:cover}
+    .agent-avatar .fallback{font-size:3rem;filter:drop-shadow(0 2px 4px rgba(10,14,22,.15))}
+    .agent-avatar::after{content:'';position:absolute;bottom:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--green-light);border:3px solid var(--surface);box-shadow:0 0 0 0 rgba(82,183,136,.4);animation:pulseRing 2s ease-out infinite;z-index:2}
+    @keyframes floatIdle{0%,100%{transform:translateY(0) rotate(-1deg)}25%{transform:translateY(-4px) rotate(.5deg)}50%{transform:translateY(-8px) rotate(1deg)}75%{transform:translateY(-3px) rotate(-.5deg)}}
+    @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(82,183,136,.5)}70%{box-shadow:0 0 0 8px rgba(82,183,136,0)}100%{box-shadow:0 0 0 0 rgba(82,183,136,0)}}
+    .agent-card:hover .agent-avatar{animation-play-state:paused}
+    .agent-card:nth-child(2) .agent-avatar{animation-delay:.3s}
+    .agent-card:nth-child(3) .agent-avatar{animation-delay:.6s}
+    .agent-card:nth-child(4) .agent-avatar{animation-delay:.9s}
+    .agent-card:nth-child(5) .agent-avatar{animation-delay:1.2s}
+    .agent-name{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:4px;letter-spacing:-.01em}
+    .agent-role{font-size:.75rem;color:var(--grey);line-height:1.4;min-height:2.5em}
+    .agent-badge{display:inline-block;margin-top:10px;padding:3px 10px;background:var(--surface-alt);border-radius:999px;font-size:.6875rem;color:var(--slate);font-weight:600}
+
+    /* CHAT VIEW */
+    .chat-container{display:grid;grid-template-columns:240px 1fr;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;min-height:600px;max-height:calc(100vh - 180px)}
+    .chat-sidebar{background:var(--surface-alt);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+    .chat-sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+    .chat-sidebar-header h4{font-size:.75rem;color:var(--grey);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+    .chat-new-btn{padding:6px 10px;background:var(--green);color:#FFF;border:none;border-radius:6px;font-size:.6875rem;font-weight:600;cursor:pointer;transition:background var(--trans-fast)}
+    .chat-new-btn:hover{background:var(--green-dark)}
+    .conv-item{padding:10px 12px;border-radius:8px;cursor:pointer;transition:background var(--trans-fast);display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:none;color:inherit;font-family:inherit;width:100%}
+    .conv-item:hover{background:var(--surface)}
+    .conv-item.active{background:var(--surface);border:1px solid var(--border)}
+    .conv-item-title{font-size:.8125rem;color:var(--ink);font-weight:500;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .conv-item-date{font-size:.625rem;color:var(--grey);margin-top:2px}
+    .chat-empty-convs{padding:20px 12px;text-align:center;color:var(--grey);font-size:.75rem}
+
+    .chat-main{display:flex;flex-direction:column;min-width:0}
+    .chat-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface)}
+    .chat-back{background:none;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:.75rem;color:var(--slate);font-family:inherit;transition:all var(--trans-fast)}
+    .chat-back:hover{border-color:var(--green-light);color:var(--green)}
+    .chat-header-avatar{width:44px;height:44px;border-radius:50%;border:2px solid var(--agent-color,var(--green));overflow:hidden;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .chat-header-avatar img{width:100%;height:100%;object-fit:cover}
+    .chat-header-info{flex:1;min-width:0}
+    .chat-header-info h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+    .chat-header-info p{font-size:.75rem;color:var(--grey);margin-top:1px}
+
+    .chat-messages{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+    .chat-welcome{text-align:center;padding:40px 20px;color:var(--grey);font-size:.875rem}
+    .chat-welcome h4{font-family:'Outfit',sans-serif;font-size:1.125rem;color:var(--ink);margin-bottom:6px}
+    .msg{display:flex;flex-direction:column;max-width:78%;gap:2px}
+    .msg-user{align-self:flex-end;align-items:flex-end}
+    .msg-assistant{align-self:flex-start}
+    .msg-bubble{padding:12px 16px;border-radius:14px;font-size:.875rem;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+    .msg-user .msg-bubble{background:var(--green);color:#FFF;border-bottom-right-radius:4px}
+    .msg-assistant .msg-bubble{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-bottom-left-radius:4px}
+    .msg-meta{font-size:.625rem;color:var(--grey);padding:0 8px;display:flex;align-items:center;gap:6px}
+    .msg-meta .author-chip{background:var(--surface-alt);padding:1px 6px;border-radius:4px;font-weight:600}
+    .msg-typing{display:flex;gap:4px;padding:16px}
+    .msg-typing span{width:8px;height:8px;border-radius:50%;background:var(--grey-light);animation:typingBounce 1.2s infinite}
+    .msg-typing span:nth-child(2){animation-delay:.15s}
+    .msg-typing span:nth-child(3){animation-delay:.3s}
+    @keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-6px);opacity:1}}
+
+    .chat-input-bar{padding:14px 20px 16px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:10px;align-items:flex-end}
+    .chat-input{flex:1;min-height:44px;max-height:160px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:.875rem;font-family:inherit;resize:none;transition:all var(--trans-fast);background:var(--bg);color:var(--ink);line-height:1.4}
+    .chat-input:focus{outline:none;border-color:var(--green-light);box-shadow:var(--shadow-glow)}
+    .chat-send{padding:12px 20px;background:var(--green);color:#FFF;border:none;border-radius:10px;font-size:.8125rem;font-weight:600;cursor:pointer;transition:all var(--trans-fast);white-space:nowrap;height:44px}
+    .chat-send:hover{background:var(--green-dark)}
+    .chat-send:disabled{opacity:.5;cursor:not-allowed}
+
+    @media(max-width:900px){
+      .chat-container{grid-template-columns:1fr;max-height:none}
+      .chat-sidebar{display:none}
+      .chat-sidebar.mobile-open{display:flex;position:absolute;z-index:10;width:100%;height:100%}
+      .agents-grid{grid-template-columns:repeat(2,1fr)}
+      .agent-avatar{width:80px;height:80px}
+    }
+
     /* FINANCE */
     .amount{font-family:'Outfit',sans-serif;font-weight:700;white-space:nowrap}
     .amount.positive{color:var(--green)}
@@ -373,6 +459,8 @@
     <nav class="mobile-menu-nav" id="mobileNav">
       <div class="nav-section-mobile">Pilotage</div>
       <button class="active" data-page="pilote360"><span class="nav-icon">&#9728;</span>Pilote 360</button>
+      <div class="nav-section-mobile">Equipe IA</div>
+      <button data-page="agents"><span class="nav-icon">&#9733;</span>Hub agents</button>
       <div class="nav-section-mobile">Site &amp; Leads</div>
       <button data-page="overview"><span class="nav-icon">&#9670;</span>Vue d'ensemble</button>
       <button data-page="traffic"><span class="nav-icon">&#9656;</span>Trafic &amp; Acquisition</button>
@@ -408,6 +496,8 @@
     <nav class="sidebar-nav" id="sidebarNav">
       <div class="nav-section">Pilotage</div>
       <button class="active" data-page="pilote360"><span class="nav-icon">&#9728;</span>Pilote 360</button>
+      <div class="nav-section">Equipe IA</div>
+      <button data-page="agents"><span class="nav-icon">&#9733;</span>Hub agents</button>
       <div class="nav-section">Site &amp; Leads</div>
       <button data-page="overview"><span class="nav-icon">&#9670;</span>Vue d'ensemble</button>
       <button data-page="traffic"><span class="nav-icon">&#9656;</span>Trafic &amp; Acquisition</button>
@@ -521,6 +611,45 @@
       <div class="kpi-grid" id="kpiLive"></div>
       <div class="cards-grid">
         <div class="card full"><div class="card-title"><span><span class="live-dot"></span>Dernieres visites en direct</span><button class="btn-icon" onclick="loadAllData()">&#8635;</button></div><div class="table-wrap" id="liveTable"></div></div>
+      </div>
+    </div>
+
+    <!-- EQUIPE IA : HUB AGENTS -->
+    <div class="page" id="page-agents">
+      <!-- Vue grille -->
+      <div id="agentsGridView">
+        <div class="agents-intro">
+          <h3>Ton equipe IA</h3>
+          <p>5 specialistes connectes a Claude, dedies au projet VIRAGE. Clique sur un avatar pour demarrer ou reprendre une conversation. Conversations partagees avec Paul.</p>
+        </div>
+        <div class="agents-grid" id="agentsGrid"></div>
+      </div>
+      <!-- Vue chat -->
+      <div id="agentsChatView" style="display:none">
+        <div class="chat-container">
+          <aside class="chat-sidebar" id="chatSidebar">
+            <div class="chat-sidebar-header">
+              <h4>Conversations</h4>
+              <button class="chat-new-btn" onclick="newConversation()">+ Nouvelle</button>
+            </div>
+            <div id="chatConvList"></div>
+          </aside>
+          <div class="chat-main">
+            <div class="chat-header">
+              <button class="chat-back" onclick="backToAgentsGrid()">&larr; Retour</button>
+              <div class="chat-header-avatar" id="chatHeaderAvatar"></div>
+              <div class="chat-header-info">
+                <h3 id="chatHeaderName"></h3>
+                <p id="chatHeaderRole"></p>
+              </div>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-bar">
+              <textarea class="chat-input" id="chatInput" placeholder="Ecris ton message... (Entree pour envoyer, Shift+Entree pour saut de ligne)" rows="1"></textarea>
+              <button class="chat-send" id="chatSendBtn" onclick="sendChatMessage()">Envoyer</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -955,8 +1084,8 @@ if(sessionStorage.getItem('virage_auth')==='ok') unlockApp();
 // ============================================================
 // NAVIGATION
 // ============================================================
-const pageTitles={pilote360:'Pilote 360',overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
-const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
+const pageTitles={pilote360:'Pilote 360',agents:'Equipe IA',overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
+const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',agents:'Ta team IA connectee a Claude',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
 
 function navigateTo(pg){
   document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button').forEach(b=>b.classList.remove('active'));
@@ -967,7 +1096,15 @@ function navigateTo(pg){
   const sub=document.getElementById('pageSubtitle');
   if(sub){sub.textContent=pageSubtitles[pg]||'';sub.style.display=pageSubtitles[pg]?'block':'none'}
   window.scrollTo({top:0,behavior:'smooth'});
-  renderAll();
+  if(pg==='agents'){
+    // Revenir a la grille si on navigue vers cet onglet
+    const grid=document.getElementById('agentsGridView'),chat=document.getElementById('agentsChatView');
+    if(grid)grid.style.display='block';if(chat)chat.style.display='none';
+    currentAgentId=null;currentConversationId=null;
+    renderAgentsGrid();
+  } else {
+    renderAll();
+  }
 }
 
 function setPeriod(days){
@@ -1844,6 +1981,206 @@ function importOutreachJSON(event){
   reader.readAsText(file);
   event.target.value='';
 }
+
+// ============================================================
+// AGENT HUB : Equipe IA connectee a Claude
+// ============================================================
+const AGENT_CHAT_ENDPOINT=SB_URL+'/functions/v1/agent-chat';
+const AGENT_AUTHOR_KEY='virage_agent_author';
+function getAgentAuthor(){
+  let a=localStorage.getItem(AGENT_AUTHOR_KEY);
+  if(!a){
+    a=prompt('Identifie-toi pour le hub d\'agents (gregoire ou paul) :','gregoire');
+    if(!a)a='anonyme';
+    localStorage.setItem(AGENT_AUTHOR_KEY,a.toLowerCase().trim());
+  }
+  return localStorage.getItem(AGENT_AUTHOR_KEY)||'anonyme';
+}
+
+const AGENTS=[
+  {id:'manager',name:'Le Manager',role:'Vision strategique, priorites, briefs',avatar:'avatars/pulmo-manager.png',fallback:'&#9818;',color:'#1B4332'},
+  {id:'marketing',name:'La Marketing',role:'Social media, copy posts, calendrier edito',avatar:'avatars/pulmo-marketing.png',fallback:'&#128226;',color:'#E09F3E'},
+  {id:'dev',name:'Le Dev Web',role:'Site, app, dashboard, Supabase, specs tech',avatar:'avatars/pulmo-dev.png',fallback:'&#60;/&#62;',color:'#3A86A8'},
+  {id:'compliance',name:'La Compliance',role:'DM/MDR, HDS, RGPD sante, App Store',avatar:'avatars/pulmo-compliance.png',fallback:'&#9877;',color:'#7B3FA0'},
+  {id:'partenariats',name:'Le Partenariats',role:'Demarchage pros, financement, RDV',avatar:'avatars/pulmo-partenariats.png',fallback:'&#129309;',color:'#52B788'},
+];
+
+let currentAgentId=null,currentConversationId=null,allConversations=[],isSending=false;
+
+function renderAgentsGrid(){
+  const grid=document.getElementById('agentsGrid');if(!grid)return;
+  // Load conversations counts
+  loadAllConversations().then(()=>{
+    const byAgent={};allConversations.forEach(c=>{byAgent[c.agent_id]=(byAgent[c.agent_id]||0)+1});
+    let h='';
+    AGENTS.forEach(a=>{
+      const count=byAgent[a.id]||0;
+      h+=`<div class="agent-card" style="--agent-color:${a.color}" onclick="openAgentChat('${a.id}')">`;
+      h+=`<div class="agent-card-inner">`;
+      h+=`<div class="agent-avatar"><div class="avatar-inner"><img src="${a.avatar}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="fallback" style="display:none">${a.fallback}</div></div></div>`;
+      h+=`<div class="agent-name">${a.name}</div>`;
+      h+=`<div class="agent-role">${a.role}</div>`;
+      h+=`<div class="agent-badge">${count} conversation${count>1?'s':''}</div>`;
+      h+=`</div></div>`;
+    });
+    grid.innerHTML=h;
+    // Parallax 3D on hover
+    grid.querySelectorAll('.agent-card').forEach(card=>{
+      const inner=card.querySelector('.agent-card-inner');
+      const av=card.querySelector('.agent-avatar');
+      card.addEventListener('mousemove',e=>{
+        const r=card.getBoundingClientRect();
+        const x=e.clientX-r.left,y=e.clientY-r.top;
+        const cx=r.width/2,cy=r.height/2;
+        const rx=((y-cy)/cy)*-8,ry=((x-cx)/cx)*10;
+        inner.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+        if(av)av.style.transform=`translateZ(30px) scale(1.06)`;
+        card.style.setProperty('--mx',x+'px');card.style.setProperty('--my',y+'px');
+      });
+      card.addEventListener('mouseleave',()=>{
+        inner.style.transform='';
+        if(av)av.style.transform='';
+      });
+    });
+  });
+}
+
+async function loadAllConversations(){
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/agent_conversations?select=*&archived=eq.false&order=updated_at.desc&limit=200',{headers:HEADERS});
+    if(r.ok)allConversations=await r.json();
+  }catch(e){console.warn('agent conversations indispo:',e.message);allConversations=[]}
+}
+
+function openAgentChat(agentId,convId){
+  currentAgentId=agentId;
+  currentConversationId=convId||null;
+  const agent=AGENTS.find(a=>a.id===agentId);if(!agent)return;
+  document.getElementById('agentsGridView').style.display='none';
+  document.getElementById('agentsChatView').style.display='block';
+  document.getElementById('chatHeaderName').textContent=agent.name;
+  document.getElementById('chatHeaderRole').textContent=agent.role;
+  document.getElementById('chatHeaderAvatar').style.borderColor=agent.color;
+  document.getElementById('chatHeaderAvatar').innerHTML=`<img src="${agent.avatar}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none;font-size:1.5rem">${agent.fallback}</div>`;
+  renderConvList();
+  renderChatMessages();
+  setTimeout(()=>document.getElementById('chatInput').focus(),100);
+}
+
+function backToAgentsGrid(){
+  document.getElementById('agentsChatView').style.display='none';
+  document.getElementById('agentsGridView').style.display='block';
+  currentAgentId=null;currentConversationId=null;
+  renderAgentsGrid();
+}
+
+function renderConvList(){
+  const list=document.getElementById('chatConvList');if(!list)return;
+  const convs=allConversations.filter(c=>c.agent_id===currentAgentId);
+  if(convs.length===0){list.innerHTML='<div class="chat-empty-convs">Aucune conversation. Envoie un message pour demarrer.</div>';return}
+  let h='';
+  convs.forEach(c=>{
+    const active=c.id===currentConversationId?' active':'';
+    const date=new Date(c.updated_at);
+    const dateStr=date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+    h+=`<button class="conv-item${active}" onclick="loadConversation('${c.id}')"><span class="conv-item-title">${escHTML(c.title||'Sans titre')}</span><span class="conv-item-date">${dateStr}</span></button>`;
+  });
+  list.innerHTML=h;
+}
+
+async function loadConversation(convId){
+  currentConversationId=convId;
+  renderConvList();
+  const msgs=document.getElementById('chatMessages');
+  msgs.innerHTML='<div class="chat-welcome">Chargement...</div>';
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/agent_messages?select=*&conversation_id=eq.'+convId+'&order=created_at.asc&limit=200',{headers:HEADERS});
+    if(r.ok){const data=await r.json();renderChatMessages(data)}
+  }catch(e){msgs.innerHTML='<div class="chat-welcome">Erreur de chargement</div>'}
+}
+
+function renderChatMessages(msgs){
+  const container=document.getElementById('chatMessages');if(!container)return;
+  if(!msgs){
+    // Welcome par defaut
+    const agent=AGENTS.find(a=>a.id===currentAgentId);
+    container.innerHTML=`<div class="chat-welcome"><h4>${agent?agent.name:''}</h4><p>Demarre une nouvelle conversation en envoyant un message.</p></div>`;
+    return;
+  }
+  if(msgs.length===0){container.innerHTML='<div class="chat-welcome">Conversation vide</div>';return}
+  let h='';
+  msgs.forEach(m=>{
+    const cls=m.role==='user'?'msg-user':'msg-assistant';
+    const author=m.author?`<span class="author-chip">${escHTML(m.author)}</span>`:'';
+    h+=`<div class="msg ${cls}">`;
+    h+=`<div class="msg-bubble">${escHTML(m.content)}</div>`;
+    h+=`<div class="msg-meta">${author}<span>${fmtDate(m.created_at)}</span></div>`;
+    h+=`</div>`;
+  });
+  container.innerHTML=h;
+  container.scrollTop=container.scrollHeight;
+}
+
+function newConversation(){
+  currentConversationId=null;
+  renderConvList();
+  renderChatMessages();
+  document.getElementById('chatInput').focus();
+}
+
+async function sendChatMessage(){
+  if(isSending)return;
+  const input=document.getElementById('chatInput');
+  const message=input.value.trim();
+  if(!message)return;
+  const btn=document.getElementById('chatSendBtn');
+  isSending=true;btn.disabled=true;btn.textContent='...';input.disabled=true;
+  const author=getAgentAuthor();
+  // Optimistic UI
+  const container=document.getElementById('chatMessages');
+  const welcome=container.querySelector('.chat-welcome');if(welcome)welcome.remove();
+  container.insertAdjacentHTML('beforeend',`<div class="msg msg-user"><div class="msg-bubble">${escHTML(message)}</div><div class="msg-meta"><span class="author-chip">${escHTML(author)}</span><span>maintenant</span></div></div>`);
+  container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant" id="typingMsg"><div class="msg-bubble"><div class="msg-typing"><span></span><span></span><span></span></div></div></div>`);
+  container.scrollTop=container.scrollHeight;
+  input.value='';
+  try{
+    const authHash=await sha256('auth:'+AUTH_HASH); // hash du hash, on envoie pas le hash brut
+    const resp=await fetch(AGENT_CHAT_ENDPOINT,{
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'apikey':SB_KEY,
+        'authorization':'Bearer '+SB_KEY,
+        'x-dashboard-auth':AUTH_HASH,
+      },
+      body:JSON.stringify({agent_id:currentAgentId,conversation_id:currentConversationId,message,author}),
+    });
+    const data=await resp.json();
+    document.getElementById('typingMsg').remove();
+    if(!resp.ok){
+      container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble" style="color:var(--red)">Erreur : ${escHTML(data.error||'inconnue')}</div></div>`);
+    }else{
+      currentConversationId=data.conversation_id;
+      container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble">${escHTML(data.content)}</div><div class="msg-meta"><span class="author-chip">${escHTML(data.agent.name)}</span><span>maintenant</span></div></div>`);
+      await loadAllConversations();renderConvList();
+    }
+    container.scrollTop=container.scrollHeight;
+  }catch(e){
+    const t=document.getElementById('typingMsg');if(t)t.remove();
+    container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble" style="color:var(--red)">Erreur reseau : ${escHTML(e.message)}</div></div>`);
+  }finally{
+    isSending=false;btn.disabled=false;btn.textContent='Envoyer';input.disabled=false;input.focus();
+  }
+}
+
+// Textarea autogrow + Enter to send
+document.addEventListener('DOMContentLoaded',()=>{
+  const input=document.getElementById('chatInput');
+  if(input){
+    input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,160)+'px'});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage()}});
+  }
+});
 
 // ============================================================
 // APP VIRAGE : BETA TESTERS
