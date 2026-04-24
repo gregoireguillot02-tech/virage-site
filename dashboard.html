@@ -635,17 +635,35 @@
     .identity-card p{font-size:.75rem;color:var(--slate);margin:0}
 
     /* Widget tasks dans Pilote 360 */
+    .mytasks-section{margin-bottom:14px}
+    .mytasks-section:last-child{margin-bottom:0}
+    .mytasks-section-head{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--slate);margin-bottom:8px;padding:0 2px}
+    .mytasks-section-icon{font-size:1rem}
+    .mytasks-section.urgent .mytasks-section-head{color:var(--red)}
+    .mytasks-section.today .mytasks-section-head{color:var(--accent-deep)}
+    .mytasks-badge{margin-left:auto;padding:1px 8px;border-radius:10px;font-size:.62rem;font-weight:700;background:var(--surface-alt);color:var(--slate);border:1px solid var(--border)}
+    .mytasks-badge.overdue{background:rgba(220,38,38,.18);color:var(--red);border-color:rgba(220,38,38,.35)}
+    .mytasks-badge.today{background:rgba(224,159,62,.2);color:var(--accent-deep);border-color:rgba(224,159,62,.4)}
     .mytasks-list{display:flex;flex-direction:column;gap:6px}
     .mytasks-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;transition:all var(--trans-fast);cursor:pointer}
     .mytasks-item:hover{border-color:var(--border-strong);background:var(--surface-alt)}
+    .mytasks-section.urgent .mytasks-item{border-left:3px solid var(--red)}
+    .mytasks-section.today .mytasks-item{border-left:3px solid var(--accent)}
     .mytasks-check{width:18px;height:18px;border:2px solid var(--border-strong);border-radius:5px;flex-shrink:0;cursor:pointer;transition:all var(--trans-fast);position:relative}
     .mytasks-check:hover{border-color:var(--green)}
     .mytasks-check.checked{background:var(--green);border-color:var(--green)}
     .mytasks-check.checked::after{content:'\2713';position:absolute;top:-3px;left:2px;color:#fff;font-size:.8rem;font-weight:700}
     .mytasks-body{flex:1;min-width:0}
-    .mytasks-title{font-size:.8125rem;font-weight:500;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mytasks-title{font-size:.8125rem;font-weight:500;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
     .mytasks-title.done{text-decoration:line-through;color:var(--grey)}
-    .mytasks-meta{font-size:.68rem;color:var(--slate);margin-top:2px;display:flex;gap:6px;align-items:center}
+    .mytasks-prio-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .mytasks-prio-dot.high{background:var(--red);box-shadow:0 0 0 2px rgba(220,38,38,.2)}
+    .mytasks-prio-dot.low{background:var(--blue);opacity:.6}
+    .mytasks-asg{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:.55rem;font-weight:700;color:#fff;flex-shrink:0}
+    .mytasks-asg.greg{background:var(--green)}
+    .mytasks-asg.paul{background:var(--purple)}
+    .mytasks-asg.both{background:linear-gradient(135deg,var(--green) 50%,var(--purple) 50%)}
+    .mytasks-meta{font-size:.68rem;color:var(--slate);margin-top:2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
     .mytasks-empty{text-align:center;padding:24px;color:var(--grey);font-size:.8125rem}
 
     @media (max-width:768px){
@@ -718,6 +736,7 @@
       <button data-page="finance"><span class="nav-icon">&#8364;</span>Finance &amp; Burn</button>
     </nav>
     <div class="mobile-period" id="mobilePeriod">
+      <button data-days="1">1j</button>
       <button class="active" data-days="7">7j</button>
       <button data-days="30">30j</button>
       <button data-days="90">90j</button>
@@ -769,6 +788,7 @@
         <div class="top-bar-subtitle" id="pageSubtitle">Vision consolidee de l'activite VIRAGE</div>
       </div>
       <div class="top-bar-actions">
+        <button class="period-btn" data-days="1">1j</button>
         <button class="period-btn active" data-days="7">7j</button>
         <button class="period-btn" data-days="30">30j</button>
         <button class="period-btn" data-days="90">90j</button>
@@ -794,11 +814,7 @@
       </div>
       <div class="kpi-grid" id="kpi360Hero"></div>
       <div class="cards-grid">
-        <div class="card"><div class="card-title">Site &amp; leads <button class="btn-sm" onclick="navigateTo('overview')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360Site" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
-        <div class="card"><div class="card-title">App VIRAGE <button class="btn-sm" onclick="navigateTo('app')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360App" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
-        <div class="card"><div class="card-title">Demarchage pros <button class="btn-sm" onclick="navigateTo('demarchage')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360Demarchage" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
-        <div class="card"><div class="card-title">Finance &amp; burn <button class="btn-sm" onclick="navigateTo('finance')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360Finance" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
-        <div class="card full"><div class="card-title">Mes tasks en priorite <button class="btn-sm" onclick="navigateTo('tasks')">Voir toutes &rarr;</button></div><div id="pilote360MyTasks"></div></div>
+        <div class="card full"><div class="card-title">A faire <button class="btn-sm" onclick="navigateTo('tasks')">Voir tout &rarr;</button></div><div id="pilote360MyTasks"></div></div>
         <div class="card full"><div class="card-title">Alertes &amp; priorites du moment</div><div id="alertesContainer"></div></div>
       </div>
     </div>
@@ -2012,7 +2028,7 @@ async function toggleTaskDone(id){
   }catch(e){alert('Erreur : '+e.message)}
 }
 
-// Widget "Mes tasks prio" dans Pilote 360
+// Widget "A faire" dans Pilote 360 : 3 sections En retard / Aujourd'hui / Priorites
 function renderMyTasksWidget(){
   const el=document.getElementById('pilote360MyTasks');
   if(!el)return;
@@ -2022,34 +2038,56 @@ function renderMyTasksWidget(){
     if(!me)return true;
     return t.assignee===me||t.assignee==='both';
   });
-  // Tri : en retard > aujourd'hui > priorite haute > deadline proche > priorite moyenne...
-  const prioRank={high:0,medium:1,low:2};
-  mine.sort((a,b)=>{
-    const da=a.due_date?new Date(a.due_date+'T12:00:00'):null;
-    const db=b.due_date?new Date(b.due_date+'T12:00:00'):null;
-    const now=new Date();now.setHours(0,0,0,0);
-    const aOv=da&&da<now?0:1;const bOv=db&&db<now?0:1;
-    if(aOv!==bOv)return aOv-bOv;
-    const ap=prioRank[a.priority||'medium'],bp=prioRank[b.priority||'medium'];
-    if(ap!==bp)return ap-bp;
-    if(da&&db)return da-db;
-    if(da)return -1;if(db)return 1;
-    return 0;
+  const now=new Date();now.setHours(0,0,0,0);
+  const overdue=[],today=[],others=[];
+  mine.forEach(t=>{
+    if(!t.due_date){others.push(t);return}
+    const d=new Date(t.due_date+'T12:00:00');
+    if(d<now)overdue.push(t);
+    else if(d.getTime()===now.getTime())today.push(t);
+    else others.push(t);
   });
-  const top=mine.slice(0,5);
-  if(top.length===0){
+  const prioRank={high:0,medium:1,low:2};
+  const byPrio=(a,b)=>(prioRank[a.priority||'medium']-prioRank[b.priority||'medium']);
+  const byDue=(a,b)=>new Date(a.due_date+'T12:00:00')-new Date(b.due_date+'T12:00:00');
+  overdue.sort(byDue);
+  today.sort(byPrio);
+  others.sort((a,b)=>byPrio(a,b)||(a.due_date&&b.due_date?byDue(a,b):(a.due_date?-1:1)));
+
+  if(mine.length===0){
     el.innerHTML='<div class="mytasks-empty">Aucune task en cours. <a href="#" onclick="event.preventDefault();navigateTo(\'tasks\')" style="color:var(--green);font-weight:600">Creer une task</a></div>';
     return;
   }
-  el.innerHTML='<div class="mytasks-list">'+top.map(t=>{
+
+  const renderItem=t=>{
     const dueInfo=fmtDueDate(t.due_date);
     const dueHTML=dueInfo?'<span class="task-due '+dueInfo.cls+'" style="font-size:.62rem;padding:1px 5px">'+dueInfo.label+'</span>':'';
     const tagHTML=t.tag?'<span class="task-tag" style="font-size:.62rem;padding:1px 6px">'+escHTML(t.tag)+'</span>':'';
+    const prioDot=t.priority==='high'?'<span class="mytasks-prio-dot high" title="Priorite haute"></span>':(t.priority==='low'?'<span class="mytasks-prio-dot low" title="Priorite basse"></span>':'');
+    const asgInitials=t.assignee==='both'?'G+P':(t.assignee==='greg'?'G':'P');
+    const asgBadge='<span class="mytasks-asg '+t.assignee+'">'+asgInitials+'</span>';
     return '<div class="mytasks-item" onclick="openTaskModal(\''+t.id+'\')">'+
       '<div class="mytasks-check" onclick="event.stopPropagation();toggleTaskDone(\''+t.id+'\')"></div>'+
-      '<div class="mytasks-body"><div class="mytasks-title">'+escHTML(t.title)+'</div>'+
-      '<div class="mytasks-meta">'+tagHTML+dueHTML+'</div></div></div>';
-  }).join('')+'</div>';
+      '<div class="mytasks-body"><div class="mytasks-title">'+prioDot+escHTML(t.title)+'</div>'+
+      '<div class="mytasks-meta">'+asgBadge+tagHTML+dueHTML+'</div></div></div>';
+  };
+
+  let html='';
+  if(overdue.length>0){
+    html+='<div class="mytasks-section urgent"><div class="mytasks-section-head"><span class="mytasks-section-icon">&#9940;</span>En retard <span class="mytasks-badge overdue">'+overdue.length+'</span></div>';
+    html+='<div class="mytasks-list">'+overdue.slice(0,5).map(renderItem).join('')+'</div></div>';
+  }
+  if(today.length>0){
+    html+='<div class="mytasks-section today"><div class="mytasks-section-head"><span class="mytasks-section-icon">&#128200;</span>Aujourd\'hui <span class="mytasks-badge today">'+today.length+'</span></div>';
+    html+='<div class="mytasks-list">'+today.slice(0,5).map(renderItem).join('')+'</div></div>';
+  }
+  if(others.length>0&&overdue.length+today.length<5){
+    const cap=Math.max(3,5-overdue.length-today.length);
+    html+='<div class="mytasks-section"><div class="mytasks-section-head"><span class="mytasks-section-icon">&#9733;</span>Prochaines priorites</div>';
+    html+='<div class="mytasks-list">'+others.slice(0,cap).map(renderItem).join('')+'</div></div>';
+  }
+  if(!html)html='<div class="mytasks-empty">Rien d\'urgent. Tout roule.</div>';
+  el.innerHTML=html;
 }
 
 // Init Tasks UI : listeners, quick-add, filtres
@@ -2245,28 +2283,8 @@ function renderPilote360(views,waitlist,pro,pv,pwl,ppr){
     drawSparkline('spark360_app',sparkApp,'#3A86A8');
   }
 
-  // Site card
-  document.getElementById('kpi360Site').innerHTML=
-    kpiHTML('Pages vues',views.length,t1.pct,t1.cls,null)+
-    kpiHTML('Conversion',convPct+'%','visiteur &rarr; inscrit','neutral',null);
-
-  // App card
-  const days=realProfiles.reduce((s,p)=>s+computeAbstinenceDays(p),0);
-  const eco=realProfiles.reduce((s,p)=>s+computeEconomies(p),0);
-  document.getElementById('kpi360App').innerHTML=
-    kpiHTML('Jours d\'abstinence',days,'cumules users reels','up',null)+
-    kpiHTML('Economies cumulees',fmtEUR(eco),'','up',null);
-
-  // Demarchage card
-  document.getElementById('kpi360Demarchage').innerHTML=
-    kpiHTML('Total contacts',contacts.length,relances>0?relances+' a relancer':'a jour',relances>0?'down':'up',null)+
-    kpiHTML('RDV planifies',rdv,enAttente+' en attente','neutral',null);
-
-  // Finance card
+  // Cards detaillees supprimees : info disponible dans les onglets dedies (Site&Leads, App VIRAGE, Demarchage, Finance)
   const finEnCours=fin.financements.filter(f=>['prepa','depose','instruction'].includes(f.statut)).length;
-  document.getElementById('kpi360Finance').innerHTML=
-    kpiHTML('Burn mensuel',fmtEUR(burn),'moyenne 3 mois',burn>0?'down':'up',null)+
-    kpiHTML('Financements pipeline',finEnCours+' dossiers','en cours','neutral',null);
 
   // Alertes dynamiques
   const alertes=[];
