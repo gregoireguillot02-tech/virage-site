@@ -263,6 +263,28 @@
     .backup-bar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
     .backup-bar .btn-sm{font-size:.625rem}
 
+    /* FINANCE */
+    .amount{font-family:'Outfit',sans-serif;font-weight:700;white-space:nowrap}
+    .amount.positive{color:var(--green)}
+    .amount.negative{color:var(--red)}
+    .tx-row .tx-cat{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.625rem;font-weight:600;background:#eee;color:var(--slate)}
+    .tx-cat.revenue{background:var(--green-pale);color:var(--green)}
+    .tx-cat.tech{background:#E8F4FD;color:var(--blue)}
+    .tx-cat.marketing{background:var(--accent-light);color:#8B6914}
+    .tx-cat.legal{background:#F3E8FD;color:#7B3FA0}
+    .tx-cat.rh{background:#FDE8E8;color:var(--red)}
+    .tx-cat.subvention{background:var(--green-pale);color:var(--green-dark)}
+    .tx-cat.levee{background:#FFF1D0;color:#8B6914}
+    .fin-statut{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.625rem;font-weight:600}
+    .fin-statut.identifie{background:#eee;color:var(--slate)}
+    .fin-statut.prepa{background:#E8F4FD;color:var(--blue)}
+    .fin-statut.depose{background:var(--accent-light);color:#8B6914}
+    .fin-statut.instruction{background:#F3E8FD;color:#7B3FA0}
+    .fin-statut.accepte{background:var(--green-pale);color:var(--green)}
+    .fin-statut.refuse{background:#FDE8E8;color:var(--red)}
+    .fin-statut.abandonne{background:#eee;color:var(--grey)}
+    .finance-actions{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+
     @media(max-width:900px){
       .filter-bar{flex-direction:column}
       .filter-search{min-width:100%}
@@ -326,6 +348,8 @@
       <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
       <div class="nav-section-mobile">Demarchage</div>
       <button data-page="demarchage"><span class="nav-icon">&#9993;</span>Pipeline contacts</button>
+      <div class="nav-section-mobile">Pilotage</div>
+      <button data-page="finance"><span class="nav-icon">&#8364;</span>Finance &amp; Burn</button>
     </nav>
     <div class="mobile-period" id="mobilePeriod">
       <button class="active" data-days="7">7j</button>
@@ -352,6 +376,8 @@
       <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
       <div class="nav-section">Demarchage</div>
       <button data-page="demarchage"><span class="nav-icon">&#9993;</span>Pipeline contacts</button>
+      <div class="nav-section">Pilotage</div>
+      <button data-page="finance"><span class="nav-icon">&#8364;</span>Finance &amp; Burn</button>
     </nav>
     <div class="sidebar-footer">
       v3.0 &middot; Data + CRM<br>Aucun cookie, RGPD-friendly
@@ -489,7 +515,146 @@
       </div>
     </div>
 
+    <!-- FINANCE -->
+    <div class="page" id="page-finance">
+      <div class="kpi-grid" id="kpiFinance"></div>
+      <div class="finance-actions">
+        <button class="btn-primary" onclick="openCashModal()">&#128176; Mettre a jour le cash</button>
+        <button class="btn-primary" onclick="openTransactionModal()">+ Transaction</button>
+        <button class="btn-primary" onclick="openFinancementModal()">+ Financement</button>
+        <button class="btn-sm" onclick="exportFinanceJSON()">&#128190; Sauvegarder</button>
+        <button class="btn-sm" onclick="document.getElementById('importFinJSON').click()">&#128194; Importer</button>
+        <input type="file" id="importFinJSON" accept=".json" style="display:none" onchange="importFinanceJSON(event)">
+      </div>
+      <div class="cards-grid">
+        <div class="card full"><div class="card-title">Evolution du cash</div><div class="chart-wrap h250"><canvas id="chartCash"></canvas></div></div>
+        <div class="card"><div class="card-title">Revenus vs Depenses (6 derniers mois)</div><div class="chart-wrap h250"><canvas id="chartRevExp"></canvas></div></div>
+        <div class="card"><div class="card-title">Depenses par categorie (3 derniers mois)</div><div class="chart-wrap h250"><canvas id="chartExpCat"></canvas></div></div>
+        <div class="card full"><div class="card-title">Pipeline financement <span class="badge" id="badgeFinCount"></span></div><div class="table-wrap" id="financementTable"></div></div>
+        <div class="card full"><div class="card-title">Transactions recentes <button class="btn-export" onclick="exportTransactionsCSV()">Exporter CSV</button></div><div class="table-wrap" id="transactionsTable"></div></div>
+      </div>
+    </div>
+
   </main>
+
+  <!-- MODAL : MISE A JOUR CASH -->
+  <div class="modal-overlay" id="cashModal">
+    <div class="modal" style="max-width:400px">
+      <div class="modal-header">
+        <h3>Mise a jour du cash</h3>
+        <button onclick="closeModal('cashModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="cashForm" onsubmit="event.preventDefault();saveCash()">
+          <div class="form-grid" style="grid-template-columns:1fr">
+            <div class="form-group"><label class="form-label">Mois *</label><input type="month" class="form-input" name="cash_mois" required></div>
+            <div class="form-group"><label class="form-label">Cash disponible (fin de mois) *</label><input type="number" step="0.01" class="form-input" name="cash_montant" required placeholder="50000"></div>
+            <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" name="cash_notes" placeholder="Commentaires..."></textarea></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('cashModal')">Annuler</button>
+        <button class="btn-primary" onclick="saveCash()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : TRANSACTION -->
+  <div class="modal-overlay" id="transactionModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="txModalTitle">Nouvelle transaction</h3>
+        <button onclick="closeModal('transactionModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="transactionForm" onsubmit="event.preventDefault();saveTransaction()">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Date *</label><input type="date" class="form-input" name="tx_date" required></div>
+            <div class="form-group">
+              <label class="form-label">Type *</label>
+              <select class="form-select" name="tx_type" required>
+                <option value="expense">Depense</option>
+                <option value="revenue">Revenu</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categorie *</label>
+              <select class="form-select" name="tx_categorie" required>
+                <option value="tech">Tech / Dev</option>
+                <option value="marketing">Marketing / Com</option>
+                <option value="legal">Legal / Admin</option>
+                <option value="rh">RH / Freelance</option>
+                <option value="subvention">Subvention / BPI</option>
+                <option value="levee">Levee de fonds</option>
+                <option value="revenue">Revenu operationnel</option>
+                <option value="other">Autre</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Montant (EUR) *</label><input type="number" step="0.01" class="form-input" name="tx_montant" required placeholder="1000"></div>
+            <div class="form-group full"><label class="form-label">Description</label><input type="text" class="form-input" name="tx_description" placeholder="Abonnement Supabase, Freelance designer..."></div>
+            <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" name="tx_notes"></textarea></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('transactionModal')">Annuler</button>
+        <button class="btn-primary" onclick="saveTransaction()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : FINANCEMENT -->
+  <div class="modal-overlay" id="financementModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="finModalTitle">Nouveau financement</h3>
+        <button onclick="closeModal('financementModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="financementForm" onsubmit="event.preventDefault();saveFinancement()">
+          <div class="form-grid">
+            <div class="form-group full"><label class="form-label">Nom *</label><input type="text" class="form-input" name="fin_nom" required placeholder="Bourse French Tech Emergence"></div>
+            <div class="form-group"><label class="form-label">Organisme</label><input type="text" class="form-input" name="fin_organisme" placeholder="BPI France"></div>
+            <div class="form-group">
+              <label class="form-label">Type *</label>
+              <select class="form-select" name="fin_type" required>
+                <option value="bpi">BPI</option>
+                <option value="aap">Appel a Projets</option>
+                <option value="subvention">Subvention regionale</option>
+                <option value="incubateur">Incubateur / Accelerateur</option>
+                <option value="concours">Concours</option>
+                <option value="levee">Levee de fonds</option>
+                <option value="horizon">Horizon Europe</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Montant demande (EUR)</label><input type="number" step="0.01" class="form-input" name="fin_montant" placeholder="30000"></div>
+            <div class="form-group"><label class="form-label">Montant obtenu (EUR)</label><input type="number" step="0.01" class="form-input" name="fin_obtenu" placeholder="0"></div>
+            <div class="form-group">
+              <label class="form-label">Statut *</label>
+              <select class="form-select" name="fin_statut" required>
+                <option value="identifie">Identifie</option>
+                <option value="prepa">En preparation</option>
+                <option value="depose">Depose</option>
+                <option value="instruction">En instruction</option>
+                <option value="accepte">Accepte</option>
+                <option value="refuse">Refuse</option>
+                <option value="abandonne">Abandonne</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Date depot</label><input type="date" class="form-input" name="fin_date_depot"></div>
+            <div class="form-group"><label class="form-label">Date reponse prevue</label><input type="date" class="form-input" name="fin_date_reponse"></div>
+            <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" name="fin_notes" placeholder="Contacts, avancee dossier..."></textarea></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" onclick="closeModal('financementModal')">Annuler</button>
+        <button class="btn-primary" onclick="saveFinancement()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL : AJOUTER/MODIFIER CONTACT -->
   <div class="modal-overlay" id="contactModal">
@@ -621,7 +786,7 @@ if(sessionStorage.getItem('virage_auth')==='ok') unlockApp();
 // ============================================================
 // NAVIGATION
 // ============================================================
-const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',demarchage:'Pipeline contacts'};
+const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
 
 function navigateTo(pg){
   document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button').forEach(b=>b.classList.remove('active'));
@@ -713,6 +878,7 @@ function renderAll(){
   renderConversions(views,waitlist,pro);
   renderLive();
   renderDemarchage();
+  renderFinance();
 }
 
 // ============================================================
@@ -1025,9 +1191,9 @@ function seedContacts(){
     data.contacts.forEach(c=>{if(c.email)c.id=emailToId(c.email)});
     if(data.contacts.length>0)saveOutreach(data);
   }
-  if(v>=5)return;
+  if(v>=6)return;
   const existing=new Set(data.contacts.map(c=>(c.email||'').toLowerCase()));
-  const d='2026-04-17T10:00:00.000Z',d2='2026-04-18T10:00:00.000Z';
+  const d='2026-04-17T10:00:00.000Z',d2='2026-04-18T10:00:00.000Z',d3='2026-04-18T18:00:00.000Z';
   const all=[
     ['Benyamina','Amine','amine.benyamina@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vision globale, portes institutionnelles',d],
     ['Karila','Laurent','laurent.karila@aphp.fr','APHP Paul Brousse','Pr, Addictologue','Vulgarisation, cible jeune, podcast',d],
@@ -1106,14 +1272,32 @@ function seedContacts(){
     ['Beurrier','Pascale','pascale.beurrier@ch-ed.fr','CH Epinal','Dr','CH Epinal',d2],
     ['Velastegui','Sophie','sophie.velastegui@ch-compiegnenoyon.fr','CH Compiegne-Noyon','Dr','CH Compiegne-Noyon',d2],
     ['Leboulanger','David','david.leboulanger@chlaval.fr','CH Laval','Dr','CH Laval',d2],
+    ['Journe','Bruno','brunojourne@me.com','','Dr, Addictologue','Addictologue liberal Paris',d3],
+    ['Kerner','Laurent','kernerlaurent@gmail.com','','Dr, Addictologue','Addictologue liberal Paris',d3],
+    ['Galera','Olivier','o.galera@clinique-saint-orens.fr','Clinique Saint-Orens (Elsan)','Dr, Tabacologue','Vice-president SFT, createur programme STEP',d3],
+    ['Kammerer','Etienne','et.kammerer@wanadoo.fr','ADDICTOLIB','Dr, Addictologue','President ADDICTOLIB (reseau addictologues liberaux)',d3],
+    ['Bourdoncle','Romain','romain.bourdoncle@administration.gov.pf','CPSA Papeete','Dr, Addictologue','Chef service addictologie Polynesie',d3],
   ];
   all.forEach(c=>{
     if(existing.has(c[2].toLowerCase()))return;
     const cid=emailToId(c[2]),aid='a_'+cid.substring(2);
     data.contacts.push({id:cid,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'addictologue',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:aid,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
   });
+  // v6: Addictions France regional contacts
+  const instit=[
+    ['Addictions France','Bretagne','bretagne@addictions-france.org','Addictions France Bretagne','Direction regionale','Delegation regionale Bretagne',d3],
+    ['Addictions France','Normandie','normandie@addictions-france.org','Addictions France Normandie','Direction regionale','Delegation regionale Normandie',d3],
+    ['Addictions France','Grand Est','grandest@addictions-france.org','Addictions France Grand Est','Direction regionale','Delegation regionale Grand Est',d3],
+    ['Addictions France','AURA','aura@addictions-france.org','Addictions France AURA','Direction regionale','Delegation regionale Auvergne-Rhone-Alpes',d3],
+    ['Guitet','Valerie','valerie.guitet@addictions-france.org','Addictions France Pays de la Loire','Directrice regionale','Directrice regionale Pays de la Loire',d3],
+  ];
+  instit.forEach(c=>{
+    if(existing.has(c[2].toLowerCase()))return;
+    const cid=emailToId(c[2]),aid='a_'+cid.substring(2);
+    data.contacts.push({id:cid,nom:c[0],prenom:c[1],email:c[2],organisation:c[3],role:c[4],telephone:'',linkedin:'',categorie:'institution',statut:'contacte',notes:c[5],created_at:c[6],updated_at:c[6],activites:[{id:aid,date:c[6],type:'email_envoye',sujet:'Prise de contact VIRAGE',notes:''}]});
+  });
   saveOutreach(data);
-  localStorage.setItem('virage_seed_v','5');
+  localStorage.setItem('virage_seed_v','6');
 }
 seedContacts();
 function genId(){return 'c_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)}
@@ -1357,9 +1541,270 @@ function importOutreachJSON(event){
   event.target.value='';
 }
 
+// ============================================================
+// FINANCE & BURN
+// ============================================================
+const FINANCE_KEY='virage_finance';
+const FIN_STATUT_LABELS={identifie:'Identifie',prepa:'En preparation',depose:'Depose',instruction:'En instruction',accepte:'Accepte',refuse:'Refuse',abandonne:'Abandonne'};
+const FIN_TYPE_LABELS={bpi:'BPI',aap:'Appel a Projets',subvention:'Subvention',incubateur:'Incubateur',concours:'Concours',levee:'Levee de fonds',horizon:'Horizon Europe',autre:'Autre'};
+const TX_CAT_LABELS={tech:'Tech / Dev',marketing:'Marketing',legal:'Legal / Admin',rh:'RH / Freelance',subvention:'Subvention',levee:'Levee',revenue:'Revenu',other:'Autre'};
+
+function getFinance(){try{return JSON.parse(localStorage.getItem(FINANCE_KEY))||{cash:[],transactions:[],financements:[]}}catch(e){return{cash:[],transactions:[],financements:[]}}}
+function saveFinance(d){localStorage.setItem(FINANCE_KEY,JSON.stringify(d))}
+function fmtEUR(n){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n||0)}
+function fmtMonth(iso){const d=new Date(iso);return d.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'})}
+function monthKey(d){return d.toISOString().substring(0,7)}
+
+// --- CASH ---
+function openCashModal(){
+  const form=document.getElementById('cashForm');form.reset();
+  form.cash_mois.value=new Date().toISOString().substring(0,7);
+  openModal('cashModal');
+}
+function saveCash(){
+  const f=document.getElementById('cashForm');
+  if(!f.cash_mois.value||!f.cash_montant.value){alert('Mois et montant requis.');return}
+  const data=getFinance();
+  const entry={mois:f.cash_mois.value,montant:parseFloat(f.cash_montant.value),notes:f.cash_notes.value.trim(),updated_at:new Date().toISOString()};
+  const idx=data.cash.findIndex(c=>c.mois===entry.mois);
+  if(idx>=0)data.cash[idx]=entry;else data.cash.push(entry);
+  data.cash.sort((a,b)=>a.mois.localeCompare(b.mois));
+  saveFinance(data);closeModal('cashModal');renderFinance();
+}
+
+// --- TRANSACTIONS ---
+let editingTxId=null;
+function openTransactionModal(txId){
+  editingTxId=txId||null;
+  const form=document.getElementById('transactionForm');form.reset();
+  document.getElementById('txModalTitle').textContent=txId?'Modifier transaction':'Nouvelle transaction';
+  if(txId){
+    const t=getFinance().transactions.find(x=>x.id===txId);if(!t)return;
+    form.tx_date.value=t.date.substring(0,10);
+    form.tx_type.value=t.type;form.tx_categorie.value=t.categorie;
+    form.tx_montant.value=Math.abs(t.montant);
+    form.tx_description.value=t.description||'';form.tx_notes.value=t.notes||'';
+  }else{form.tx_date.value=new Date().toISOString().substring(0,10)}
+  openModal('transactionModal');
+}
+function saveTransaction(){
+  const f=document.getElementById('transactionForm');
+  const t={id:editingTxId||('t_'+Date.now()),date:f.tx_date.value,type:f.tx_type.value,categorie:f.tx_categorie.value,montant:parseFloat(f.tx_montant.value),description:f.tx_description.value.trim(),notes:f.tx_notes.value.trim(),created_at:new Date().toISOString()};
+  const data=getFinance();
+  if(editingTxId){const i=data.transactions.findIndex(x=>x.id===editingTxId);if(i>=0)data.transactions[i]=t}
+  else data.transactions.unshift(t);
+  saveFinance(data);closeModal('transactionModal');renderFinance();
+}
+function deleteTransaction(id){
+  if(!confirm('Supprimer cette transaction ?'))return;
+  const data=getFinance();data.transactions=data.transactions.filter(t=>t.id!==id);
+  saveFinance(data);renderFinance();
+}
+
+// --- FINANCEMENTS ---
+let editingFinId=null;
+function openFinancementModal(finId){
+  editingFinId=finId||null;
+  const form=document.getElementById('financementForm');form.reset();
+  document.getElementById('finModalTitle').textContent=finId?'Modifier financement':'Nouveau financement';
+  if(finId){
+    const fn=getFinance().financements.find(x=>x.id===finId);if(!fn)return;
+    form.fin_nom.value=fn.nom||'';form.fin_organisme.value=fn.organisme||'';
+    form.fin_type.value=fn.type||'autre';form.fin_montant.value=fn.montant||'';
+    form.fin_obtenu.value=fn.montant_obtenu||'';form.fin_statut.value=fn.statut||'identifie';
+    form.fin_date_depot.value=fn.date_depot||'';form.fin_date_reponse.value=fn.date_reponse||'';
+    form.fin_notes.value=fn.notes||'';
+  }
+  openModal('financementModal');
+}
+function saveFinancement(){
+  const f=document.getElementById('financementForm');
+  if(!f.fin_nom.value.trim()){alert('Le nom est requis.');return}
+  const fn={id:editingFinId||('f_'+Date.now()),nom:f.fin_nom.value.trim(),organisme:f.fin_organisme.value.trim(),type:f.fin_type.value,montant:parseFloat(f.fin_montant.value)||0,montant_obtenu:parseFloat(f.fin_obtenu.value)||0,statut:f.fin_statut.value,date_depot:f.fin_date_depot.value,date_reponse:f.fin_date_reponse.value,notes:f.fin_notes.value.trim(),updated_at:new Date().toISOString()};
+  const data=getFinance();
+  if(editingFinId){const i=data.financements.findIndex(x=>x.id===editingFinId);if(i>=0)data.financements[i]=fn}
+  else{fn.created_at=new Date().toISOString();data.financements.unshift(fn)}
+  saveFinance(data);closeModal('financementModal');renderFinance();
+}
+function deleteFinancement(id){
+  if(!confirm('Supprimer ce financement ?'))return;
+  const data=getFinance();data.financements=data.financements.filter(f=>f.id!==id);
+  saveFinance(data);renderFinance();
+}
+function updateFinStatut(id,statut){
+  const data=getFinance();const fn=data.financements.find(x=>x.id===id);
+  if(!fn)return;fn.statut=statut;fn.updated_at=new Date().toISOString();
+  saveFinance(data);renderFinance();
+}
+
+// --- CALCULATIONS ---
+function getCashActuel(){
+  const data=getFinance();if(data.cash.length===0)return 0;
+  return data.cash[data.cash.length-1].montant;
+}
+function getMonthlyStats(){
+  // Build month-by-month revenue / expense from transactions
+  const data=getFinance();const stats={};
+  data.transactions.forEach(t=>{
+    const m=t.date.substring(0,7);
+    if(!stats[m])stats[m]={revenue:0,expense:0,byCategorie:{}};
+    const amt=Math.abs(t.montant);
+    if(t.type==='revenue')stats[m].revenue+=amt;
+    else{stats[m].expense+=amt;stats[m].byCategorie[t.categorie]=(stats[m].byCategorie[t.categorie]||0)+amt}
+  });
+  return stats;
+}
+function getBurnRate(){
+  // Average monthly net (expense - revenue) on last 3 months with data
+  const stats=getMonthlyStats();const months=Object.keys(stats).sort().reverse().slice(0,3);
+  if(months.length===0)return 0;
+  const net=months.reduce((s,m)=>s+(stats[m].expense-stats[m].revenue),0)/months.length;
+  return net;
+}
+function getRunway(){
+  const burn=getBurnRate(),cash=getCashActuel();
+  if(burn<=0)return '&#8734;';
+  return (cash/burn).toFixed(1)+' mois';
+}
+
+// --- RENDER ---
+function renderFinance(){
+  renderFinanceKPIs();
+  renderCashChart();
+  renderRevExpChart();
+  renderExpCatChart();
+  renderFinancementTable();
+  renderTransactionsTable();
+}
+
+function renderFinanceKPIs(){
+  const data=getFinance();
+  const cash=getCashActuel();
+  const burn=getBurnRate();
+  const runway=getRunway();
+  const now=new Date().toISOString().substring(0,7);
+  const stats=getMonthlyStats();
+  const mRev=stats[now]?stats[now].revenue:0;
+  const mExp=stats[now]?stats[now].expense:0;
+  const finEnCours=data.financements.filter(f=>['prepa','depose','instruction'].includes(f.statut));
+  const finPipeline=finEnCours.reduce((s,f)=>s+(f.montant||0),0);
+  const finObtenu=data.financements.filter(f=>f.statut==='accepte').reduce((s,f)=>s+(f.montant_obtenu||f.montant||0),0);
+  const runwayCls=typeof runway==='string'&&runway!=='&#8734;'&&parseFloat(runway)<6?'down':'up';
+  document.getElementById('kpiFinance').innerHTML=
+    kpiHTML('Cash actuel',fmtEUR(cash),data.cash.length>0?'au '+fmtMonth(data.cash[data.cash.length-1].mois+'-01'):'Aucune saisie','neutral')+
+    kpiHTML('Burn rate',fmtEUR(burn)+'<span style="font-size:.6875rem;color:var(--grey)">/mois</span>','moyenne 3 mois',burn>0?'down':'up')+
+    kpiHTML('Runway',runway,cash>0?'reste estime':'--',runwayCls)+
+    kpiHTML('Revenus du mois',fmtEUR(mRev),now,'up')+
+    kpiHTML('Depenses du mois',fmtEUR(mExp),now,mExp>0?'down':'neutral')+
+    kpiHTML('Financements',fmtEUR(finPipeline),finObtenu>0?fmtEUR(finObtenu)+' obtenus':'pipeline en cours','neutral');
+}
+
+function renderCashChart(){
+  const data=getFinance();
+  const labels=data.cash.map(c=>fmtMonth(c.mois+'-01'));
+  const values=data.cash.map(c=>c.montant);
+  createChart('chartCash',{type:'line',data:{labels,datasets:[{label:'Cash (EUR)',data:values,borderColor:C_GREEN,backgroundColor:C_GREEN_BG,fill:true,tension:.3,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{...defaultScales,y:{...defaultScales.y,ticks:{...defaultScales.y.ticks,callback:v=>fmtEUR(v)}}},plugins:defaultPlugins}});
+}
+
+function renderRevExpChart(){
+  const stats=getMonthlyStats();
+  const months=Object.keys(stats).sort().slice(-6);
+  const rev=months.map(m=>stats[m].revenue);
+  const exp=months.map(m=>stats[m].expense);
+  createChart('chartRevExp',{type:'bar',data:{labels:months.map(m=>fmtMonth(m+'-01')),datasets:[{label:'Revenus',data:rev,backgroundColor:C_GREEN_BG,borderColor:C_GREEN,borderWidth:1.5,borderRadius:4},{label:'Depenses',data:exp,backgroundColor:'rgba(214,64,69,.15)',borderColor:C_RED,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{...defaultScales,y:{...defaultScales.y,ticks:{...defaultScales.y.ticks,callback:v=>fmtEUR(v)}}},plugins:{...defaultPlugins,legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11,family:'Inter'}}}}}});
+}
+
+function renderExpCatChart(){
+  const stats=getMonthlyStats();
+  const months=Object.keys(stats).sort().slice(-3);
+  const byCat={};
+  months.forEach(m=>{Object.entries(stats[m].byCategorie).forEach(([c,v])=>{byCat[c]=(byCat[c]||0)+v})});
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  createChart('chartExpCat',{type:'doughnut',data:{labels:sorted.map(s=>TX_CAT_LABELS[s[0]]||s[0]),datasets:[{data:sorted.map(s=>s[1]),backgroundColor:CHART_COLORS.slice(0,sorted.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{...defaultPlugins,legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:10,family:'Inter'}}},tooltip:{...defaultPlugins.tooltip,callbacks:{label:ctx=>ctx.label+': '+fmtEUR(ctx.parsed)}}}}});
+}
+
+function renderFinancementTable(){
+  const data=getFinance();
+  document.getElementById('badgeFinCount').textContent=data.financements.length+' dossier'+(data.financements.length>1?'s':'');
+  if(data.financements.length===0){
+    document.getElementById('financementTable').innerHTML='<div class="empty">Aucun financement.<div style="margin-top:12px"><button class="btn-primary" onclick="openFinancementModal()">+ Ajouter un financement</button></div></div>';
+    return;
+  }
+  let h='<table><tr><th>Nom</th><th>Type</th><th>Montant</th><th>Statut</th><th>Reponse prevue</th><th>Actions</th></tr>';
+  data.financements.forEach(fn=>{
+    const montant=fn.statut==='accepte'&&fn.montant_obtenu?fn.montant_obtenu:(fn.montant||0);
+    h+='<tr style="cursor:pointer" onclick="openFinancementModal(\''+fn.id+'\')">';
+    h+='<td><strong>'+escHTML(fn.nom)+'</strong>'+(fn.organisme?'<br><span style="font-size:.6875rem;color:var(--grey)">'+escHTML(fn.organisme)+'</span>':'')+'</td>';
+    h+='<td><span class="cat-tag">'+(FIN_TYPE_LABELS[fn.type]||fn.type)+'</span></td>';
+    h+='<td class="amount '+(fn.statut==='accepte'?'positive':'')+'">'+fmtEUR(montant)+'</td>';
+    h+='<td onclick="event.stopPropagation()"><select class="status-select fin-statut '+fn.statut+'" onchange="updateFinStatut(\''+fn.id+'\',this.value)">';
+    Object.entries(FIN_STATUT_LABELS).forEach(([k,v])=>{h+='<option value="'+k+'"'+(fn.statut===k?' selected':'')+'>'+v+'</option>'});
+    h+='</select></td>';
+    h+='<td>'+(fn.date_reponse?fn.date_reponse:'<span style="color:var(--grey)">--</span>')+'</td>';
+    h+='<td onclick="event.stopPropagation()"><button class="btn-sm" onclick="openFinancementModal(\''+fn.id+'\')">Modifier</button> <button class="btn-sm danger" onclick="deleteFinancement(\''+fn.id+'\')">&times;</button></td>';
+    h+='</tr>';
+  });
+  h+='</table>';
+  document.getElementById('financementTable').innerHTML=h;
+}
+
+function renderTransactionsTable(){
+  const data=getFinance();
+  const txs=[...data.transactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30);
+  if(txs.length===0){
+    document.getElementById('transactionsTable').innerHTML='<div class="empty">Aucune transaction.<div style="margin-top:12px"><button class="btn-primary" onclick="openTransactionModal()">+ Ajouter une transaction</button></div></div>';
+    return;
+  }
+  let h='<table><tr><th>Date</th><th>Description</th><th>Categorie</th><th>Montant</th><th>Actions</th></tr>';
+  txs.forEach(t=>{
+    const sign=t.type==='revenue'?'+':'-';
+    const cls=t.type==='revenue'?'positive':'negative';
+    h+='<tr class="tx-row">';
+    h+='<td>'+t.date+'</td>';
+    h+='<td>'+escHTML(t.description||'--')+'</td>';
+    h+='<td><span class="tx-cat '+(t.type==='revenue'?'revenue':t.categorie)+'">'+(TX_CAT_LABELS[t.categorie]||t.categorie)+'</span></td>';
+    h+='<td class="amount '+cls+'">'+sign+fmtEUR(t.montant)+'</td>';
+    h+='<td style="white-space:nowrap"><button class="btn-sm" onclick="openTransactionModal(\''+t.id+'\')">Modifier</button> <button class="btn-sm danger" onclick="deleteTransaction(\''+t.id+'\')">&times;</button></td>';
+    h+='</tr>';
+  });
+  h+='</table>';
+  document.getElementById('transactionsTable').innerHTML=h;
+}
+
+// --- Export/Import ---
+function exportTransactionsCSV(){
+  const data=getFinance();
+  let csv='date,type,categorie,montant,description,notes\n';
+  data.transactions.forEach(t=>{
+    csv+=[t.date,t.type,t.categorie,t.montant,'"'+(t.description||'').replace(/"/g,'""')+'"','"'+(t.notes||'').replace(/"/g,'""')+'"'].join(',')+'\n';
+  });
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='virage-transactions.csv';a.click();URL.revokeObjectURL(url);
+}
+function exportFinanceJSON(){
+  const data=getFinance();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='virage-finance-backup.json';a.click();URL.revokeObjectURL(url);
+}
+function importFinanceJSON(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const imported=JSON.parse(e.target.result);
+      if(!imported.cash||!imported.transactions||!imported.financements){alert('Format invalide.');return}
+      if(!confirm('Remplacer toutes les donnees financieres actuelles ?'))return;
+      saveFinance(imported);renderFinance();
+      alert('Import reussi.');
+    }catch(err){alert('Erreur de lecture du fichier.')}
+  };
+  reader.readAsText(file);event.target.value='';
+}
+
 // --- Keyboard ---
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){['contactModal','activityModal','detailModal'].forEach(id=>closeModal(id))}
+  if(e.key==='Escape'){['contactModal','activityModal','detailModal','cashModal','transactionModal','financementModal'].forEach(id=>closeModal(id))}
 });
 </script>
 </body>
