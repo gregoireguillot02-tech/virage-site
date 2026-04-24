@@ -600,10 +600,14 @@
     .task-assignee.paul{background:var(--purple)}
     .task-assignee.both{background:linear-gradient(135deg,var(--green) 50%,var(--purple) 50%);position:relative}
     .task-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:.68rem;color:var(--slate)}
-    .task-tag{background:var(--green-pale);color:var(--green-dark);padding:2px 8px;border-radius:10px;font-weight:600;text-transform:capitalize;font-size:.65rem}
-    .task-due{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:6px;background:var(--surface-alt);color:var(--slate);font-weight:500}
-    .task-due.overdue{background:var(--red-pale);color:var(--red);font-weight:700}
-    .task-due.soon{background:var(--accent-light);color:var(--accent-deep);font-weight:700}
+    .task-tag{background:rgba(82,183,136,.18);color:var(--green-dark);padding:2px 8px;border-radius:10px;font-weight:600;text-transform:capitalize;font-size:.65rem;border:1px solid rgba(82,183,136,.25)}
+    .task-due{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:6px;background:var(--surface-alt);color:var(--slate);font-weight:500;border:1px solid var(--border)}
+    .task-due.overdue{background:rgba(220,38,38,.15);color:var(--red);font-weight:700;border-color:rgba(220,38,38,.35)}
+    .task-due.soon{background:rgba(224,159,62,.18);color:var(--accent-deep);font-weight:700;border-color:rgba(224,159,62,.35)}
+    [data-theme="dark"] .task-tag{background:rgba(82,183,136,.22);color:#98D9B4;border-color:rgba(82,183,136,.4)}
+    [data-theme="dark"] .task-due{background:rgba(255,255,255,.06);color:#C0C4D0;border-color:rgba(255,255,255,.1)}
+    [data-theme="dark"] .task-due.overdue{background:rgba(220,38,38,.22);color:#FCA5A5;border-color:rgba(220,38,38,.5)}
+    [data-theme="dark"] .task-due.soon{background:rgba(224,159,62,.25);color:#FDBA74;border-color:rgba(224,159,62,.5)}
     .task-desc-hint{font-size:.68rem;color:var(--grey);margin-top:4px}
     .task-delete{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(220,38,38,.1);color:var(--red);border:none;cursor:pointer;font-size:.68rem;display:none;align-items:center;justify-content:center;line-height:1;font-family:inherit}
     .task-card:hover .task-delete{display:flex}
@@ -2092,7 +2096,7 @@ else initTasksUI();
 // NAVIGATION
 // ============================================================
 const pageTitles={pilote360:'Pilote 360',tasks:'Tasks',agents:'Equipe IA',overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
-const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',tasks:'Todo partagee Greg &amp; Paul',agents:'Ta team IA connectee a Claude',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
+const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',tasks:'Todo partagee Greg et Paul',agents:'Ta team IA connectee a Claude',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
 
 function navigateTo(pg){
   document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button').forEach(b=>b.classList.remove('active'));
