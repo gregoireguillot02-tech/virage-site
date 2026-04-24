@@ -2269,18 +2269,25 @@ function renderPilote360(views,waitlist,pro,pv,pwl,ppr){
   const rdv=contacts.filter(c=>c.statut==='rdv_planifie').length;
   const relances=contacts.filter(c=>typeof needsRelance==='function'&&needsRelance(c)).length;
 
-  // HERO : 4 gros KPI
+  // HERO : 4 gros KPI (temps reel / cumul / conversion)
+  const now=Date.now();
+  const liveSessions=new Set(rawViews.filter(r=>new Date(r.created_at).getTime()>now-30*60*1000).map(r=>r.session_id)).size;
+  const liveLast5min=new Set(rawViews.filter(r=>new Date(r.created_at).getTime()>now-5*60*1000).map(r=>r.session_id)).size;
+  const totalSessions=new Set(rawViews.map(r=>r.session_id)).size;
+  const convTotal=totalSessions>0?(rawWaitlist.length/totalSessions*100).toFixed(1):'0';
   const t1=trendPct(sessions,pSessions),t2=trendPct(waitlist.length,pwl.length);
   const hero=document.getElementById('kpi360Hero');
   if(hero){
     hero.innerHTML=
-      kpiHTML('Visiteurs site (periode)',sessions,t1.pct,t1.cls,'spark360_visits')+
-      kpiHTML('Waitlist (cumul)',rawWaitlist.length,'+'+waitlist.length+' cette periode','up','spark360_wl')+
-      kpiHTML('Beta testers app',realProfiles.length,(rawProfiles||[]).length-realProfiles.length+' tests exclus','neutral','spark360_app')+
-      kpiHTML('Cash actuel',fmtEUR(cash),typeof runway==='string'?'runway '+runway:'','neutral',null);
+      kpiHTML('Visiteurs live (30 min)','<span style="display:inline-flex;align-items:center;gap:8px">'+liveSessions+(liveLast5min>0?'<span class="live-dot"></span>':'')+'</span>',liveLast5min>0?liveLast5min+' dans les 5 dernieres min':'aucun depuis 5 min',liveLast5min>0?'up':'neutral','spark360_visits')+
+      kpiHTML('Waitlist users (cumul)',rawWaitlist.length,'+'+waitlist.length+' cette periode',waitlist.length>0?'up':'neutral','spark360_wl')+
+      kpiHTML('Waitlist pros (cumul)',rawPro.length,'+'+pro.length+' cette periode',pro.length>0?'up':'neutral','spark360_pro')+
+      kpiHTML('Taux de conversion',convTotal+'%','visiteur &rarr; inscrit (tout)','neutral',null);
     drawSparkline('spark360_visits',sparkVisits,'#52B788');
     drawSparkline('spark360_wl',sparkWL,'#E09F3E');
-    drawSparkline('spark360_app',sparkApp,'#3A86A8');
+    // Sparkline pros (cumul sur la periode)
+    const dailyPro=groupByDay(pro);const proKeys=Object.keys(dailyPro).sort();let cumPro=0;const sparkPro=proKeys.map(d=>{cumPro+=dailyPro[d].count;return cumPro});
+    drawSparkline('spark360_pro',sparkPro,'#7B3FA0');
   }
 
   // Cards detaillees supprimees : info disponible dans les onglets dedies (Site&Leads, App VIRAGE, Demarchage, Finance)
