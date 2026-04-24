@@ -471,6 +471,16 @@
 
     <!-- APP VIRAGE : BETA TESTERS -->
     <div class="page" id="page-app">
+      <div style="background:var(--accent-light);border-left:3px solid var(--accent);padding:12px 16px;border-radius:8px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <div>
+          <label style="cursor:pointer;font-size:.8125rem;font-weight:600;color:var(--charcoal)"><input type="checkbox" id="hideTestProfiles" checked onchange="renderApp()" style="margin-right:6px">Masquer les comptes de test</label>
+          <span id="testCounter" style="font-size:.75rem;color:var(--slate);margin-left:12px"></span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" onclick="markAllAsTest()">Tout marquer comme test</button>
+          <button class="btn-sm" onclick="clearTestMarks()">Reset marquages</button>
+        </div>
+      </div>
       <div class="kpi-grid" id="kpiApp"></div>
       <div class="cards-grid">
         <div class="card full"><div class="card-title">Inscriptions app par jour</div><div class="chart-wrap h250"><canvas id="chartAppDaily"></canvas></div></div>
@@ -478,7 +488,7 @@
         <div class="card"><div class="card-title">Substances</div><div class="chart-wrap h200"><canvas id="chartAppSubstance"></canvas></div></div>
         <div class="card"><div class="card-title">Top motivations</div><div class="chart-wrap h250"><canvas id="chartAppMotiv"></canvas></div></div>
         <div class="card"><div class="card-title">Consommation initiale (cig/jour)</div><div class="chart-wrap h250"><canvas id="chartAppCigs"></canvas></div></div>
-        <div class="card full"><div class="card-title">Liste des beta testers (anonyme)</div><div class="table-wrap" id="appTesterTable"></div></div>
+        <div class="card full"><div class="card-title">Profils beta</div><div class="table-wrap" id="appTesterTable"></div></div>
       </div>
     </div>
 
@@ -1653,6 +1663,25 @@ function importOutreachJSON(event){
 const GOAL_LABELS={arreter_net:'Arret net',reduire:'Reduction',indetermine:'Non defini'};
 const SUBSTANCE_LABELS={tabac:'Tabac',vapotage:'Vapotage',vaping:'Vaping'};
 const MOTIV_LABELS={sante:'Sante',argent:'Argent',sport:'Sport',entourage:'Entourage',grossesse:'Grossesse',enfants:'Enfants',liberte:'Liberte',esthetique:'Esthetique'};
+const TEST_PROFILES_KEY='virage_test_profile_ids';
+
+function getTestProfileIds(){try{return new Set(JSON.parse(localStorage.getItem(TEST_PROFILES_KEY))||[])}catch(e){return new Set()}}
+function saveTestProfileIds(s){localStorage.setItem(TEST_PROFILES_KEY,JSON.stringify([...s]))}
+function toggleTestProfile(id){
+  const s=getTestProfileIds();
+  if(s.has(id))s.delete(id);else s.add(id);
+  saveTestProfileIds(s);renderApp();
+}
+function markAllAsTest(){
+  if(!confirm('Marquer tous les profils actuellement affiches comme tests ?'))return;
+  const s=getTestProfileIds();
+  (rawProfiles||[]).forEach(p=>s.add(p.id));
+  saveTestProfileIds(s);renderApp();
+}
+function clearTestMarks(){
+  if(!confirm('Enlever tous les marquages de test ?'))return;
+  localStorage.removeItem(TEST_PROFILES_KEY);renderApp();
+}
 
 function computeAbstinenceDays(profile){
   if(!profile.start_date)return 0;
@@ -1665,19 +1694,24 @@ function computeEconomies(profile){
   const cd=profile.consumption_data||{};
   const cigs=cd.cigarettesPerDay||0;
   const pp=cd.packPrice||0;
-  // economies = days * cigs/day * (packPrice / 20 cigs par paquet)
   return days*cigs*(pp/20);
 }
 
 function renderApp(){
-  const profiles=rawProfiles||[],msgs=rawCoachMessages||[];
-  renderAppKPIs(profiles,msgs);
-  renderAppDailyChart(profiles);
-  renderAppGoalChart(profiles);
-  renderAppSubstanceChart(profiles);
-  renderAppMotivChart(profiles);
-  renderAppCigsChart(profiles);
-  renderAppTesterTable(profiles);
+  const all=rawProfiles||[],msgs=rawCoachMessages||[];
+  const testIds=getTestProfileIds();
+  const hideTests=document.getElementById('hideTestProfiles')?document.getElementById('hideTestProfiles').checked:true;
+  const filteredProfiles=hideTests?all.filter(p=>!testIds.has(p.id)):all;
+  // update counter
+  const cnt=document.getElementById('testCounter');
+  if(cnt)cnt.textContent=all.length+' profils Supabase ('+testIds.size+' marques comme tests, '+filteredProfiles.length+' comptes pris en compte)';
+  renderAppKPIs(filteredProfiles,msgs);
+  renderAppDailyChart(filteredProfiles);
+  renderAppGoalChart(filteredProfiles);
+  renderAppSubstanceChart(filteredProfiles);
+  renderAppMotivChart(filteredProfiles);
+  renderAppCigsChart(filteredProfiles);
+  renderAppTesterTable(all,testIds); // table toujours tout, avec indicateur
 }
 
 function renderAppKPIs(profiles,msgs){
@@ -1741,25 +1775,27 @@ function renderAppCigsChart(profiles){
   createChart('chartAppCigs',{type:'bar',data:{labels:Object.keys(buckets),datasets:[{data:Object.values(buckets),backgroundColor:C_GREEN_BG,borderColor:C_GREEN,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:defaultPlugins}});
 }
 
-function renderAppTesterTable(profiles){
+function renderAppTesterTable(profiles,testIds){
   if(profiles.length===0){
-    document.getElementById('appTesterTable').innerHTML='<div class="empty">Aucun beta tester pour le moment. L\'app app.virage envoi dans la table `profiles` de Supabase.</div>';
+    document.getElementById('appTesterTable').innerHTML='<div class="empty">Aucun profil dans la table `profiles` de Supabase.</div>';
     return;
   }
   const sorted=[...profiles].sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
-  let h='<table><tr><th>Date inscription</th><th>Substance</th><th>Objectif</th><th>Motivations</th><th style="text-align:right">Cig/jour</th><th style="text-align:right">Jours sevrage</th><th style="text-align:right">Economies</th></tr>';
+  let h='<table><tr><th>Date inscription</th><th>Substance</th><th>Objectif</th><th>Motivations</th><th style="text-align:right">Cig/jour</th><th style="text-align:right">Jours sevrage</th><th style="text-align:right">Economies</th><th>Type</th></tr>';
   sorted.forEach(p=>{
+    const isTest=testIds.has(p.id);
     const days=computeAbstinenceDays(p);
     const eco=computeEconomies(p);
     const cd=p.consumption_data||{};
-    h+='<tr>';
+    h+='<tr style="opacity:'+(isTest?'.5':'1')+'">';
     h+='<td>'+fmtDate(p.created_at)+'</td>';
     h+='<td><span class="cat-tag">'+(SUBSTANCE_LABELS[p.substance]||p.substance||'--')+'</span></td>';
     h+='<td><span class="tag '+(p.goal==='arreter_net'?'tag-green':'tag-accent')+'">'+(GOAL_LABELS[p.goal]||p.goal||'--')+'</span></td>';
-    h+='<td>'+(p.motivations||[]).map(m=>MOTIV_LABELS[m]||m).join(', ')+'</td>';
+    h+='<td style="font-size:.75rem">'+(p.motivations||[]).map(m=>MOTIV_LABELS[m]||m).join(', ')+'</td>';
     h+='<td style="text-align:right">'+(cd.cigarettesPerDay||'--')+'</td>';
     h+='<td style="text-align:right"><strong>'+days+'</strong></td>';
     h+='<td class="amount positive" style="text-align:right">'+new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(eco)+'</td>';
+    h+='<td><button class="btn-sm" onclick="toggleTestProfile(\''+p.id+'\')" title="Basculer test/reel">'+(isTest?'&#9733; Test':'Reel')+'</button></td>';
     h+='</tr>';
   });
   h+='</table>';
