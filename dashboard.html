@@ -650,27 +650,6 @@
     .identity-card h4{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);margin:0 0 4px}
     .identity-card p{font-size:.75rem;color:var(--slate);margin:0}
 
-    /* Widget Social dans Pilote 360 */
-    .social-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-    .social-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:4px;transition:all var(--trans-fast);position:relative;overflow:hidden}
-    .social-tile::before{content:"";position:absolute;top:0;right:-30px;width:100px;height:100px;opacity:.08;font-size:80px;display:flex;align-items:center;justify-content:center;pointer-events:none}
-    .social-tile:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-1px)}
-    .social-tile-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-    .social-tile-platform{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--slate)}
-    .social-tile-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff;font-weight:700;flex-shrink:0}
-    .social-tile-icon.instagram{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}
-    .social-tile-icon.linkedin{background:#0A66C2}
-    .social-tile-icon.tiktok{background:#000}
-    .social-tile-icon.youtube{background:#FF0000}
-    .social-tile-icon.x{background:#000}
-    .social-tile-value{font-family:'Outfit',sans-serif;font-size:1.75rem;font-weight:800;color:var(--ink);line-height:1;margin:6px 0 4px;font-variant-numeric:tabular-nums}
-    .social-tile-trend{font-size:.72rem;font-weight:600;display:flex;gap:4px;align-items:center}
-    .social-tile-trend.up{color:var(--green)}
-    .social-tile-trend.down{color:var(--red)}
-    .social-tile-trend.neutral{color:var(--grey)}
-    .social-tile-meta{font-size:.68rem;color:var(--grey);margin-top:4px}
-    .social-tile-empty{text-align:center;padding:18px 10px;color:var(--grey);font-size:.75rem;grid-column:1/-1}
-
     /* Widget tasks dans Pilote 360 */
     .mytasks-section{margin-bottom:14px}
     .mytasks-section:last-child{margin-bottom:0}
@@ -860,7 +839,6 @@
       </div>
       <div class="kpi-grid" id="kpi360Hero"></div>
       <div class="cards-grid">
-        <div class="card full"><div class="card-title">Social (abonnes) <button class="btn-sm" onclick="openSocialModal()">+ Mettre a jour</button></div><div id="pilote360Social"></div></div>
         <div class="card full"><div class="card-title">A faire <button class="btn-sm" onclick="navigateTo('tasks')">Voir tout &rarr;</button></div><div id="pilote360MyTasks"></div></div>
         <div class="card full"><div class="card-title">Alertes &amp; priorites du moment</div><div id="alertesContainer"></div></div>
       </div>
@@ -1200,53 +1178,6 @@
         <div style="flex:1"></div>
         <button class="btn-sm" onclick="closeModal('taskModal')">Annuler</button>
         <button class="btn-primary" onclick="saveTask()">Enregistrer</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL : UPDATE SOCIAL STATS -->
-  <div class="modal-overlay" id="socialModal">
-    <div class="modal" style="max-width:480px">
-      <div class="modal-header">
-        <h3>Mettre a jour abonnes social</h3>
-        <button onclick="closeModal('socialModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size:.8125rem;color:var(--slate);margin-bottom:14px;line-height:1.5">Saisis le nombre actuel d'abonnes pour chaque reseau. Chaque saisie cree une nouvelle mesure horodatee (garde l'historique pour voir l'evolution).</p>
-        <form class="task-modal-form" onsubmit="event.preventDefault();saveSocialStats()">
-          <div>
-            <label>Plateforme</label>
-            <select id="socialPlatform">
-              <option value="instagram">Instagram (@virage.app)</option>
-              <option value="linkedin">LinkedIn (VIRAGE)</option>
-              <option value="tiktok">TikTok</option>
-              <option value="youtube">YouTube</option>
-              <option value="x">X / Twitter</option>
-            </select>
-          </div>
-          <div class="row-split">
-            <div>
-              <label>Nombre d'abonnes *</label>
-              <input type="number" id="socialFollowers" required min="0" placeholder="1234">
-            </div>
-            <div>
-              <label>Nombre de posts</label>
-              <input type="number" id="socialPosts" min="0" placeholder="optionnel">
-            </div>
-          </div>
-          <div>
-            <label>Taux d'engagement (%)</label>
-            <input type="number" id="socialEngagement" min="0" max="100" step="0.1" placeholder="optionnel, ex 2.5">
-          </div>
-          <div>
-            <label>Notes</label>
-            <input type="text" id="socialNotes" maxlength="200" placeholder="optionnel : campagne, pic, contexte...">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-sm" onclick="closeModal('socialModal')">Annuler</button>
-        <button class="btn-primary" onclick="saveSocialStats()">Enregistrer</button>
       </div>
     </div>
   </div>
@@ -1827,127 +1758,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else setTimeout(initTodayWidget,300);
 
 // ============================================================
-// SOCIAL STATS : compteur abonnes reseaux sociaux (saisie manuelle V1)
-// ============================================================
-let rawSocialStats=[];
-const SOCIAL_PLATFORMS=[
-  {id:'instagram',name:'Instagram',handle:'@virage.app',icon:'&#128247;'},
-  {id:'linkedin',name:'LinkedIn',handle:'VIRAGE',icon:'in'},
-  {id:'tiktok',name:'TikTok',handle:'',icon:'TT'},
-  {id:'youtube',name:'YouTube',handle:'',icon:'&#9654;'},
-  {id:'x',name:'X',handle:'',icon:'X'}
-];
-
-async function loadSocialStats(){
-  try{
-    const r=await fetch(`${SB_URL}/rest/v1/social_stats?select=*&order=recorded_at.desc&limit=500`,{headers:HEADERS});
-    if(!r.ok){rawSocialStats=[];return}
-    rawSocialStats=await r.json();
-  }catch(e){console.warn('social_stats indispo:',e.message);rawSocialStats=[]}
-}
-
-function getLatestByPlatform(){
-  const map={};
-  rawSocialStats.forEach(s=>{
-    if(!map[s.platform]||new Date(s.recorded_at)>new Date(map[s.platform].recorded_at))map[s.platform]=s;
-  });
-  return map;
-}
-
-function getPreviousByPlatform(currentMap){
-  const prev={};
-  Object.keys(currentMap).forEach(p=>{
-    const others=rawSocialStats.filter(s=>s.platform===p&&s.id!==currentMap[p].id);
-    if(others.length>0)prev[p]=others[0]; // deja trie desc
-  });
-  return prev;
-}
-
-function fmtRelativeDate(iso){
-  const d=new Date(iso);
-  const diff=(Date.now()-d.getTime())/1000;
-  if(diff<60)return "a l'instant";
-  if(diff<3600)return 'il y a '+Math.round(diff/60)+' min';
-  if(diff<86400)return 'il y a '+Math.round(diff/3600)+'h';
-  if(diff<86400*7)return 'il y a '+Math.round(diff/86400)+'j';
-  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-}
-
-function renderSocialWidget(){
-  const el=document.getElementById('pilote360Social');
-  if(!el)return;
-  const latest=getLatestByPlatform();
-  const prev=getPreviousByPlatform(latest);
-  const activePlatforms=Object.keys(latest);
-  if(activePlatforms.length===0){
-    el.innerHTML='<div class="social-tile-empty">Aucune donnee pour l\'instant. Clique sur <strong>+ Mettre a jour</strong> pour saisir ton premier compteur.</div>';
-    return;
-  }
-  const tiles=activePlatforms.map(pid=>{
-    const s=latest[pid];
-    const p=SOCIAL_PLATFORMS.find(x=>x.id===pid)||{name:pid,icon:'?',handle:''};
-    const previousStat=prev[pid];
-    let trendHTML='';
-    if(previousStat){
-      const delta=s.followers-previousStat.followers;
-      const cls=delta>0?'up':(delta<0?'down':'neutral');
-      const arrow=delta>0?'&uarr;':(delta<0?'&darr;':'&middot;');
-      trendHTML='<div class="social-tile-trend '+cls+'">'+arrow+' '+(delta>=0?'+':'')+delta.toLocaleString('fr-FR')+' depuis '+fmtRelativeDate(previousStat.recorded_at)+'</div>';
-    }else{
-      trendHTML='<div class="social-tile-trend neutral">Premiere mesure</div>';
-    }
-    const iconTxt=p.id==='instagram'?'IG':(p.id==='linkedin'?'in':(p.id==='tiktok'?'TT':(p.id==='youtube'?'YT':'X')));
-    return '<div class="social-tile" onclick="openSocialModal(\''+pid+'\')" style="cursor:pointer">'+
-      '<div class="social-tile-head"><span class="social-tile-platform">'+p.name+(p.handle?' &middot; '+p.handle:'')+'</span>'+
-      '<span class="social-tile-icon '+pid+'">'+iconTxt+'</span></div>'+
-      '<div class="social-tile-value">'+s.followers.toLocaleString('fr-FR')+'</div>'+
-      trendHTML+
-      '<div class="social-tile-meta">MAJ '+fmtRelativeDate(s.recorded_at)+(s.author?' par '+s.author:'')+(s.notes?' &middot; '+escHTML(s.notes.substring(0,40))+(s.notes.length>40?'...':''):'')+'</div>'+
-      '</div>';
-  }).join('');
-  el.innerHTML='<div class="social-grid">'+tiles+'</div>';
-}
-
-function openSocialModal(preselect){
-  const modal=document.getElementById('socialModal');
-  if(!modal)return;
-  // Pre-remplir avec la derniere valeur connue de la plateforme
-  const platform=preselect||'instagram';
-  document.getElementById('socialPlatform').value=platform;
-  const latest=getLatestByPlatform()[platform];
-  document.getElementById('socialFollowers').value=latest?latest.followers:'';
-  document.getElementById('socialPosts').value=latest?.posts_count||'';
-  document.getElementById('socialEngagement').value=latest?.engagement_rate||'';
-  document.getElementById('socialNotes').value='';
-  modal.classList.add('open');
-  setTimeout(()=>document.getElementById('socialFollowers').focus(),50);
-}
-
-async function saveSocialStats(){
-  const platform=document.getElementById('socialPlatform').value;
-  const followers=parseInt(document.getElementById('socialFollowers').value);
-  if(!followers&&followers!==0){alert('Le nombre d\'abonnes est obligatoire');return}
-  const posts=document.getElementById('socialPosts').value;
-  const eng=document.getElementById('socialEngagement').value;
-  const notes=document.getElementById('socialNotes').value.trim();
-  const me=getIdentity()||'greg';
-  const payload={
-    platform,
-    followers,
-    posts_count:posts?parseInt(posts):null,
-    engagement_rate:eng?parseFloat(eng):null,
-    notes:notes||null,
-    author:me
-  };
-  try{
-    await sbMutate('POST','social_stats',payload);
-    await loadSocialStats();
-    renderSocialWidget();
-    closeModal('socialModal');
-  }catch(e){alert('Erreur enregistrement : '+e.message)}
-}
-
-// ============================================================
 // FACTOIDS : 'Le saviez-vous ?' sur tabac/vape/sevrage
 // Chiffres source : OMS, Sante Publique France, INSERM, Inca, Tabac Info Service
 // ============================================================
@@ -2501,9 +2311,9 @@ async function sbFetch(table,limit=10000){
 async function sbFetchSafe(table){try{return await sbFetch(table)}catch(e){console.warn(table+' indispo:',e.message);return[]}}
 async function loadAllData(){
   try{
-    const [v,w,p,pr,cm]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist'),sbFetchSafe('profiles'),sbFetchSafe('coach_messages'),loadTasks(),loadSocialStats()]);
+    const [v,w,p,pr,cm]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist'),sbFetchSafe('profiles'),sbFetchSafe('coach_messages'),loadTasks()]);
     rawViews=v;rawWaitlist=w;rawPro=p;rawProfiles=pr;rawCoachMessages=cm;
-    try{renderAll();renderTasks();renderMyTasksWidget();renderSocialWidget()}catch(re){console.error('Render error:',re);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur rendu : '+re.message+'</div>'}
+    try{renderAll();renderTasks();renderMyTasksWidget()}catch(re){console.error('Render error:',re);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur rendu : '+re.message+'</div>'}
   }catch(e){console.error('Fetch error:',e);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur chargement : '+e.message+'</div>'}
 }
 
