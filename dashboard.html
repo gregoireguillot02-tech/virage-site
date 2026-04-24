@@ -346,6 +346,8 @@
       <button data-page="pro"><span class="nav-icon">&#9879;</span>CRM Pro Sante</button>
       <button data-page="conversions"><span class="nav-icon">&#9660;</span>Conversions</button>
       <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
+      <div class="nav-section-mobile">App VIRAGE</div>
+      <button data-page="app"><span class="nav-icon">&#9733;</span>Beta testers</button>
       <div class="nav-section-mobile">Demarchage</div>
       <button data-page="demarchage"><span class="nav-icon">&#9993;</span>Pipeline contacts</button>
       <div class="nav-section-mobile">Pilotage</div>
@@ -374,6 +376,8 @@
       <button data-page="pro"><span class="nav-icon">&#9879;</span>CRM Pro Sante</button>
       <button data-page="conversions"><span class="nav-icon">&#9660;</span>Conversions</button>
       <button data-page="live"><span class="nav-icon">&#9679;</span>Temps reel</button>
+      <div class="nav-section">App VIRAGE</div>
+      <button data-page="app"><span class="nav-icon">&#9733;</span>Beta testers</button>
       <div class="nav-section">Demarchage</div>
       <button data-page="demarchage"><span class="nav-icon">&#9993;</span>Pipeline contacts</button>
       <div class="nav-section">Pilotage</div>
@@ -462,6 +466,19 @@
       <div class="kpi-grid" id="kpiLive"></div>
       <div class="cards-grid">
         <div class="card full"><div class="card-title"><span><span class="live-dot"></span>Dernieres visites en direct</span><button class="btn-icon" onclick="loadAllData()">&#8635;</button></div><div class="table-wrap" id="liveTable"></div></div>
+      </div>
+    </div>
+
+    <!-- APP VIRAGE : BETA TESTERS -->
+    <div class="page" id="page-app">
+      <div class="kpi-grid" id="kpiApp"></div>
+      <div class="cards-grid">
+        <div class="card full"><div class="card-title">Inscriptions app par jour</div><div class="chart-wrap h250"><canvas id="chartAppDaily"></canvas></div></div>
+        <div class="card"><div class="card-title">Objectif de sevrage</div><div class="chart-wrap h200"><canvas id="chartAppGoal"></canvas></div></div>
+        <div class="card"><div class="card-title">Substances</div><div class="chart-wrap h200"><canvas id="chartAppSubstance"></canvas></div></div>
+        <div class="card"><div class="card-title">Top motivations</div><div class="chart-wrap h250"><canvas id="chartAppMotiv"></canvas></div></div>
+        <div class="card"><div class="card-title">Consommation initiale (cig/jour)</div><div class="chart-wrap h250"><canvas id="chartAppCigs"></canvas></div></div>
+        <div class="card full"><div class="card-title">Liste des beta testers (anonyme)</div><div class="table-wrap" id="appTesterTable"></div></div>
       </div>
     </div>
 
@@ -864,7 +881,7 @@ document.getElementById('loginForm').addEventListener('submit',async e=>{e.preve
 const SB_URL='https://cipxesubpcpsqplcqnus.supabase.co';
 const SB_KEY='sb_publishable_RxZ3ClMgOkAgGO409P--qQ_2ZNZTR9-';
 const HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
-let currentDays=7, rawViews=[], rawWaitlist=[], rawPro=[];
+let currentDays=7, rawViews=[], rawWaitlist=[], rawPro=[], rawProfiles=[], rawCoachMessages=[];
 let chartInstances={};
 
 // Auto-login (apres CONFIG pour eviter erreur d'initialisation)
@@ -873,7 +890,7 @@ if(sessionStorage.getItem('virage_auth')==='ok') unlockApp();
 // ============================================================
 // NAVIGATION
 // ============================================================
-const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
+const pageTitles={overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
 
 function navigateTo(pg){
   document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button').forEach(b=>b.classList.remove('active'));
@@ -910,10 +927,11 @@ async function sbFetch(table,limit=10000){
   const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=created_at.desc&limit=${limit}`,{headers:HEADERS});
   if(!r.ok)throw new Error(table+' HTTP '+r.status);return r.json();
 }
+async function sbFetchSafe(table){try{return await sbFetch(table)}catch(e){console.warn(table+' indispo:',e.message);return[]}}
 async function loadAllData(){
   try{
-    const [v,w,p]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist')]);
-    rawViews=v;rawWaitlist=w;rawPro=p;
+    const [v,w,p,pr,cm]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist'),sbFetchSafe('profiles'),sbFetchSafe('coach_messages')]);
+    rawViews=v;rawWaitlist=w;rawPro=p;rawProfiles=pr;rawCoachMessages=cm;
     try{renderAll()}catch(re){console.error('Render error:',re);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur rendu : '+re.message+'</div>'}
   }catch(e){console.error('Fetch error:',e);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur chargement : '+e.message+'</div>'}
 }
@@ -964,6 +982,7 @@ function renderAll(){
   renderPro(pro,prevPR);
   renderConversions(views,waitlist,pro);
   renderLive();
+  renderApp();
   renderDemarchage();
   renderFinance();
 }
@@ -1626,6 +1645,125 @@ function importOutreachJSON(event){
   };
   reader.readAsText(file);
   event.target.value='';
+}
+
+// ============================================================
+// APP VIRAGE : BETA TESTERS
+// ============================================================
+const GOAL_LABELS={arreter_net:'Arret net',reduire:'Reduction',indetermine:'Non defini'};
+const SUBSTANCE_LABELS={tabac:'Tabac',vapotage:'Vapotage',vaping:'Vaping'};
+const MOTIV_LABELS={sante:'Sante',argent:'Argent',sport:'Sport',entourage:'Entourage',grossesse:'Grossesse',enfants:'Enfants',liberte:'Liberte',esthetique:'Esthetique'};
+
+function computeAbstinenceDays(profile){
+  if(!profile.start_date)return 0;
+  const start=new Date(profile.start_date);
+  const now=new Date();
+  return Math.max(0,Math.floor((now-start)/864e5));
+}
+function computeEconomies(profile){
+  const days=computeAbstinenceDays(profile);
+  const cd=profile.consumption_data||{};
+  const cigs=cd.cigarettesPerDay||0;
+  const pp=cd.packPrice||0;
+  // economies = days * cigs/day * (packPrice / 20 cigs par paquet)
+  return days*cigs*(pp/20);
+}
+
+function renderApp(){
+  const profiles=rawProfiles||[],msgs=rawCoachMessages||[];
+  renderAppKPIs(profiles,msgs);
+  renderAppDailyChart(profiles);
+  renderAppGoalChart(profiles);
+  renderAppSubstanceChart(profiles);
+  renderAppMotivChart(profiles);
+  renderAppCigsChart(profiles);
+  renderAppTesterTable(profiles);
+}
+
+function renderAppKPIs(profiles,msgs){
+  const total=profiles.length;
+  const now=Date.now();
+  const weekAgo=now-7*864e5;
+  const newThisWeek=profiles.filter(p=>new Date(p.created_at).getTime()>=weekAgo).length;
+  const prevWeek=profiles.filter(p=>{const t=new Date(p.created_at).getTime();return t>=now-14*864e5&&t<weekAgo}).length;
+  const trendNew=trendPct(newThisWeek,prevWeek);
+  const totalDays=profiles.reduce((s,p)=>s+computeAbstinenceDays(p),0);
+  const totalEconomies=profiles.reduce((s,p)=>s+computeEconomies(p),0);
+  const avgCigs=profiles.length>0?Math.round(profiles.reduce((s,p)=>s+((p.consumption_data||{}).cigarettesPerDay||0),0)/profiles.length):0;
+  const msgs7j=msgs.filter(m=>new Date(m.created_at).getTime()>=weekAgo).length;
+  const arreters=profiles.filter(p=>p.goal==='arreter_net').length;
+  document.getElementById('kpiApp').innerHTML=
+    kpiHTML('Beta testers',total,newThisWeek+' cette semaine',trendNew.cls)+
+    kpiHTML('Nouveau (7j)',newThisWeek,trendNew.pct,trendNew.cls)+
+    kpiHTML('Objectif : Arret net',arreters,Math.round(arreters/Math.max(total,1)*100)+'% des users','neutral')+
+    kpiHTML('Jours d\'abstinence cumules',totalDays,'tous users','up')+
+    kpiHTML('Economies cumulees',new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(totalEconomies),'tous users','up')+
+    kpiHTML('Coach IA (7j)',msgs7j,msgs.length+' au total','neutral');
+}
+
+function renderAppDailyChart(profiles){
+  const byDay={};
+  profiles.forEach(p=>{const d=(p.created_at||'').substring(0,10);if(!d)return;byDay[d]=(byDay[d]||0)+1});
+  const days=Object.keys(byDay).sort();
+  let cumul=0;const cum=days.map(d=>{cumul+=byDay[d];return cumul});
+  createChart('chartAppDaily',{type:'line',data:{labels:days.map(d=>d.substring(5)),datasets:[{label:'Cumul beta testers',data:cum,borderColor:C_GREEN,backgroundColor:C_GREEN_BG,fill:true,tension:.3,pointRadius:3},{label:'Par jour',data:days.map(d=>byDay[d]),type:'bar',backgroundColor:C_ACCENT_BG,borderColor:C_ACCENT,borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:{...defaultPlugins,legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11,family:'Inter'}}}}}});
+}
+
+function renderAppGoalChart(profiles){
+  const counts={};profiles.forEach(p=>{const g=p.goal||'indetermine';counts[g]=(counts[g]||0)+1});
+  const entries=Object.entries(counts);
+  createChart('chartAppGoal',{type:'doughnut',data:{labels:entries.map(e=>GOAL_LABELS[e[0]]||e[0]),datasets:[{data:entries.map(e=>e[1]),backgroundColor:[C_GREEN,C_ACCENT,C_BLUE],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{...defaultPlugins,legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11,family:'Inter'}}}}}});
+}
+
+function renderAppSubstanceChart(profiles){
+  const counts={};profiles.forEach(p=>{const s=p.substance||'autre';counts[s]=(counts[s]||0)+1});
+  const entries=Object.entries(counts);
+  createChart('chartAppSubstance',{type:'doughnut',data:{labels:entries.map(e=>SUBSTANCE_LABELS[e[0]]||e[0]),datasets:[{data:entries.map(e=>e[1]),backgroundColor:[C_GREEN,C_ACCENT,C_BLUE],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{...defaultPlugins,legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11,family:'Inter'}}}}}});
+}
+
+function renderAppMotivChart(profiles){
+  const counts={};
+  profiles.forEach(p=>{(p.motivations||[]).forEach(m=>{counts[m]=(counts[m]||0)+1})});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  createChart('chartAppMotiv',{type:'bar',data:{labels:sorted.map(s=>MOTIV_LABELS[s[0]]||s[0]),datasets:[{data:sorted.map(s=>s[1]),backgroundColor:CHART_COLORS.slice(0,sorted.length),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}},plugins:defaultPlugins}});
+}
+
+function renderAppCigsChart(profiles){
+  const buckets={'1-5':0,'6-10':0,'11-15':0,'16-20':0,'20+':0};
+  profiles.forEach(p=>{
+    const c=((p.consumption_data||{}).cigarettesPerDay)||0;
+    if(c<=5)buckets['1-5']++;
+    else if(c<=10)buckets['6-10']++;
+    else if(c<=15)buckets['11-15']++;
+    else if(c<=20)buckets['16-20']++;
+    else buckets['20+']++;
+  });
+  createChart('chartAppCigs',{type:'bar',data:{labels:Object.keys(buckets),datasets:[{data:Object.values(buckets),backgroundColor:C_GREEN_BG,borderColor:C_GREEN,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:defaultScales,plugins:defaultPlugins}});
+}
+
+function renderAppTesterTable(profiles){
+  if(profiles.length===0){
+    document.getElementById('appTesterTable').innerHTML='<div class="empty">Aucun beta tester pour le moment. L\'app app.virage envoi dans la table `profiles` de Supabase.</div>';
+    return;
+  }
+  const sorted=[...profiles].sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
+  let h='<table><tr><th>Date inscription</th><th>Substance</th><th>Objectif</th><th>Motivations</th><th style="text-align:right">Cig/jour</th><th style="text-align:right">Jours sevrage</th><th style="text-align:right">Economies</th></tr>';
+  sorted.forEach(p=>{
+    const days=computeAbstinenceDays(p);
+    const eco=computeEconomies(p);
+    const cd=p.consumption_data||{};
+    h+='<tr>';
+    h+='<td>'+fmtDate(p.created_at)+'</td>';
+    h+='<td><span class="cat-tag">'+(SUBSTANCE_LABELS[p.substance]||p.substance||'--')+'</span></td>';
+    h+='<td><span class="tag '+(p.goal==='arreter_net'?'tag-green':'tag-accent')+'">'+(GOAL_LABELS[p.goal]||p.goal||'--')+'</span></td>';
+    h+='<td>'+(p.motivations||[]).map(m=>MOTIV_LABELS[m]||m).join(', ')+'</td>';
+    h+='<td style="text-align:right">'+(cd.cigarettesPerDay||'--')+'</td>';
+    h+='<td style="text-align:right"><strong>'+days+'</strong></td>';
+    h+='<td class="amount positive" style="text-align:right">'+new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(eco)+'</td>';
+    h+='</tr>';
+  });
+  h+='</table>';
+  document.getElementById('appTesterTable').innerHTML=h;
 }
 
 // ============================================================
