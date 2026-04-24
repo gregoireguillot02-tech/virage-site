@@ -530,8 +530,9 @@
         <div class="card full"><div class="card-title">Evolution du cash</div><div class="chart-wrap h250"><canvas id="chartCash"></canvas></div></div>
         <div class="card"><div class="card-title">Revenus vs Depenses (6 derniers mois)</div><div class="chart-wrap h250"><canvas id="chartRevExp"></canvas></div></div>
         <div class="card"><div class="card-title">Depenses par categorie (3 derniers mois)</div><div class="chart-wrap h250"><canvas id="chartExpCat"></canvas></div></div>
+        <div class="card full"><div class="card-title">Avances co-fondateurs (a rembourser en CC associe)</div><div id="cofoundersRecap"></div></div>
         <div class="card full"><div class="card-title">Pipeline financement <span class="badge" id="badgeFinCount"></span></div><div class="table-wrap" id="financementTable"></div></div>
-        <div class="card full"><div class="card-title">Transactions recentes <button class="btn-export" onclick="exportTransactionsCSV()">Exporter CSV</button></div><div class="table-wrap" id="transactionsTable"></div></div>
+        <div class="card full"><div class="card-title">Transactions <span class="badge" id="badgeTxCount"></span> <div style="display:flex;gap:6px"><button class="btn-export" onclick="exportTransactionsCSV()">Export CSV (format Excel)</button></div></div><div class="table-wrap" id="transactionsTable"></div></div>
       </div>
     </div>
 
@@ -562,7 +563,7 @@
 
   <!-- MODAL : TRANSACTION -->
   <div class="modal-overlay" id="transactionModal">
-    <div class="modal">
+    <div class="modal modal-lg">
       <div class="modal-header">
         <h3 id="txModalTitle">Nouvelle transaction</h3>
         <button onclick="closeModal('transactionModal')">&times;</button>
@@ -571,6 +572,7 @@
         <form id="transactionForm" onsubmit="event.preventDefault();saveTransaction()">
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Date *</label><input type="date" class="form-input" name="tx_date" required></div>
+            <div class="form-group"><label class="form-label">N&deg; piece</label><input type="text" class="form-input" name="tx_num_piece" placeholder="F2026-001"></div>
             <div class="form-group">
               <label class="form-label">Type *</label>
               <select class="form-select" name="tx_type" required>
@@ -579,20 +581,39 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Categorie *</label>
-              <select class="form-select" name="tx_categorie" required>
-                <option value="tech">Tech / Dev</option>
-                <option value="marketing">Marketing / Com</option>
-                <option value="legal">Legal / Admin</option>
-                <option value="rh">RH / Freelance</option>
-                <option value="subvention">Subvention / BPI</option>
-                <option value="levee">Levee de fonds</option>
-                <option value="revenue">Revenu operationnel</option>
-                <option value="other">Autre</option>
+              <label class="form-label">Paye par *</label>
+              <select class="form-select" name="tx_paye_par" required>
+                <option value="gregoire">Gregoire</option>
+                <option value="paul">Paul</option>
+                <option value="societe">Societe</option>
               </select>
             </div>
-            <div class="form-group"><label class="form-label">Montant (EUR) *</label><input type="number" step="0.01" class="form-input" name="tx_montant" required placeholder="1000"></div>
-            <div class="form-group full"><label class="form-label">Description</label><input type="text" class="form-input" name="tx_description" placeholder="Abonnement Supabase, Freelance designer..."></div>
+            <div class="form-group"><label class="form-label">Fournisseur</label><input type="text" class="form-input" name="tx_fournisseur" placeholder="Supabase, OVH, BPI..."></div>
+            <div class="form-group">
+              <label class="form-label">Categorie *</label>
+              <select class="form-select" name="tx_categorie" required>
+                <option value="juridique">Juridique</option>
+                <option value="comptable">Comptable</option>
+                <option value="banque">Banque</option>
+                <option value="hebergement">Hebergement / Domaine</option>
+                <option value="saas">SaaS / Abonnements</option>
+                <option value="api_ia">API IA (Claude, OpenAI)</option>
+                <option value="marketing">Marketing / Publicite</option>
+                <option value="design">Identite de marque / Design</option>
+                <option value="deplacements">Deplacements</option>
+                <option value="restauration">Restauration pro</option>
+                <option value="fournitures">Fournitures</option>
+                <option value="materiel">Materiel informatique</option>
+                <option value="formation">Formation</option>
+                <option value="evenement">Salon / Evenement</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+            <div class="form-group full"><label class="form-label">Description *</label><input type="text" class="form-input" name="tx_description" required placeholder="Abonnement Supabase Pro mensuel"></div>
+            <div class="form-group"><label class="form-label">Montant TTC (EUR) *</label><input type="number" step="0.01" class="form-input" name="tx_ttc" required placeholder="24.00" oninput="computeHT()"></div>
+            <div class="form-group"><label class="form-label">TVA (EUR)</label><input type="number" step="0.01" class="form-input" name="tx_tva" placeholder="4.00" oninput="computeHT()"></div>
+            <div class="form-group"><label class="form-label">Montant HT (EUR)</label><input type="number" step="0.01" class="form-input" name="tx_ht" placeholder="20.00" readonly style="background:#f7f7fa"></div>
+            <div class="form-group full"><label class="form-label">Justificatif (lien/ref)</label><input type="text" class="form-input" name="tx_justificatif" placeholder="Lien Drive, numero facture..."></div>
             <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" name="tx_notes"></textarea></div>
           </div>
         </form>
@@ -1547,10 +1568,37 @@ function importOutreachJSON(event){
 const FINANCE_KEY='virage_finance';
 const FIN_STATUT_LABELS={identifie:'Identifie',prepa:'En preparation',depose:'Depose',instruction:'En instruction',accepte:'Accepte',refuse:'Refuse',abandonne:'Abandonne'};
 const FIN_TYPE_LABELS={bpi:'BPI',aap:'Appel a Projets',subvention:'Subvention',incubateur:'Incubateur',concours:'Concours',levee:'Levee de fonds',horizon:'Horizon Europe',autre:'Autre'};
-const TX_CAT_LABELS={tech:'Tech / Dev',marketing:'Marketing',legal:'Legal / Admin',rh:'RH / Freelance',subvention:'Subvention',levee:'Levee',revenue:'Revenu',other:'Autre'};
+const TX_CAT_LABELS={juridique:'Juridique',comptable:'Comptable',banque:'Banque',hebergement:'Hebergement / Domaine',saas:'SaaS / Abonnements',api_ia:'API IA',marketing:'Marketing',design:'Design',deplacements:'Deplacements',restauration:'Restauration',fournitures:'Fournitures',materiel:'Materiel info',formation:'Formation',evenement:'Salon / Evenement',autre:'Autre'};
+const PAYEUR_LABELS={gregoire:'Gregoire',paul:'Paul',societe:'Societe'};
+function computeHT(){const f=document.getElementById('transactionForm');const ttc=parseFloat(f.tx_ttc.value)||0;const tva=parseFloat(f.tx_tva.value)||0;f.tx_ht.value=ttc>0?(ttc-tva).toFixed(2):''}
 
 function getFinance(){try{return JSON.parse(localStorage.getItem(FINANCE_KEY))||{cash:[],transactions:[],financements:[]}}catch(e){return{cash:[],transactions:[],financements:[]}}}
 function saveFinance(d){localStorage.setItem(FINANCE_KEY,JSON.stringify(d))}
+
+function seedFinanceIfEmpty(){
+  const v=parseInt(localStorage.getItem('virage_finance_seed_v')||'0');
+  if(v>=1)return;
+  const data=getFinance();
+  if(data.financements.length>0){localStorage.setItem('virage_finance_seed_v','1');return}
+  // Pipeline financement sante / tech typique VIRAGE, a affiner
+  const seeds=[
+    {nom:'Bourse French Tech Emergence',organisme:'BPI France',type:'bpi',montant:30000,statut:'identifie',notes:'Subvention 30K pour startups deep tech/sante en phase pre-amorcage. Eligibilite : < 1 an activite.'},
+    {nom:'Pret Innovation',organisme:'BPI France',type:'bpi',montant:50000,statut:'identifie',notes:'Pret a taux 0 pour innovation, remboursable sur succes.'},
+    {nom:'Aide au Developpement Deep Tech',organisme:'BPI France',type:'bpi',montant:0,statut:'identifie',notes:'Pour projets a forte composante tech (IA sante).'},
+    {nom:'AAP e-Sante ARS Nouvelle-Aquitaine',organisme:'ARS',type:'aap',montant:0,statut:'identifie',notes:'Appel a projets regional sur solutions numeriques de sante.'},
+    {nom:'AAP MILDECA / Fonds Addictions',organisme:'MILDECA',type:'aap',montant:0,statut:'identifie',notes:'Subventions pour prevention des addictions, pilotage interministeriel.'},
+    {nom:'FEHAP / Fondation Fondamentale',organisme:'FEHAP',type:'aap',montant:0,statut:'identifie',notes:'Fondations sante mentale et addictions.'},
+    {nom:'Concours i-Lab',organisme:'Ministere Recherche',type:'concours',montant:0,statut:'identifie',notes:'Concours national innovation tech, 2 vagues/an.'},
+    {nom:'Concours i-PhD / i-Nov',organisme:'BPI / MinRecherche',type:'concours',montant:0,statut:'identifie',notes:'Concours deep tech.'},
+    {nom:'Incubateur Bordeaux Technowest',organisme:'Technowest',type:'incubateur',montant:0,statut:'identifie',notes:'Incubateur regional nouvelle aquitaine.'},
+    {nom:'Wilco (ex-Scientipole)',organisme:'Wilco',type:'incubateur',montant:0,statut:'identifie',notes:'Accelerateur de startups IDF.'},
+    {nom:'EIT Health Innostars',organisme:'EIT Health',type:'horizon',montant:0,statut:'identifie',notes:'Programme europeen startups sante.'},
+    {nom:'Horizon Europe EIC Accelerator',organisme:'UE',type:'horizon',montant:0,statut:'identifie',notes:'Subvention jusqu\'a 2.5M + equity jusqu\'a 15M pour scale-ups deep tech.'},
+  ];
+  seeds.forEach((s,i)=>{data.financements.push({id:'f_seed_'+i,...s,montant_obtenu:0,date_depot:'',date_reponse:'',created_at:new Date().toISOString(),updated_at:new Date().toISOString()})});
+  saveFinance(data);
+  localStorage.setItem('virage_finance_seed_v','1');
+}
 function fmtEUR(n){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n||0)}
 function fmtMonth(iso){const d=new Date(iso);return d.toLocaleDateString('fr-FR',{month:'short',year:'2-digit'})}
 function monthKey(d){return d.toISOString().substring(0,7)}
@@ -1581,15 +1629,24 @@ function openTransactionModal(txId){
   if(txId){
     const t=getFinance().transactions.find(x=>x.id===txId);if(!t)return;
     form.tx_date.value=t.date.substring(0,10);
-    form.tx_type.value=t.type;form.tx_categorie.value=t.categorie;
-    form.tx_montant.value=Math.abs(t.montant);
-    form.tx_description.value=t.description||'';form.tx_notes.value=t.notes||'';
+    form.tx_num_piece.value=t.num_piece||'';
+    form.tx_type.value=t.type;form.tx_paye_par.value=t.paye_par||'societe';
+    form.tx_fournisseur.value=t.fournisseur||'';
+    form.tx_categorie.value=t.categorie;
+    form.tx_description.value=t.description||'';
+    form.tx_ttc.value=t.ttc||t.montant||0;
+    form.tx_tva.value=t.tva||0;
+    form.tx_ht.value=t.ht||'';
+    form.tx_justificatif.value=t.justificatif||'';
+    form.tx_notes.value=t.notes||'';
   }else{form.tx_date.value=new Date().toISOString().substring(0,10)}
   openModal('transactionModal');
 }
 function saveTransaction(){
   const f=document.getElementById('transactionForm');
-  const t={id:editingTxId||('t_'+Date.now()),date:f.tx_date.value,type:f.tx_type.value,categorie:f.tx_categorie.value,montant:parseFloat(f.tx_montant.value),description:f.tx_description.value.trim(),notes:f.tx_notes.value.trim(),created_at:new Date().toISOString()};
+  const ttc=parseFloat(f.tx_ttc.value)||0;const tva=parseFloat(f.tx_tva.value)||0;
+  const ht=ttc>0?(ttc-tva):0;
+  const t={id:editingTxId||('t_'+Date.now()),date:f.tx_date.value,num_piece:f.tx_num_piece.value.trim(),type:f.tx_type.value,paye_par:f.tx_paye_par.value,fournisseur:f.tx_fournisseur.value.trim(),categorie:f.tx_categorie.value,description:f.tx_description.value.trim(),ttc,tva,ht,montant:ttc,justificatif:f.tx_justificatif.value.trim(),notes:f.tx_notes.value.trim(),created_at:new Date().toISOString()};
   const data=getFinance();
   if(editingTxId){const i=data.transactions.findIndex(x=>x.id===editingTxId);if(i>=0)data.transactions[i]=t}
   else data.transactions.unshift(t);
@@ -1669,12 +1726,36 @@ function getRunway(){
 
 // --- RENDER ---
 function renderFinance(){
+  seedFinanceIfEmpty();
   renderFinanceKPIs();
   renderCashChart();
   renderRevExpChart();
   renderExpCatChart();
+  renderCofoundersRecap();
   renderFinancementTable();
   renderTransactionsTable();
+}
+
+function renderCofoundersRecap(){
+  const data=getFinance();
+  const byPayeur={gregoire:{ttc:0,ht:0,nb:0},paul:{ttc:0,ht:0,nb:0},societe:{ttc:0,ht:0,nb:0}};
+  data.transactions.forEach(t=>{
+    if(t.type!=='expense')return;
+    const p=t.paye_par||'societe';if(!byPayeur[p])return;
+    byPayeur[p].ttc+=t.ttc||t.montant||0;
+    byPayeur[p].ht+=t.ht||0;
+    byPayeur[p].nb++;
+  });
+  let h='<table style="max-width:700px"><tr><th>Co-fondateur</th><th style="text-align:right">TTC avance</th><th style="text-align:right">HT</th><th style="text-align:right">Nb depenses</th></tr>';
+  ['gregoire','paul'].forEach(p=>{
+    const s=byPayeur[p];
+    h+='<tr><td><strong>'+PAYEUR_LABELS[p]+'</strong></td><td class="amount" style="text-align:right">'+fmtEUR(s.ttc)+'</td><td style="text-align:right;color:var(--grey)">'+fmtEUR(s.ht)+'</td><td style="text-align:right">'+s.nb+'</td></tr>';
+  });
+  const total=byPayeur.gregoire.ttc+byPayeur.paul.ttc;
+  h+='<tr style="background:var(--green-pale);font-weight:700"><td>TOTAL A REMBOURSER</td><td class="amount positive" style="text-align:right">'+fmtEUR(total)+'</td><td style="text-align:right">'+fmtEUR(byPayeur.gregoire.ht+byPayeur.paul.ht)+'</td><td style="text-align:right">'+(byPayeur.gregoire.nb+byPayeur.paul.nb)+'</td></tr>';
+  h+='</table>';
+  h+='<div style="font-size:.75rem;color:var(--grey);margin-top:8px">Montants a rembourser aux co-fondateurs apres constitution de la societe (compte courant d\'associe).</div>';
+  document.getElementById('cofoundersRecap').innerHTML=h;
 }
 
 function renderFinanceKPIs(){
@@ -1689,13 +1770,16 @@ function renderFinanceKPIs(){
   const finEnCours=data.financements.filter(f=>['prepa','depose','instruction'].includes(f.statut));
   const finPipeline=finEnCours.reduce((s,f)=>s+(f.montant||0),0);
   const finObtenu=data.financements.filter(f=>f.statut==='accepte').reduce((s,f)=>s+(f.montant_obtenu||f.montant||0),0);
+  // Co-founder advances
+  const advGreg=data.transactions.filter(t=>t.type==='expense'&&t.paye_par==='gregoire').reduce((s,t)=>s+(t.ttc||t.montant||0),0);
+  const advPaul=data.transactions.filter(t=>t.type==='expense'&&t.paye_par==='paul').reduce((s,t)=>s+(t.ttc||t.montant||0),0);
   const runwayCls=typeof runway==='string'&&runway!=='&#8734;'&&parseFloat(runway)<6?'down':'up';
   document.getElementById('kpiFinance').innerHTML=
     kpiHTML('Cash actuel',fmtEUR(cash),data.cash.length>0?'au '+fmtMonth(data.cash[data.cash.length-1].mois+'-01'):'Aucune saisie','neutral')+
     kpiHTML('Burn rate',fmtEUR(burn)+'<span style="font-size:.6875rem;color:var(--grey)">/mois</span>','moyenne 3 mois',burn>0?'down':'up')+
     kpiHTML('Runway',runway,cash>0?'reste estime':'--',runwayCls)+
-    kpiHTML('Revenus du mois',fmtEUR(mRev),now,'up')+
     kpiHTML('Depenses du mois',fmtEUR(mExp),now,mExp>0?'down':'neutral')+
+    kpiHTML('Avances co-fondateurs',fmtEUR(advGreg+advPaul),'G: '+fmtEUR(advGreg)+' / P: '+fmtEUR(advPaul),'neutral')+
     kpiHTML('Financements',fmtEUR(finPipeline),finObtenu>0?fmtEUR(finObtenu)+' obtenus':'pipeline en cours','neutral');
 }
 
@@ -1750,36 +1834,48 @@ function renderFinancementTable(){
 
 function renderTransactionsTable(){
   const data=getFinance();
-  const txs=[...data.transactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30);
+  const txs=[...data.transactions].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('badgeTxCount').textContent=txs.length+' ligne'+(txs.length>1?'s':'');
   if(txs.length===0){
     document.getElementById('transactionsTable').innerHTML='<div class="empty">Aucune transaction.<div style="margin-top:12px"><button class="btn-primary" onclick="openTransactionModal()">+ Ajouter une transaction</button></div></div>';
     return;
   }
-  let h='<table><tr><th>Date</th><th>Description</th><th>Categorie</th><th>Montant</th><th>Actions</th></tr>';
-  txs.forEach(t=>{
-    const sign=t.type==='revenue'?'+':'-';
+  let h='<table><tr><th>Date</th><th>Fournisseur</th><th>Description</th><th>Categorie</th><th>Paye par</th><th style="text-align:right">TTC</th><th style="text-align:right">HT</th><th>Actions</th></tr>';
+  txs.slice(0,50).forEach(t=>{
     const cls=t.type==='revenue'?'positive':'negative';
+    const amt=t.ttc||t.montant||0;const ht=t.ht||0;
     h+='<tr class="tx-row">';
     h+='<td>'+t.date+'</td>';
-    h+='<td>'+escHTML(t.description||'--')+'</td>';
+    h+='<td>'+escHTML(t.fournisseur||'--')+'</td>';
+    h+='<td>'+escHTML(t.description||'--')+(t.num_piece?'<br><span style="font-size:.625rem;color:var(--grey)">'+escHTML(t.num_piece)+'</span>':'')+'</td>';
     h+='<td><span class="tx-cat '+(t.type==='revenue'?'revenue':t.categorie)+'">'+(TX_CAT_LABELS[t.categorie]||t.categorie)+'</span></td>';
-    h+='<td class="amount '+cls+'">'+sign+fmtEUR(t.montant)+'</td>';
-    h+='<td style="white-space:nowrap"><button class="btn-sm" onclick="openTransactionModal(\''+t.id+'\')">Modifier</button> <button class="btn-sm danger" onclick="deleteTransaction(\''+t.id+'\')">&times;</button></td>';
+    h+='<td><span class="cat-tag">'+(PAYEUR_LABELS[t.paye_par]||t.paye_par||'--')+'</span></td>';
+    h+='<td class="amount '+cls+'" style="text-align:right">'+(t.type==='revenue'?'+':'')+fmtEUR(amt)+'</td>';
+    h+='<td style="text-align:right;color:var(--grey);font-size:.75rem">'+fmtEUR(ht)+'</td>';
+    h+='<td style="white-space:nowrap"><button class="btn-sm" onclick="openTransactionModal(\''+t.id+'\')">&hellip;</button> <button class="btn-sm danger" onclick="deleteTransaction(\''+t.id+'\')">&times;</button></td>';
     h+='</tr>';
   });
   h+='</table>';
+  if(txs.length>50) h+='<div style="text-align:center;color:var(--grey);font-size:.75rem;margin-top:8px">Affichage des 50 plus recentes sur '+txs.length+' (export CSV pour tout)</div>';
   document.getElementById('transactionsTable').innerHTML=h;
 }
 
 // --- Export/Import ---
+// Format exact de l'Excel : Date | N pièce | Fournisseur | Description | Categorie | Paye par | TTC | TVA | HT | Justificatif
 function exportTransactionsCSV(){
   const data=getFinance();
-  let csv='date,type,categorie,montant,description,notes\n';
-  data.transactions.forEach(t=>{
-    csv+=[t.date,t.type,t.categorie,t.montant,'"'+(t.description||'').replace(/"/g,'""')+'"','"'+(t.notes||'').replace(/"/g,'""')+'"'].join(',')+'\n';
+  const txs=[...data.transactions].sort((a,b)=>a.date.localeCompare(b.date));
+  const esc=v=>'"'+((v||'')+'').replace(/"/g,'""')+'"';
+  const catLabels=TX_CAT_LABELS;
+  const paye=PAYEUR_LABELS;
+  let csv='Date;N° pièce;Fournisseur;Description;Catégorie;Payé par;Montant TTC (€);TVA (€);Montant HT (€);Justificatif\n';
+  txs.forEach(t=>{
+    if(t.type==='revenue')return; // on exporte que les depenses vers l'Excel
+    csv+=[t.date,esc(t.num_piece),esc(t.fournisseur),esc(t.description),esc(catLabels[t.categorie]||t.categorie),esc(paye[t.paye_par]||t.paye_par),(t.ttc||t.montant||0).toFixed(2),(t.tva||0).toFixed(2),(t.ht||0).toFixed(2),esc(t.justificatif)].join(';')+'\n';
   });
-  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='virage-transactions.csv';a.click();URL.revokeObjectURL(url);
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}); // BOM pour Excel
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='virage-depenses-'+new Date().toISOString().substring(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
 }
 function exportFinanceJSON(){
   const data=getFinance();
