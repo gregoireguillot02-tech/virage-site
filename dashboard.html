@@ -339,11 +339,14 @@
     .chat-sidebar-header h4{font-size:.75rem;color:var(--grey);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
     .chat-new-btn{padding:6px 10px;background:var(--green);color:#FFF;border:none;border-radius:6px;font-size:.6875rem;font-weight:600;cursor:pointer;transition:background var(--trans-fast)}
     .chat-new-btn:hover{background:var(--green-dark)}
-    .conv-item{padding:10px 12px;border-radius:8px;cursor:pointer;transition:background var(--trans-fast);display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:none;color:inherit;font-family:inherit;width:100%}
+    .conv-item{padding:10px 12px;border-radius:8px;cursor:pointer;transition:background var(--trans-fast);display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:none;color:inherit;font-family:inherit;width:100%;position:relative}
     .conv-item:hover{background:var(--surface)}
     .conv-item.active{background:var(--surface);border:1px solid var(--border)}
-    .conv-item-title{font-size:.8125rem;color:var(--ink);font-weight:500;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .conv-item-title{font-size:.8125rem;color:var(--ink);font-weight:500;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;padding-right:20px}
     .conv-item-date{font-size:.625rem;color:var(--grey);margin-top:2px}
+    .conv-item-del{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--grey);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:.875rem;line-height:1;padding:0}
+    .conv-item:hover .conv-item-del{display:flex}
+    .conv-item-del:hover{background:rgba(214,64,69,.15);color:var(--red)}
     .chat-empty-convs{padding:20px 12px;text-align:center;color:var(--grey);font-size:.75rem}
 
     .chat-main{display:flex;flex-direction:column;min-width:0}
@@ -2078,9 +2081,25 @@ function renderConvList(){
     const active=c.id===currentConversationId?' active':'';
     const date=new Date(c.updated_at);
     const dateStr=date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-    h+=`<button class="conv-item${active}" onclick="loadConversation('${c.id}')"><span class="conv-item-title">${escHTML(c.title||'Sans titre')}</span><span class="conv-item-date">${dateStr}</span></button>`;
+    h+=`<div class="conv-item${active}" style="display:block;position:relative">`;
+    h+=`<button class="conv-item" style="background:none;border:none;width:100%;padding:0;text-align:left;cursor:pointer" onclick="loadConversation('${c.id}')">`;
+    h+=`<span class="conv-item-title">${escHTML(c.title||'Sans titre')}</span><span class="conv-item-date">${dateStr}</span>`;
+    h+=`</button>`;
+    h+=`<button class="conv-item-del" onclick="event.stopPropagation();deleteConversation('${c.id}')" title="Supprimer cette conversation">&times;</button>`;
+    h+=`</div>`;
   });
   list.innerHTML=h;
+}
+
+async function deleteConversation(convId){
+  if(!confirm('Supprimer cette conversation definitivement ?'))return;
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/agent_conversations?id=eq.'+convId,{method:'DELETE',headers:HEADERS});
+    if(r.ok){
+      if(currentConversationId===convId){currentConversationId=null;renderChatMessages()}
+      await loadAllConversations();renderConvList();
+    }else alert('Echec suppression : '+r.status);
+  }catch(e){alert('Erreur : '+e.message)}
 }
 
 async function loadConversation(convId){
@@ -2173,9 +2192,13 @@ async function sendChatMessage(){
   container.scrollTop=container.scrollHeight;
   input.value='';
   try{
-    const authHash=await sha256('auth:'+AUTH_HASH); // hash du hash, on envoie pas le hash brut
+    // Manager peut prendre jusqu'a 2 min avec orchestration
+    const ctrl=new AbortController();
+    const timeoutMs=currentAgentId==='manager'?140000:60000;
+    const t=setTimeout(()=>ctrl.abort(),timeoutMs);
     const resp=await fetch(AGENT_CHAT_ENDPOINT,{
       method:'POST',
+      signal:ctrl.signal,
       headers:{
         'content-type':'application/json',
         'apikey':SB_KEY,
@@ -2184,7 +2207,9 @@ async function sendChatMessage(){
       },
       body:JSON.stringify({agent_id:currentAgentId,conversation_id:currentConversationId,message,author}),
     });
-    const data=await resp.json();
+    clearTimeout(t);
+    let data;
+    try{data=await resp.json()}catch(pe){data={error:'Reponse invalide ('+resp.status+'). Reessaie.'}}
     document.getElementById('typingMsg').remove();
     if(!resp.ok){
       container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble" style="color:var(--red)">Erreur : ${escHTML(data.error||'inconnue')}</div></div>`);
