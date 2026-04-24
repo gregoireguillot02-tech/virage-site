@@ -547,6 +547,99 @@
     .today-status-dot{width:6px;height:6px;border-radius:50%;background:#52B788;box-shadow:0 0 0 3px rgba(82,183,136,.25)}
     .today-error{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.35);padding:10px 12px;border-radius:8px;font-size:.75rem;margin-top:8px;position:relative;z-index:1}
     [data-theme="dark"] .today-card{background:linear-gradient(135deg,#0B1F15,#1B4332 60%,#2D6A4F)}
+
+    /* ===== Tasks Kanban ===== */
+    .tasks-toolbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+    .tasks-filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .task-filter-btn{padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:.75rem;font-weight:600;color:var(--slate);cursor:pointer;transition:all var(--trans-fast);font-family:inherit}
+    .task-filter-btn:hover{background:var(--surface-alt);color:var(--ink);border-color:var(--border-strong)}
+    .task-filter-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+    .tasks-select{padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:.75rem;font-weight:500;color:var(--ink);font-family:inherit;cursor:pointer;min-width:130px}
+    .tasks-select:focus{outline:none;border-color:var(--green);box-shadow:var(--shadow-glow)}
+    .tasks-quick-add{margin-bottom:16px}
+    .tasks-quick-add input{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:.875rem;color:var(--ink);font-family:inherit;transition:all var(--trans-fast)}
+    .tasks-quick-add input:focus{outline:none;border-color:var(--green);box-shadow:var(--shadow-glow);background:var(--surface)}
+    .tasks-quick-add input::placeholder{color:var(--grey)}
+
+    .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;min-height:500px}
+    .kanban-col{background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;min-height:400px}
+    .kanban-col-header{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 12px;border-bottom:1px solid var(--border);margin-bottom:10px}
+    .kanban-col-header h4{font-family:'Outfit',sans-serif;font-size:.8125rem;font-weight:700;color:var(--ink);margin:0;display:flex;align-items:center;gap:8px;letter-spacing:.02em;text-transform:uppercase}
+    .kanban-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+    .kanban-dot.todo{background:var(--grey)}
+    .kanban-dot.doing{background:var(--accent)}
+    .kanban-dot.done{background:var(--green-light)}
+    .kanban-count{background:var(--border);color:var(--slate);padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700;min-width:22px;text-align:center}
+    .kanban-body{flex:1;display:flex;flex-direction:column;gap:8px;min-height:100px}
+    .kanban-body.drag-over{background:rgba(82,183,136,.08);border-radius:8px;outline:2px dashed var(--green-light);outline-offset:-4px}
+
+    .task-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--grey);border-radius:10px;padding:12px 14px;cursor:grab;transition:all var(--trans-fast);user-select:none;box-shadow:var(--shadow-xs);position:relative}
+    .task-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+    .task-card.dragging{opacity:.5;cursor:grabbing;transform:rotate(1deg);box-shadow:var(--shadow-lg)}
+    .task-card.priority-high{border-left-color:var(--red)}
+    .task-card.priority-medium{border-left-color:var(--accent)}
+    .task-card.priority-low{border-left-color:var(--blue)}
+    .task-card.status-done{opacity:.65}
+    .task-card.status-done .task-title{text-decoration:line-through;color:var(--grey)}
+    .task-head{display:flex;justify-content:space-between;gap:6px;margin-bottom:4px}
+    .task-title{font-size:.875rem;font-weight:600;color:var(--ink);line-height:1.35;margin:0;flex:1;word-break:break-word}
+    .task-assignee{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;letter-spacing:.01em}
+    .task-assignee.greg{background:var(--green)}
+    .task-assignee.paul{background:var(--purple)}
+    .task-assignee.both{background:linear-gradient(135deg,var(--green) 50%,var(--purple) 50%);position:relative}
+    .task-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:.68rem;color:var(--slate)}
+    .task-tag{background:var(--green-pale);color:var(--green-dark);padding:2px 8px;border-radius:10px;font-weight:600;text-transform:capitalize;font-size:.65rem}
+    .task-due{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:6px;background:var(--surface-alt);color:var(--slate);font-weight:500}
+    .task-due.overdue{background:var(--red-pale);color:var(--red);font-weight:700}
+    .task-due.soon{background:var(--accent-light);color:var(--accent-deep);font-weight:700}
+    .task-desc-hint{font-size:.68rem;color:var(--grey);margin-top:4px}
+    .task-delete{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(220,38,38,.1);color:var(--red);border:none;cursor:pointer;font-size:.68rem;display:none;align-items:center;justify-content:center;line-height:1;font-family:inherit}
+    .task-card:hover .task-delete{display:flex}
+    .task-delete:hover{background:var(--red);color:#fff}
+
+    .kanban-empty{text-align:center;padding:30px 12px;color:var(--grey);font-size:.75rem;border:2px dashed var(--border);border-radius:10px}
+
+    /* Task modal spécifique */
+    .task-modal-form{display:grid;gap:14px}
+    .task-modal-form .row-split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .task-modal-form .row-split-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .task-modal-form label{display:block;font-size:.72rem;font-weight:600;color:var(--slate);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+    .task-modal-form input,.task-modal-form textarea,.task-modal-form select{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:.8125rem;color:var(--ink);font-family:inherit}
+    .task-modal-form input:focus,.task-modal-form textarea:focus,.task-modal-form select:focus{outline:none;border-color:var(--green);box-shadow:var(--shadow-glow)}
+    .task-modal-form textarea{resize:vertical;min-height:80px;line-height:1.4}
+
+    /* Identity picker modal */
+    .identity-picker{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:8px 0 16px}
+    .identity-card{padding:24px 16px;text-align:center;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all var(--trans-fast);font-family:inherit}
+    .identity-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+    .identity-avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#fff}
+    .identity-avatar.greg{background:var(--green)}
+    .identity-avatar.paul{background:var(--purple)}
+    .identity-card h4{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);margin:0 0 4px}
+    .identity-card p{font-size:.75rem;color:var(--slate);margin:0}
+
+    /* Widget tasks dans Pilote 360 */
+    .mytasks-list{display:flex;flex-direction:column;gap:6px}
+    .mytasks-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;transition:all var(--trans-fast);cursor:pointer}
+    .mytasks-item:hover{border-color:var(--border-strong);background:var(--surface-alt)}
+    .mytasks-check{width:18px;height:18px;border:2px solid var(--border-strong);border-radius:5px;flex-shrink:0;cursor:pointer;transition:all var(--trans-fast);position:relative}
+    .mytasks-check:hover{border-color:var(--green)}
+    .mytasks-check.checked{background:var(--green);border-color:var(--green)}
+    .mytasks-check.checked::after{content:'\2713';position:absolute;top:-3px;left:2px;color:#fff;font-size:.8rem;font-weight:700}
+    .mytasks-body{flex:1;min-width:0}
+    .mytasks-title{font-size:.8125rem;font-weight:500;color:var(--ink);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mytasks-title.done{text-decoration:line-through;color:var(--grey)}
+    .mytasks-meta{font-size:.68rem;color:var(--slate);margin-top:2px;display:flex;gap:6px;align-items:center}
+    .mytasks-empty{text-align:center;padding:24px;color:var(--grey);font-size:.8125rem}
+
+    @media (max-width:768px){
+      .kanban{grid-template-columns:1fr;gap:10px}
+      .kanban-col{min-height:200px}
+      .tasks-toolbar{flex-direction:column;align-items:stretch}
+      .tasks-filters{justify-content:flex-start}
+      .task-modal-form .row-split,.task-modal-form .row-split-3{grid-template-columns:1fr}
+      .identity-picker{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
@@ -590,6 +683,7 @@
     <nav class="mobile-menu-nav" id="mobileNav">
       <div class="nav-section-mobile">Pilotage</div>
       <button class="active" data-page="pilote360"><span class="nav-icon">&#9728;</span>Pilote 360</button>
+      <button data-page="tasks"><span class="nav-icon">&#10003;</span>Tasks</button>
       <div class="nav-section-mobile">Equipe IA</div>
       <button data-page="agents"><span class="nav-icon">&#9733;</span>Hub agents</button>
       <div class="nav-section-mobile">Site &amp; Leads</div>
@@ -627,6 +721,7 @@
     <nav class="sidebar-nav" id="sidebarNav">
       <div class="nav-section">Pilotage</div>
       <button class="active" data-page="pilote360"><span class="nav-icon">&#9728;</span>Pilote 360</button>
+      <button data-page="tasks"><span class="nav-icon">&#10003;</span>Tasks</button>
       <div class="nav-section">Equipe IA</div>
       <button data-page="agents"><span class="nav-icon">&#9733;</span>Hub agents</button>
       <div class="nav-section">Site &amp; Leads</div>
@@ -687,7 +782,59 @@
         <div class="card"><div class="card-title">App VIRAGE <button class="btn-sm" onclick="navigateTo('app')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360App" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
         <div class="card"><div class="card-title">Demarchage pros <button class="btn-sm" onclick="navigateTo('demarchage')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360Demarchage" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
         <div class="card"><div class="card-title">Finance &amp; burn <button class="btn-sm" onclick="navigateTo('finance')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360Finance" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
+        <div class="card full"><div class="card-title">Mes tasks en priorite <button class="btn-sm" onclick="navigateTo('tasks')">Voir toutes &rarr;</button></div><div id="pilote360MyTasks"></div></div>
         <div class="card full"><div class="card-title">Alertes &amp; priorites du moment</div><div id="alertesContainer"></div></div>
+      </div>
+    </div>
+
+    <!-- TASKS : Todo partagee Greg/Paul -->
+    <div class="page" id="page-tasks">
+      <div class="tasks-toolbar">
+        <div class="tasks-filters">
+          <button class="task-filter-btn active" data-filter-assignee="all">Tous</button>
+          <button class="task-filter-btn" data-filter-assignee="me">Moi</button>
+          <button class="task-filter-btn" data-filter-assignee="greg">Greg</button>
+          <button class="task-filter-btn" data-filter-assignee="paul">Paul</button>
+          <button class="task-filter-btn" data-filter-assignee="both">Les 2</button>
+        </div>
+        <div class="tasks-filters">
+          <select id="tasksPriorityFilter" class="tasks-select">
+            <option value="all">Toutes priorites</option>
+            <option value="high">Haute</option>
+            <option value="medium">Moyenne</option>
+            <option value="low">Basse</option>
+          </select>
+          <select id="tasksTagFilter" class="tasks-select">
+            <option value="all">Tous tags</option>
+          </select>
+          <button class="btn-primary" onclick="openTaskModal()">+ Nouvelle task</button>
+        </div>
+      </div>
+      <div class="tasks-quick-add">
+        <input type="text" id="tasksQuickAdd" placeholder="Ajout rapide : ecris un titre puis Entree (valable pour Moi par defaut)">
+      </div>
+      <div class="kanban">
+        <div class="kanban-col" data-col-status="todo">
+          <div class="kanban-col-header">
+            <h4><span class="kanban-dot todo"></span>A faire</h4>
+            <span class="kanban-count" id="kanbanCountTodo">0</span>
+          </div>
+          <div class="kanban-body" id="kanbanColTodo" data-status="todo"></div>
+        </div>
+        <div class="kanban-col" data-col-status="doing">
+          <div class="kanban-col-header">
+            <h4><span class="kanban-dot doing"></span>En cours</h4>
+            <span class="kanban-count" id="kanbanCountDoing">0</span>
+          </div>
+          <div class="kanban-body" id="kanbanColDoing" data-status="doing"></div>
+        </div>
+        <div class="kanban-col" data-col-status="done">
+          <div class="kanban-col-header">
+            <h4><span class="kanban-dot done"></span>Fait</h4>
+            <span class="kanban-count" id="kanbanCountDone">0</span>
+          </div>
+          <div class="kanban-body" id="kanbanColDone" data-status="done"></div>
+        </div>
       </div>
     </div>
 
@@ -898,6 +1045,105 @@
     </div>
 
   </main>
+
+  <!-- MODAL : TASK EDIT/CREATE -->
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-header">
+        <h3 id="taskModalTitle">Nouvelle task</h3>
+        <button onclick="closeModal('taskModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form class="task-modal-form" onsubmit="event.preventDefault();saveTask()">
+          <input type="hidden" id="taskId">
+          <div>
+            <label>Titre *</label>
+            <input type="text" id="taskTitle" required maxlength="200" placeholder="Ex: Relancer Dr. Talbot avant vendredi">
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea id="taskDescription" maxlength="2000" placeholder="Contexte, notes, liens..."></textarea>
+          </div>
+          <div class="row-split-3">
+            <div>
+              <label>Assignee</label>
+              <select id="taskAssignee">
+                <option value="greg">Greg</option>
+                <option value="paul">Paul</option>
+                <option value="both">Les 2</option>
+              </select>
+            </div>
+            <div>
+              <label>Priorite</label>
+              <select id="taskPriority">
+                <option value="high">Haute</option>
+                <option value="medium" selected>Moyenne</option>
+                <option value="low">Basse</option>
+              </select>
+            </div>
+            <div>
+              <label>Statut</label>
+              <select id="taskStatus">
+                <option value="todo" selected>A faire</option>
+                <option value="doing">En cours</option>
+                <option value="done">Fait</option>
+              </select>
+            </div>
+          </div>
+          <div class="row-split">
+            <div>
+              <label>Deadline</label>
+              <input type="date" id="taskDueDate">
+            </div>
+            <div>
+              <label>Tag</label>
+              <input type="text" id="taskTag" list="tasksTagDatalist" placeholder="marketing, dev, finance...">
+              <datalist id="tasksTagDatalist">
+                <option value="marketing">
+                <option value="dev">
+                <option value="finance">
+                <option value="compliance">
+                <option value="partenariats">
+                <option value="ops">
+                <option value="produit">
+                <option value="perso">
+              </datalist>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" id="taskDeleteBtn" style="display:none;background:var(--red-pale);color:var(--red);border-color:var(--red-pale)" onclick="deleteTaskFromModal()">Supprimer</button>
+        <div style="flex:1"></div>
+        <button class="btn-sm" onclick="closeModal('taskModal')">Annuler</button>
+        <button class="btn-primary" onclick="saveTask()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : IDENTITY PICKER (qui es-tu ?) -->
+  <div class="modal-overlay" id="identityModal">
+    <div class="modal" style="max-width:480px">
+      <div class="modal-header">
+        <h3>Qui es-tu ?</h3>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:.8125rem;color:var(--slate);margin-bottom:16px;line-height:1.5">Choisis qui tu es pour que les tasks que tu crees soient attribuees au bon fondateur par defaut. Tu peux toujours changer l'assignee individuellement.</p>
+        <div class="identity-picker">
+          <div class="identity-card" onclick="setIdentity('greg')">
+            <div class="identity-avatar greg">G</div>
+            <h4>Gregoire</h4>
+            <p>Dev co, strategie, partenariats</p>
+          </div>
+          <div class="identity-card" onclick="setIdentity('paul')">
+            <div class="identity-avatar paul">P</div>
+            <h4>Paul</h4>
+            <p>Produit, technique, app</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL : MISE A JOUR CASH -->
   <div class="modal-overlay" id="cashModal">
@@ -1214,7 +1460,7 @@
 // ============================================================
 const AUTH_HASH='4ddeaa2454fe1f705196dab138b7bba79f155be1d568068421053d84fc3bb371';
 async function sha256(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-function unlockApp(){document.getElementById('loginOverlay').style.display='none';document.getElementById('app').classList.remove('app-hidden');loadAllData()}
+function unlockApp(){document.getElementById('loginOverlay').style.display='none';document.getElementById('app').classList.remove('app-hidden');loadAllData();setTimeout(()=>{if(!getIdentity())document.getElementById('identityModal').classList.add('open')},500)}
 document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value;if(await sha256(u+':'+p)===AUTH_HASH){sessionStorage.setItem('virage_auth','ok');unlockApp()}else{document.getElementById('loginError').style.display='block';document.getElementById('loginPass').value=''}});
 
 // ============================================================
@@ -1451,10 +1697,366 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else setTimeout(initTodayWidget,300);
 
 // ============================================================
+// TASKS : todo partagee Greg/Paul (Supabase)
+// ============================================================
+let rawTasks=[];
+let tasksFilterAssignee='all';
+let tasksFilterPriority='all';
+let tasksFilterTag='all';
+let currentEditTaskId=null;
+
+// Identity : qui je suis (Greg/Paul) - stocke en localStorage
+const IDENTITY_KEY='virage_user_identity';
+function getIdentity(){return localStorage.getItem(IDENTITY_KEY)}
+function setIdentity(who){
+  if(!['greg','paul'].includes(who))return;
+  localStorage.setItem(IDENTITY_KEY,who);
+  closeModal('identityModal');
+  renderTasks();
+  renderMyTasksWidget();
+}
+function ensureIdentity(cb){
+  if(getIdentity()){cb&&cb();return}
+  document.getElementById('identityModal').classList.add('open');
+}
+
+async function sbMutate(method,path,body){
+  const r=await fetch(`${SB_URL}/rest/v1/${path}`,{
+    method,
+    headers:{...HEADERS,'Content-Type':'application/json','Prefer':'return=representation'},
+    body:body?JSON.stringify(body):undefined
+  });
+  if(!r.ok){const t=await r.text();throw new Error(`${method} ${path} HTTP ${r.status}: ${t}`)}
+  const txt=await r.text();
+  return txt?JSON.parse(txt):null;
+}
+
+async function loadTasks(){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/tasks?select=*&order=sort_order.asc,created_at.desc&limit=2000`,{headers:HEADERS});
+    if(!r.ok){console.warn('tasks fetch '+r.status);rawTasks=[];return}
+    rawTasks=await r.json();
+  }catch(e){console.warn('tasks indispo:',e.message);rawTasks=[]}
+}
+
+async function createTask(data){
+  const me=getIdentity()||'greg';
+  const payload={
+    title:data.title||'Sans titre',
+    description:data.description||null,
+    status:data.status||'todo',
+    priority:data.priority||'medium',
+    assignee:data.assignee||me,
+    tag:data.tag||null,
+    due_date:data.due_date||null,
+    author:me
+  };
+  const [created]=await sbMutate('POST','tasks',payload);
+  rawTasks.unshift(created);
+  return created;
+}
+
+async function updateTask(id,patch){
+  const [updated]=await sbMutate('PATCH',`tasks?id=eq.${id}`,patch);
+  const idx=rawTasks.findIndex(t=>t.id===id);
+  if(idx>=0)rawTasks[idx]=updated;
+  return updated;
+}
+
+async function deleteTask(id){
+  await sbMutate('DELETE',`tasks?id=eq.${id}`);
+  rawTasks=rawTasks.filter(t=>t.id!==id);
+}
+
+function getFilteredTasks(){
+  const me=getIdentity();
+  return rawTasks.filter(t=>{
+    if(tasksFilterAssignee==='me'){if(t.assignee!==me&&t.assignee!=='both')return false}
+    else if(tasksFilterAssignee!=='all'&&t.assignee!==tasksFilterAssignee)return false;
+    if(tasksFilterPriority!=='all'&&t.priority!==tasksFilterPriority)return false;
+    if(tasksFilterTag!=='all'&&(t.tag||'')!==tasksFilterTag)return false;
+    return true;
+  });
+}
+
+function fmtDueDate(iso){
+  if(!iso)return null;
+  const d=new Date(iso+'T12:00:00');
+  const now=new Date();now.setHours(0,0,0,0);
+  const diff=Math.round((d-now)/864e5);
+  let cls='',label='';
+  if(diff<0){cls='overdue';label='Retard '+Math.abs(diff)+'j'}
+  else if(diff===0){cls='soon';label="Aujourd'hui"}
+  else if(diff===1){cls='soon';label='Demain'}
+  else if(diff<=3){cls='soon';label='Dans '+diff+'j'}
+  else label=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  return {cls,label};
+}
+
+function renderTaskCard(task){
+  const asg=task.assignee||'greg';
+  const initials=asg==='both'?'G+P':(asg==='greg'?'G':'P');
+  const dueInfo=fmtDueDate(task.due_date);
+  const descHint=task.description?'<div class="task-desc-hint">'+escHTML(task.description.substring(0,80))+(task.description.length>80?'...':'')+'</div>':'';
+  let meta='';
+  if(task.tag)meta+='<span class="task-tag">'+escHTML(task.tag)+'</span>';
+  if(dueInfo)meta+='<span class="task-due '+dueInfo.cls+'">'+dueInfo.label+'</span>';
+  const metaHTML=meta?'<div class="task-meta">'+meta+'</div>':'';
+  return `<div class="task-card priority-${task.priority||'medium'} status-${task.status}" draggable="true" data-task-id="${task.id}" onclick="openTaskModal('${task.id}')">
+    <button class="task-delete" onclick="event.stopPropagation();confirmDeleteTask('${task.id}')" title="Supprimer">&times;</button>
+    <div class="task-head">
+      <div class="task-title">${escHTML(task.title)}</div>
+      <div class="task-assignee ${asg}" title="${asg==='both'?'Greg + Paul':(asg.charAt(0).toUpperCase()+asg.slice(1))}">${initials}</div>
+    </div>
+    ${descHint}
+    ${metaHTML}
+  </div>`;
+}
+
+function renderTasks(){
+  // Tags : extrait l'ensemble des tags existants pour le filtre
+  const tags=new Set();rawTasks.forEach(t=>{if(t.tag)tags.add(t.tag)});
+  const tagFilter=document.getElementById('tasksTagFilter');
+  if(tagFilter){
+    const current=tasksFilterTag;
+    tagFilter.innerHTML='<option value="all">Tous tags</option>'+Array.from(tags).sort().map(t=>`<option value="${escHTML(t)}"${t===current?' selected':''}>${escHTML(t)}</option>`).join('');
+  }
+  const tasks=getFilteredTasks();
+  const cols={todo:[],doing:[],done:[]};
+  tasks.forEach(t=>{if(cols[t.status])cols[t.status].push(t)});
+  // Sort done by completed_at desc, others by priority then sort_order
+  const prioRank={high:0,medium:1,low:2};
+  ['todo','doing'].forEach(k=>cols[k].sort((a,b)=>(prioRank[a.priority||'medium']-prioRank[b.priority||'medium'])||(a.sort_order||0)-(b.sort_order||0)));
+  cols.done.sort((a,b)=>new Date(b.completed_at||b.updated_at)-new Date(a.completed_at||a.updated_at));
+
+  ['todo','doing','done'].forEach(status=>{
+    const el=document.getElementById('kanbanCol'+status.charAt(0).toUpperCase()+status.slice(1));
+    const countEl=document.getElementById('kanbanCount'+status.charAt(0).toUpperCase()+status.slice(1));
+    if(!el)return;
+    countEl.textContent=cols[status].length;
+    if(cols[status].length===0){
+      el.innerHTML='<div class="kanban-empty">Aucune task</div>';
+    }else{
+      el.innerHTML=cols[status].map(renderTaskCard).join('');
+    }
+  });
+  setupKanbanDragDrop();
+}
+
+let draggedTaskId=null;
+function setupKanbanDragDrop(){
+  document.querySelectorAll('.task-card').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      draggedTaskId=card.dataset.taskId;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+      try{e.dataTransfer.setData('text/plain',draggedTaskId)}catch{}
+    });
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('dragging');
+      document.querySelectorAll('.kanban-body').forEach(b=>b.classList.remove('drag-over'));
+    });
+  });
+  document.querySelectorAll('.kanban-body').forEach(body=>{
+    body.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';body.classList.add('drag-over')});
+    body.addEventListener('dragleave',e=>{if(e.target===body)body.classList.remove('drag-over')});
+    body.addEventListener('drop',async e=>{
+      e.preventDefault();
+      body.classList.remove('drag-over');
+      if(!draggedTaskId)return;
+      const newStatus=body.dataset.status;
+      const task=rawTasks.find(t=>t.id===draggedTaskId);
+      if(!task||task.status===newStatus){draggedTaskId=null;return}
+      try{
+        await updateTask(draggedTaskId,{status:newStatus});
+        renderTasks();
+        renderMyTasksWidget();
+        try{if(typeof renderPilote360==='function'&&rawViews)renderAll()}catch{}
+      }catch(err){
+        alert('Erreur MAJ task : '+err.message);
+      }
+      draggedTaskId=null;
+    });
+  });
+}
+
+function openTaskModal(taskId){
+  ensureIdentity(()=>{
+    currentEditTaskId=taskId||null;
+    const modal=document.getElementById('taskModal');
+    const title=document.getElementById('taskModalTitle');
+    const delBtn=document.getElementById('taskDeleteBtn');
+    if(taskId){
+      const t=rawTasks.find(x=>x.id===taskId);
+      if(!t)return;
+      title.textContent='Modifier la task';
+      document.getElementById('taskId').value=t.id;
+      document.getElementById('taskTitle').value=t.title||'';
+      document.getElementById('taskDescription').value=t.description||'';
+      document.getElementById('taskAssignee').value=t.assignee||'greg';
+      document.getElementById('taskPriority').value=t.priority||'medium';
+      document.getElementById('taskStatus').value=t.status||'todo';
+      document.getElementById('taskDueDate').value=t.due_date||'';
+      document.getElementById('taskTag').value=t.tag||'';
+      delBtn.style.display='';
+    }else{
+      title.textContent='Nouvelle task';
+      document.getElementById('taskId').value='';
+      document.getElementById('taskTitle').value='';
+      document.getElementById('taskDescription').value='';
+      document.getElementById('taskAssignee').value=getIdentity()||'greg';
+      document.getElementById('taskPriority').value='medium';
+      document.getElementById('taskStatus').value='todo';
+      document.getElementById('taskDueDate').value='';
+      document.getElementById('taskTag').value='';
+      delBtn.style.display='none';
+    }
+    modal.classList.add('open');
+    setTimeout(()=>document.getElementById('taskTitle').focus(),50);
+  });
+}
+
+async function saveTask(){
+  const id=document.getElementById('taskId').value;
+  const title=document.getElementById('taskTitle').value.trim();
+  if(!title){alert('Le titre est obligatoire');return}
+  const data={
+    title,
+    description:document.getElementById('taskDescription').value.trim()||null,
+    assignee:document.getElementById('taskAssignee').value,
+    priority:document.getElementById('taskPriority').value,
+    status:document.getElementById('taskStatus').value,
+    due_date:document.getElementById('taskDueDate').value||null,
+    tag:document.getElementById('taskTag').value.trim().toLowerCase()||null
+  };
+  try{
+    if(id)await updateTask(id,data);
+    else await createTask(data);
+    closeModal('taskModal');
+    renderTasks();
+    renderMyTasksWidget();
+    try{renderPilote360Tasks()}catch{}
+  }catch(e){alert('Erreur enregistrement : '+e.message)}
+}
+
+async function deleteTaskFromModal(){
+  const id=document.getElementById('taskId').value;
+  if(!id)return;
+  if(!confirm('Supprimer cette task ?'))return;
+  try{
+    await deleteTask(id);
+    closeModal('taskModal');
+    renderTasks();
+    renderMyTasksWidget();
+  }catch(e){alert('Erreur suppression : '+e.message)}
+}
+
+async function confirmDeleteTask(id){
+  if(!confirm('Supprimer cette task ?'))return;
+  try{
+    await deleteTask(id);
+    renderTasks();
+    renderMyTasksWidget();
+  }catch(e){alert('Erreur : '+e.message)}
+}
+
+async function quickAddTask(title){
+  if(!title||!title.trim())return;
+  ensureIdentity(async ()=>{
+    try{
+      await createTask({title:title.trim()});
+      renderTasks();
+      renderMyTasksWidget();
+    }catch(e){alert('Erreur : '+e.message)}
+  });
+}
+
+async function toggleTaskDone(id){
+  const task=rawTasks.find(t=>t.id===id);
+  if(!task)return;
+  const newStatus=task.status==='done'?'todo':'done';
+  try{
+    await updateTask(id,{status:newStatus});
+    renderTasks();
+    renderMyTasksWidget();
+  }catch(e){alert('Erreur : '+e.message)}
+}
+
+// Widget "Mes tasks prio" dans Pilote 360
+function renderMyTasksWidget(){
+  const el=document.getElementById('pilote360MyTasks');
+  if(!el)return;
+  const me=getIdentity();
+  const mine=rawTasks.filter(t=>{
+    if(t.status==='done')return false;
+    if(!me)return true;
+    return t.assignee===me||t.assignee==='both';
+  });
+  // Tri : en retard > aujourd'hui > priorite haute > deadline proche > priorite moyenne...
+  const prioRank={high:0,medium:1,low:2};
+  mine.sort((a,b)=>{
+    const da=a.due_date?new Date(a.due_date+'T12:00:00'):null;
+    const db=b.due_date?new Date(b.due_date+'T12:00:00'):null;
+    const now=new Date();now.setHours(0,0,0,0);
+    const aOv=da&&da<now?0:1;const bOv=db&&db<now?0:1;
+    if(aOv!==bOv)return aOv-bOv;
+    const ap=prioRank[a.priority||'medium'],bp=prioRank[b.priority||'medium'];
+    if(ap!==bp)return ap-bp;
+    if(da&&db)return da-db;
+    if(da)return -1;if(db)return 1;
+    return 0;
+  });
+  const top=mine.slice(0,5);
+  if(top.length===0){
+    el.innerHTML='<div class="mytasks-empty">Aucune task en cours. <a href="#" onclick="event.preventDefault();navigateTo(\'tasks\')" style="color:var(--green);font-weight:600">Creer une task</a></div>';
+    return;
+  }
+  el.innerHTML='<div class="mytasks-list">'+top.map(t=>{
+    const dueInfo=fmtDueDate(t.due_date);
+    const dueHTML=dueInfo?'<span class="task-due '+dueInfo.cls+'" style="font-size:.62rem;padding:1px 5px">'+dueInfo.label+'</span>':'';
+    const tagHTML=t.tag?'<span class="task-tag" style="font-size:.62rem;padding:1px 6px">'+escHTML(t.tag)+'</span>':'';
+    return '<div class="mytasks-item" onclick="openTaskModal(\''+t.id+'\')">'+
+      '<div class="mytasks-check" onclick="event.stopPropagation();toggleTaskDone(\''+t.id+'\')"></div>'+
+      '<div class="mytasks-body"><div class="mytasks-title">'+escHTML(t.title)+'</div>'+
+      '<div class="mytasks-meta">'+tagHTML+dueHTML+'</div></div></div>';
+  }).join('')+'</div>';
+}
+
+// Init Tasks UI : listeners, quick-add, filtres
+function initTasksUI(){
+  const quick=document.getElementById('tasksQuickAdd');
+  if(quick){
+    quick.addEventListener('keydown',e=>{
+      if(e.key==='Enter'&&!e.shiftKey){
+        e.preventDefault();
+        const v=quick.value;quick.value='';
+        quickAddTask(v);
+      }
+    });
+  }
+  // Filtres assignee
+  document.querySelectorAll('.task-filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.task-filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      tasksFilterAssignee=btn.dataset.filterAssignee;
+      renderTasks();
+    });
+  });
+  const pf=document.getElementById('tasksPriorityFilter');
+  if(pf)pf.addEventListener('change',()=>{tasksFilterPriority=pf.value;renderTasks()});
+  const tf=document.getElementById('tasksTagFilter');
+  if(tf)tf.addEventListener('change',()=>{tasksFilterTag=tf.value;renderTasks()});
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initTasksUI);
+else initTasksUI();
+
+// ============================================================
 // NAVIGATION
 // ============================================================
-const pageTitles={pilote360:'Pilote 360',agents:'Equipe IA',overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
-const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',agents:'Ta team IA connectee a Claude',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
+const pageTitles={pilote360:'Pilote 360',tasks:'Tasks',agents:'Equipe IA',overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
+const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',tasks:'Todo partagee Greg &amp; Paul',agents:'Ta team IA connectee a Claude',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
 
 function navigateTo(pg){
   document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button').forEach(b=>b.classList.remove('active'));
@@ -1505,9 +2107,9 @@ async function sbFetch(table,limit=10000){
 async function sbFetchSafe(table){try{return await sbFetch(table)}catch(e){console.warn(table+' indispo:',e.message);return[]}}
 async function loadAllData(){
   try{
-    const [v,w,p,pr,cm]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist'),sbFetchSafe('profiles'),sbFetchSafe('coach_messages')]);
+    const [v,w,p,pr,cm]=await Promise.all([sbFetch('page_views'),sbFetch('waitlist'),sbFetch('pro_waitlist'),sbFetchSafe('profiles'),sbFetchSafe('coach_messages'),loadTasks()]);
     rawViews=v;rawWaitlist=w;rawPro=p;rawProfiles=pr;rawCoachMessages=cm;
-    try{renderAll()}catch(re){console.error('Render error:',re);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur rendu : '+re.message+'</div>'}
+    try{renderAll();renderTasks();renderMyTasksWidget()}catch(re){console.error('Render error:',re);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur rendu : '+re.message+'</div>'}
   }catch(e){console.error('Fetch error:',e);document.getElementById('kpiGrid').innerHTML='<div class="kpi-card" style="grid-column:1/-1;color:#D64045">Erreur chargement : '+e.message+'</div>'}
 }
 
@@ -1628,6 +2230,25 @@ function renderPilote360(views,waitlist,pro,pv,pwl,ppr){
 
   // Alertes dynamiques
   const alertes=[];
+  // Tasks en retard (pour moi ou les 2)
+  const me=typeof getIdentity==='function'?getIdentity():null;
+  const today0=new Date();today0.setHours(0,0,0,0);
+  const overdueTasks=(rawTasks||[]).filter(t=>{
+    if(t.status==='done')return false;
+    if(!t.due_date)return false;
+    if(me&&t.assignee!==me&&t.assignee!=='both')return false;
+    return new Date(t.due_date+'T12:00:00')<today0;
+  });
+  if(overdueTasks.length>0)alertes.push({icon:'&#9940;',type:'danger',title:overdueTasks.length+' task(s) en retard'+(me?' (pour toi)':''),action:'Voir tasks',pg:'tasks'});
+  // Tasks echeance aujourd'hui
+  const todayTasks=(rawTasks||[]).filter(t=>{
+    if(t.status==='done')return false;
+    if(!t.due_date)return false;
+    if(me&&t.assignee!==me&&t.assignee!=='both')return false;
+    const d=new Date(t.due_date+'T12:00:00');
+    return d.getTime()===today0.getTime();
+  });
+  if(todayTasks.length>0)alertes.push({icon:'&#128200;',type:'warning',title:todayTasks.length+' task(s) a faire aujourd\'hui',action:'Voir tasks',pg:'tasks'});
   if(relances>0)alertes.push({icon:'&#9888;',type:'warning',title:relances+' contact(s) a relancer',action:'Ouvrir Pipeline contacts',pg:'demarchage'});
   if(typeof runway==='string'&&runway!=='&#8734;'){const months=parseFloat(runway);if(months>0&&months<6)alertes.push({icon:'&#128308;',type:'danger',title:'Runway critique : '+runway,action:'Voir Finance',pg:'finance'})}
   const upcomingFin=fin.financements.filter(f=>{if(!f.date_reponse)return false;const d=new Date(f.date_reponse);const diff=(d-new Date())/864e5;return diff>=0&&diff<=14&&['depose','instruction'].includes(f.statut)});
