@@ -548,6 +548,22 @@
     .today-error{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.35);padding:10px 12px;border-radius:8px;font-size:.75rem;margin-top:8px;position:relative;z-index:1}
     [data-theme="dark"] .today-card{background:linear-gradient(135deg,#0B1F15,#1B4332 60%,#2D6A4F)}
 
+    /* Bandeau 'Le saviez-vous ?' : info tabac/vape/sevrage rotative */
+    .factoid-bar{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,rgba(82,183,136,.12) 0%,rgba(224,159,62,.08) 100%);border:1px solid rgba(82,183,136,.2);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:.8125rem;animation:factoidFade .4s ease}
+    .factoid-icon{font-size:1.1rem;flex-shrink:0}
+    .factoid-label{color:var(--green-dark);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:.65rem;white-space:nowrap;flex-shrink:0;background:rgba(82,183,136,.18);padding:3px 8px;border-radius:6px}
+    .factoid-text{flex:1;color:var(--ink);line-height:1.45;font-weight:500}
+    .factoid-source{color:var(--grey);font-size:.68rem;font-style:italic;white-space:nowrap;flex-shrink:0}
+    .factoid-next{width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--slate);font-size:.9rem;cursor:pointer;transition:all var(--trans-fast);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:inherit}
+    .factoid-next:hover{background:var(--green);color:#fff;border-color:var(--green);transform:translateX(2px)}
+    @keyframes factoidFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+    [data-theme="dark"] .factoid-bar{background:linear-gradient(90deg,rgba(82,183,136,.14) 0%,rgba(224,159,62,.1) 100%);border-color:rgba(82,183,136,.28)}
+    [data-theme="dark"] .factoid-label{color:#98D9B4;background:rgba(82,183,136,.22)}
+    @media (max-width:768px){
+      .factoid-bar{flex-wrap:wrap;gap:6px;font-size:.75rem}
+      .factoid-source{font-size:.62rem;width:100%;order:10}
+    }
+
     /* ===== Tasks Kanban ===== */
     .tasks-toolbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
     .tasks-filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -795,6 +811,15 @@
         <button class="period-btn" data-days="0">Tout</button>
         <button class="btn-icon" onclick="loadAllData()" title="Actualiser">&#8635;</button>
       </div>
+    </div>
+
+    <!-- Bandeau 'Le saviez-vous ?' : chiffre/info tabac/vape/sevrage -->
+    <div class="factoid-bar" id="factoidBar">
+      <span class="factoid-icon">&#128161;</span>
+      <span class="factoid-label">Le saviez-vous</span>
+      <span class="factoid-text" id="factoidText"></span>
+      <span class="factoid-source" id="factoidSource"></span>
+      <button class="factoid-next" id="factoidNext" title="Suivant">&rarr;</button>
     </div>
 
     <!-- PILOTE 360 : Executive overview -->
@@ -1733,6 +1758,106 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else setTimeout(initTodayWidget,300);
 
 // ============================================================
+// FACTOIDS : 'Le saviez-vous ?' sur tabac/vape/sevrage
+// Chiffres source : OMS, Sante Publique France, INSERM, Inca, Tabac Info Service
+// ============================================================
+const FACTOIDS=[
+  // Epidemio tabac France
+  {t:"Le tabac tue 75 000 personnes par an en France, soit 200 morts par jour.",s:"Sante Publique France, 2023"},
+  {t:"Un fumeur perd en moyenne 10 annees d'esperance de vie par rapport a un non-fumeur.",s:"OMS, 2021"},
+  {t:"12 millions de Francais fument quotidiennement, dont 31% des 18-24 ans.",s:"Barometre Sante SPF 2023"},
+  {t:"Le tabac est responsable de 90% des cancers du poumon et de 75% des cancers ORL.",s:"INCa, 2023"},
+  {t:"Pres de 60% des fumeurs reguliers declarent vouloir arreter. Seuls 3 a 5% y parviennent sans aide.",s:"OMS, 2022"},
+
+  // Benefices du sevrage (delais)
+  {t:"20 minutes apres la derniere cigarette, le rythme cardiaque et la tension arterielle redeviennent normaux.",s:"Tabac Info Service"},
+  {t:"8 heures apres l'arret, le taux de monoxyde de carbone dans le sang est divise par deux.",s:"Tabac Info Service"},
+  {t:"24 heures sans tabac, les poumons commencent deja a eliminer le mucus et les residus.",s:"SPF"},
+  {t:"48 heures apres l'arret, le gout et l'odorat reapparaissent.",s:"Tabac Info Service"},
+  {t:"2 a 3 semaines apres l'arret, la marche devient nettement plus facile et la toux diminue.",s:"INSERM"},
+  {t:"1 an apres l'arret, le risque d'infarctus est divise par deux.",s:"OMS"},
+  {t:"5 ans apres l'arret, le risque d'AVC redevient equivalent a celui d'un non-fumeur.",s:"INCa"},
+  {t:"10 ans apres l'arret, le risque de cancer du poumon est divise par deux.",s:"OMS"},
+  {t:"15 ans apres l'arret, le risque cardiaque est comparable a celui d'une personne n'ayant jamais fume.",s:"OMS"},
+
+  // Economies
+  {t:"Un paquet par jour represente environ 4 200 euros depenses par an en 2025.",s:"Observatoire des prix tabac"},
+  {t:"Arreter de fumer un paquet/jour pendant 10 ans = 42 000 euros economises, soit un apport immobilier.",s:"Calcul VIRAGE"},
+
+  // Cannabis
+  {t:"1,5 million de Francais consomment du cannabis au moins 10 fois par mois.",s:"OFDT, 2023"},
+  {t:"Chez les 18-25 ans, 1 consommateur regulier sur 4 developpe une dependance.",s:"INSERM, 2022"},
+  {t:"Le cannabis augmente de 40% le risque de developper des troubles anxieux chroniques.",s:"The Lancet Psychiatry, 2023"},
+
+  // Vape
+  {t:"La vape est consideree comme 95% moins nocive que la cigarette traditionnelle.",s:"Public Health England"},
+  {t:"Parmi les vapoteurs reguliers en France, 77% sont d'anciens fumeurs.",s:"SPF, 2023"},
+  {t:"Les puffs (vapes jetables) seront interdites en France en 2025.",s:"Loi LFSS 2024"},
+  {t:"Une puff jetable equivaut en nicotine a environ 20 cigarettes.",s:"ANSM"},
+
+  // Addiction / neuro
+  {t:"La nicotine atteint le cerveau en 7 secondes apres une bouffee, plus vite qu'une injection IV.",s:"INSERM"},
+  {t:"Le systeme dopaminergique peut mettre jusqu'a 3 mois a se normaliser apres l'arret.",s:"Neuroscience & Biobehavioral Reviews"},
+  {t:"L'envie irrepressible (craving) dure en moyenne 3 minutes. Apres, elle s'attenue.",s:"Tabac Info Service"},
+  {t:"Les rechutes apres sevrage surviennent dans 85% des cas dans les 3 premiers mois.",s:"OMS"},
+
+  // Jeunes / cible VIRAGE
+  {t:"L'age moyen d'entree dans le tabagisme en France est de 14 ans.",s:"SPF"},
+  {t:"85% des fumeurs reguliers ont commence avant 18 ans.",s:"INCa"},
+  {t:"Les 18-35 ans representent la tranche d'age qui arrete le plus avec succes (+42% vs moyenne).",s:"Barometre Sante 2023"},
+
+  // Impact sante globale
+  {t:"Le tabagisme passif tue 3 000 a 5 000 personnes par an en France.",s:"SPF"},
+  {t:"Fumer pendant la grossesse multiplie par 2 le risque de fausse couche.",s:"Haute Autorite de Sante"},
+  {t:"La dependance au tabac est classee maladie chronique par l'OMS depuis 1998.",s:"OMS ICD-11"},
+
+  // B2B / remboursement
+  {t:"Les substituts nicotiniques sont rembourses a 65% par l'Assurance Maladie sur prescription.",s:"Ameli 2024"},
+  {t:"Un salarie non-fumeur est en moyenne 5 jours par an moins absent qu'un fumeur.",s:"INRS"},
+  {t:"Le cout societal du tabac en France est estime a 120 milliards d'euros par an.",s:"Kopp, 2020"},
+
+  // App / digital sante
+  {t:"Les apps d'aide au sevrage doublent les chances de succes a 6 mois.",s:"Cochrane Review 2022"},
+  {t:"Le suivi quotidien (compteur, coach) augmente de 60% le taux d'abstinence a 3 mois.",s:"JMIR mHealth 2023"},
+
+  // Fun / motivation
+  {t:"Apres 72 heures sans tabac, la nicotine est totalement eliminee de l'organisme.",s:"Tabac Info Service"},
+  {t:"Un mois sans fumer = capacite respiratoire augmentee jusqu'a 30%.",s:"INSERM"},
+  {t:"La plupart des rechutes ont lieu le soir, en situation de stress ou de socialisation avec d'autres fumeurs.",s:"Inpes"},
+  {t:"Arreter avant 40 ans recupere plus de 90% des annees de vie que le tabac aurait volees.",s:"NEJM, 2013"}
+];
+
+let factoidLastIdx=-1;
+function pickNextFactoid(){
+  if(FACTOIDS.length<=1)return 0;
+  let idx;
+  do{idx=Math.floor(Math.random()*FACTOIDS.length)}while(idx===factoidLastIdx);
+  factoidLastIdx=idx;
+  return idx;
+}
+function renderFactoid(){
+  const idx=pickNextFactoid();
+  const f=FACTOIDS[idx];
+  const bar=document.getElementById('factoidBar');
+  const tEl=document.getElementById('factoidText');
+  const sEl=document.getElementById('factoidSource');
+  if(!bar||!tEl||!sEl)return;
+  // Reset animation
+  bar.style.animation='none';bar.offsetHeight;bar.style.animation='';
+  tEl.textContent=f.t;
+  sEl.textContent='— '+f.s;
+}
+function initFactoidBar(){
+  const bar=document.getElementById('factoidBar');
+  if(!bar)return;
+  const next=document.getElementById('factoidNext');
+  if(next)next.addEventListener('click',renderFactoid);
+  renderFactoid();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initFactoidBar);
+else initFactoidBar();
+
+// ============================================================
 // TASKS : todo partagee Greg/Paul (Supabase)
 // ============================================================
 let rawTasks=[];
@@ -2144,6 +2269,7 @@ function navigateTo(pg){
   document.getElementById('pageTitle').textContent=pageTitles[pg]||'';
   const sub=document.getElementById('pageSubtitle');
   if(sub){sub.textContent=pageSubtitles[pg]||'';sub.style.display=pageSubtitles[pg]?'block':'none'}
+  if(typeof renderFactoid==='function')renderFactoid();
   window.scrollTo({top:0,behavior:'smooth'});
   if(pg==='agents'){
     // Revenir a la grille si on navigue vers cet onglet
