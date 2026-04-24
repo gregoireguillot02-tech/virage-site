@@ -9,7 +9,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <!-- Headers securite (audit 2026-04-24). A completer avec vrais headers HTTP cote hebergeur -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://cipxesubpcpsqplcqnus.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.googleusercontent.com https://*.gstatic.com; connect-src 'self' https://cipxesubpcpsqplcqnus.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://content.googleapis.com; frame-src https://accounts.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
   <meta http-equiv="Referrer-Policy" content="no-referrer">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -17,6 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <!-- TODO securite : pinner un SRI sur Chart.js (integrity="sha384-...") une fois la version figee -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Google Identity Services (OAuth pour Calendar API, Gmail, Drive) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       /* Brand */
@@ -510,6 +512,41 @@
       .detail-activities{border-top:1px solid #eee;padding-top:16px;margin-top:16px}
       .nav-section-mobile{font-size:.5625rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:16px 14px 4px;font-weight:700}
     }
+
+    /* ===== Widget Ma journee (Google Calendar) ===== */
+    .today-card{background:linear-gradient(135deg,var(--green-dark),var(--green) 60%,var(--green-light));color:#fff;border-radius:var(--radius-lg);padding:20px 22px;box-shadow:var(--shadow-md);position:relative;overflow:hidden}
+    .today-card::before{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none}
+    .today-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;position:relative;z-index:1}
+    .today-title{font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;margin:0 0 2px;letter-spacing:-.01em}
+    .today-date{font-size:.75rem;opacity:.8;text-transform:capitalize}
+    .today-actions{display:flex;gap:6px;flex-shrink:0}
+    .today-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 10px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all var(--trans-fast);backdrop-filter:blur(4px);font-family:inherit}
+    .today-btn:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.35)}
+    .today-btn.primary{background:#fff;color:var(--green-dark)}
+    .today-btn.primary:hover{background:var(--green-pale)}
+    .today-connect{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center;position:relative;z-index:1}
+    .today-connect-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:14px}
+    .today-connect h4{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;margin:0 0 6px}
+    .today-connect p{font-size:.8125rem;opacity:.85;margin:0 0 16px;max-width:360px;line-height:1.5}
+    .today-events{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1;max-height:320px;overflow-y:auto}
+    .today-events::-webkit-scrollbar{width:6px}
+    .today-events::-webkit-scrollbar-thumb{background:rgba(255,255,255,.25);border-radius:3px}
+    .today-event{display:flex;gap:12px;padding:10px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:10px;transition:all var(--trans-fast);text-decoration:none;color:#fff}
+    .today-event:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.22);transform:translateX(2px)}
+    .today-event-time{flex-shrink:0;text-align:right;min-width:62px;font-variant-numeric:tabular-nums}
+    .today-event-start{font-size:.875rem;font-weight:700;line-height:1}
+    .today-event-end{font-size:.68rem;opacity:.7;margin-top:2px}
+    .today-event-body{flex:1;min-width:0}
+    .today-event-title{font-size:.875rem;font-weight:600;margin:0 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .today-event-meta{font-size:.72rem;opacity:.8;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+    .today-event-meet{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:2px 6px;border-radius:4px;font-size:.68rem;font-weight:600}
+    .today-event.allday .today-event-time{color:var(--accent-light);font-size:.68rem}
+    .today-divider{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;opacity:.6;padding:8px 2px 4px;font-weight:700;position:relative;z-index:1}
+    .today-empty{text-align:center;padding:20px;font-size:.8125rem;opacity:.8;position:relative;z-index:1}
+    .today-status{display:flex;align-items:center;gap:6px;font-size:.68rem;opacity:.75;margin-top:10px;position:relative;z-index:1}
+    .today-status-dot{width:6px;height:6px;border-radius:50%;background:#52B788;box-shadow:0 0 0 3px rgba(82,183,136,.25)}
+    .today-error{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.35);padding:10px 12px;border-radius:8px;font-size:.75rem;margin-top:8px;position:relative;z-index:1}
+    [data-theme="dark"] .today-card{background:linear-gradient(135deg,#0B1F15,#1B4332 60%,#2D6A4F)}
   </style>
 </head>
 <body>
@@ -631,6 +668,19 @@
 
     <!-- PILOTE 360 : Executive overview -->
     <div class="page active" id="page-pilote360">
+      <!-- Widget Ma journee (Google Calendar) -->
+      <div class="today-card" id="todayCard" style="margin-bottom:18px">
+        <div class="today-head">
+          <div>
+            <h3 class="today-title">Ma journee</h3>
+            <div class="today-date" id="todayDate"></div>
+          </div>
+          <div class="today-actions" id="todayActions"></div>
+        </div>
+        <div id="todayBody">
+          <div class="today-empty">Chargement...</div>
+        </div>
+      </div>
       <div class="kpi-grid" id="kpi360Hero"></div>
       <div class="cards-grid">
         <div class="card"><div class="card-title">Site &amp; leads <button class="btn-sm" onclick="navigateTo('overview')">Voir plus &rarr;</button></div><div class="kpi-grid" id="kpi360Site" style="margin-bottom:0;grid-template-columns:1fr 1fr"></div></div>
@@ -1176,8 +1226,229 @@ const HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 let currentDays=7, rawViews=[], rawWaitlist=[], rawPro=[], rawProfiles=[], rawCoachMessages=[];
 let chartInstances={};
 
+// Google OAuth : Client ID a coller ici une fois cree dans Google Cloud Console
+// https://console.cloud.google.com/apis/credentials (type Web application)
+// Ajouter https://virage.one en JavaScript origins autorise
+const GOOGLE_CLIENT_ID='939188906408-3o1jr5jaq3npnn2gijqu7t2dkj9mpb4g.apps.googleusercontent.com';
+const GOOGLE_SCOPES='https://www.googleapis.com/auth/calendar.readonly';
+let googleToken=null, googleTokenExp=0, googleTokenClient=null, googleCalRefreshTimer=null;
+
 // Auto-login (apres CONFIG pour eviter erreur d'initialisation)
 if(sessionStorage.getItem('virage_auth')==='ok') unlockApp();
+
+// ============================================================
+// GOOGLE CALENDAR : Widget Ma journee
+// ============================================================
+const GOOGLE_TOKEN_KEY='virage_google_token';
+
+function loadCachedGoogleToken(){
+  try{
+    const raw=sessionStorage.getItem(GOOGLE_TOKEN_KEY);
+    if(!raw)return false;
+    const {token,exp}=JSON.parse(raw);
+    if(!token||!exp||Date.now()>exp-60000)return false;
+    googleToken=token; googleTokenExp=exp;
+    return true;
+  }catch{return false}
+}
+
+function saveGoogleToken(token,expiresIn){
+  googleToken=token;
+  googleTokenExp=Date.now()+expiresIn*1000;
+  sessionStorage.setItem(GOOGLE_TOKEN_KEY,JSON.stringify({token,exp:googleTokenExp}));
+}
+
+function clearGoogleToken(){
+  googleToken=null; googleTokenExp=0;
+  sessionStorage.removeItem(GOOGLE_TOKEN_KEY);
+}
+
+function initGoogleTokenClient(){
+  if(!GOOGLE_CLIENT_ID||googleTokenClient||typeof google==='undefined'||!google.accounts?.oauth2)return false;
+  googleTokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:GOOGLE_CLIENT_ID,
+    scope:GOOGLE_SCOPES,
+    callback:resp=>{
+      if(resp.error){
+        console.warn('Google OAuth error',resp);
+        renderTodayWidget({error:'Connexion refusee : '+(resp.error_description||resp.error)});
+        return;
+      }
+      saveGoogleToken(resp.access_token,resp.expires_in||3600);
+      fetchAndRenderCalendar();
+    }
+  });
+  return true;
+}
+
+function connectGoogleCalendar(){
+  if(!GOOGLE_CLIENT_ID){
+    alert('Google Client ID manquant. Va dans console.cloud.google.com, cree un OAuth Client ID (type Web), puis colle-le dans dashboard.html (variable GOOGLE_CLIENT_ID).');
+    return;
+  }
+  if(!googleTokenClient&&!initGoogleTokenClient()){
+    alert('Google Identity Services pas encore charge. Reessaie dans 2s.');
+    return;
+  }
+  googleTokenClient.requestAccessToken({prompt:googleToken?'':'consent'});
+}
+
+function disconnectGoogleCalendar(){
+  if(googleToken&&typeof google!=='undefined'&&google.accounts?.oauth2){
+    google.accounts.oauth2.revoke(googleToken,()=>{});
+  }
+  clearGoogleToken();
+  if(googleCalRefreshTimer){clearInterval(googleCalRefreshTimer);googleCalRefreshTimer=null;}
+  renderTodayWidget();
+}
+
+async function fetchCalendarEvents(){
+  if(!googleToken)throw new Error('no_token');
+  const now=new Date();
+  const tomorrow=new Date(now); tomorrow.setDate(tomorrow.getDate()+1); tomorrow.setHours(23,59,59,999);
+  const url='https://www.googleapis.com/calendar/v3/calendars/primary/events'+
+    '?timeMin='+encodeURIComponent(now.toISOString())+
+    '&timeMax='+encodeURIComponent(tomorrow.toISOString())+
+    '&singleEvents=true&orderBy=startTime&maxResults=20';
+  const r=await fetch(url,{headers:{Authorization:'Bearer '+googleToken}});
+  if(r.status===401){clearGoogleToken();throw new Error('token_expired');}
+  if(!r.ok)throw new Error('api_'+r.status);
+  const data=await r.json();
+  return data.items||[];
+}
+
+async function fetchAndRenderCalendar(){
+  try{
+    const events=await fetchCalendarEvents();
+    renderTodayWidget({events});
+    if(!googleCalRefreshTimer){
+      googleCalRefreshTimer=setInterval(fetchAndRenderCalendar,5*60*1000);
+    }
+  }catch(e){
+    if(e.message==='token_expired'){renderTodayWidget();return;}
+    console.error('Calendar fetch error',e);
+    renderTodayWidget({error:'Erreur API Calendar : '+e.message});
+  }
+}
+
+function formatTodayDate(){
+  const d=new Date();
+  return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+function fmtEventTime(iso){
+  const d=new Date(iso);
+  return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function escapeHTML(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
+
+function renderTodayWidget(state){
+  state=state||{};
+  const dateEl=document.getElementById('todayDate');
+  const actEl=document.getElementById('todayActions');
+  const bodyEl=document.getElementById('todayBody');
+  if(!dateEl||!bodyEl)return;
+  dateEl.textContent=formatTodayDate();
+
+  // Cas 1 : pas configure
+  if(!GOOGLE_CLIENT_ID){
+    actEl.innerHTML='<button class="today-btn" onclick="window.open(\'https://console.cloud.google.com/apis/credentials\',\'_blank\')">Config Google</button>';
+    bodyEl.innerHTML='<div class="today-connect"><div class="today-connect-icon">&#128197;</div><h4>Connecte Google Calendar</h4><p>Suis le guide <code>GOOGLE-CALENDAR-SETUP.md</code> pour creer un OAuth Client ID, puis colle-le dans la variable GOOGLE_CLIENT_ID du dashboard.</p></div>';
+    return;
+  }
+
+  // Cas 2 : pas connecte
+  if(!googleToken){
+    actEl.innerHTML='';
+    bodyEl.innerHTML='<div class="today-connect"><div class="today-connect-icon">&#128197;</div><h4>Connecte ton agenda</h4><p>Agenda du compte Google VIRAGE : evenements du jour et de demain, liens Meet directs, refresh auto toutes les 5 min.</p><button class="today-btn primary" onclick="connectGoogleCalendar()">Connecter Google Calendar</button></div>';
+    return;
+  }
+
+  // Cas 3 : erreur apres connexion
+  if(state.error){
+    actEl.innerHTML='<button class="today-btn" onclick="fetchAndRenderCalendar()">Reessayer</button><button class="today-btn" onclick="disconnectGoogleCalendar()">Deconnexion</button>';
+    bodyEl.innerHTML='<div class="today-error">'+escapeHTML(state.error)+'</div>';
+    return;
+  }
+
+  // Cas 4 : connecte, events charges
+  actEl.innerHTML='<button class="today-btn" onclick="fetchAndRenderCalendar()" title="Rafraichir">&#8635;</button><button class="today-btn" onclick="window.open(\'https://calendar.google.com\',\'_blank\')">Calendar &#8599;</button><button class="today-btn" onclick="disconnectGoogleCalendar()" title="Deconnexion">&#10005;</button>';
+
+  const events=state.events||[];
+  if(events.length===0){
+    bodyEl.innerHTML='<div class="today-empty">Aucun evenement aujourd\'hui ni demain. Profite.</div><div class="today-status"><span class="today-status-dot"></span>Connecte &middot; MAJ '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+'</div>';
+    return;
+  }
+
+  const todayStr=new Date().toISOString().substring(0,10);
+  const tomorrowStr=(()=>{const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().substring(0,10)})();
+  const todayEvents=[],tomorrowEvents=[];
+  events.forEach(ev=>{
+    const startISO=ev.start?.dateTime||ev.start?.date;
+    if(!startISO)return;
+    const day=startISO.substring(0,10);
+    if(day===todayStr)todayEvents.push(ev);
+    else if(day===tomorrowStr)tomorrowEvents.push(ev);
+  });
+
+  const renderEvent=ev=>{
+    const allDay=!ev.start?.dateTime;
+    const startISO=ev.start?.dateTime||ev.start?.date;
+    const endISO=ev.end?.dateTime||ev.end?.date;
+    const title=escapeHTML(ev.summary||'Sans titre');
+    const timeHTML=allDay
+      ? '<div class="today-event-start">Toute la journee</div>'
+      : '<div class="today-event-start">'+fmtEventTime(startISO)+'</div>'+(endISO?'<div class="today-event-end">'+fmtEventTime(endISO)+'</div>':'');
+    let metaParts=[];
+    if(ev.location)metaParts.push('<span>&#128205; '+escapeHTML(ev.location.substring(0,40))+'</span>');
+    const meet=ev.hangoutLink||(ev.conferenceData?.entryPoints||[]).find(e=>e.entryPointType==='video')?.uri;
+    if(meet)metaParts.push('<a class="today-event-meet" href="'+escapeHTML(meet)+'" target="_blank" rel="noopener">&#127909; Meet</a>');
+    if(ev.attendees?.length)metaParts.push('<span>&#128101; '+ev.attendees.length+'</span>');
+    const metaHTML=metaParts.length?'<div class="today-event-meta">'+metaParts.join('')+'</div>':'';
+    const href=ev.htmlLink||'#';
+    return '<a class="today-event'+(allDay?' allday':'')+'" href="'+escapeHTML(href)+'" target="_blank" rel="noopener"><div class="today-event-time">'+timeHTML+'</div><div class="today-event-body"><div class="today-event-title">'+title+'</div>'+metaHTML+'</div></a>';
+  };
+
+  let html='<div class="today-events">';
+  if(todayEvents.length){
+    html+='<div class="today-divider">Aujourd\'hui &middot; '+todayEvents.length+'</div>';
+    html+=todayEvents.map(renderEvent).join('');
+  }
+  if(tomorrowEvents.length){
+    html+='<div class="today-divider">Demain &middot; '+tomorrowEvents.length+'</div>';
+    html+=tomorrowEvents.map(renderEvent).join('');
+  }
+  if(!todayEvents.length&&!tomorrowEvents.length){
+    html+='<div class="today-empty">Aucun evenement dans les 48h.</div>';
+  }
+  html+='</div>';
+  html+='<div class="today-status"><span class="today-status-dot"></span>Connecte &middot; MAJ '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+'</div>';
+  bodyEl.innerHTML=html;
+}
+
+function initTodayWidget(){
+  renderTodayWidget();
+  if(!GOOGLE_CLIENT_ID)return;
+  const ready=()=>{
+    initGoogleTokenClient();
+    if(loadCachedGoogleToken())fetchAndRenderCalendar();
+  };
+  if(typeof google!=='undefined'&&google.accounts?.oauth2)ready();
+  else{
+    // GIS charge async, retry jusqu'a dispo
+    let tries=0;
+    const t=setInterval(()=>{
+      tries++;
+      if(typeof google!=='undefined'&&google.accounts?.oauth2){clearInterval(t);ready();}
+      else if(tries>40){clearInterval(t);console.warn('Google Identity Services non charge apres 20s');}
+    },500);
+  }
+}
+
+// Lance le widget apres que le DOM + auto-login soient prets
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(initTodayWidget,300));
+else setTimeout(initTodayWidget,300);
 
 // ============================================================
 // NAVIGATION
