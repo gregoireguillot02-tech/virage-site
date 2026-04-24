@@ -371,6 +371,22 @@
     .chat-footer-stats{padding:8px 20px;border-top:1px solid var(--border);background:var(--surface-alt);font-size:.6875rem;color:var(--slate);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
     .chat-footer-stats .stat-group{display:flex;gap:12px;align-items:center}
     .chat-footer-stats .stat-group strong{color:var(--ink);font-variant-numeric:tabular-nums}
+
+    /* DELEGATIONS (trace du Manager) */
+    .delegation-trace{margin:12px 0;padding:12px 14px;background:var(--surface-alt);border:1px solid var(--border);border-radius:12px;border-left:3px solid var(--agent-color,var(--green))}
+    .delegation-trace-header{font-size:.6875rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:8px;cursor:pointer}
+    .delegation-trace-header::before{content:'\\25B8';transition:transform var(--trans-fast);color:var(--grey)}
+    .delegation-trace.open .delegation-trace-header::before{transform:rotate(90deg)}
+    .delegation-list{display:none;flex-direction:column;gap:10px}
+    .delegation-trace.open .delegation-list{display:flex}
+    .deleg-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px}
+    .deleg-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .deleg-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid var(--deleg-color,var(--green));background:var(--surface-alt);flex-shrink:0}
+    .deleg-avatar img{width:100%;height:100%;object-fit:cover}
+    .deleg-agent-name{font-family:'Outfit',sans-serif;font-size:.8125rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+    .deleg-task{font-size:.75rem;color:var(--grey);margin-bottom:8px;font-style:italic;padding-left:36px}
+    .deleg-response{font-size:.8125rem;color:var(--ink);line-height:1.5;white-space:pre-wrap;padding-left:36px}
+    .deleg-tokens{font-size:.625rem;color:var(--grey);margin-top:6px;padding-left:36px;font-variant-numeric:tabular-nums}
     .msg-typing{display:flex;gap:4px;padding:16px}
     .msg-typing span{width:8px;height:8px;border-radius:50%;background:var(--grey-light);animation:typingBounce 1.2s infinite}
     .msg-typing span:nth-child(2){animation-delay:.15s}
@@ -2078,6 +2094,29 @@ async function loadConversation(convId){
   }catch(e){msgs.innerHTML='<div class="chat-welcome">Erreur de chargement</div>'}
 }
 
+function renderDelegationTrace(trace){
+  if(!trace||!Array.isArray(trace)||trace.length===0)return '';
+  let h=`<div class="delegation-trace open" onclick="event.target.closest('.delegation-trace').classList.toggle('open')">`;
+  h+=`<div class="delegation-trace-header">&#9889; Orchestration : ${trace.length} delegation${trace.length>1?'s':''}</div>`;
+  h+=`<div class="delegation-list" onclick="event.stopPropagation()">`;
+  trace.forEach(d=>{
+    const agent=AGENTS.find(a=>a.id===d.agent);
+    const color=agent?agent.color:'#52B788';
+    const avatar=agent?agent.avatar:'';
+    const name=d.agent_name||(agent?agent.name:d.agent);
+    const tokens=(d.tokens_in||0)+(d.tokens_out||0);
+    const cost=tokensToEUR(d.tokens_in,d.tokens_out);
+    h+=`<div class="deleg-card" style="--deleg-color:${color}">`;
+    h+=`<div class="deleg-header"><div class="deleg-avatar" style="--deleg-color:${color}"><img src="${avatar}"></div><div class="deleg-agent-name">${escHTML(name)}</div></div>`;
+    h+=`<div class="deleg-task">&#9876; ${escHTML(d.task)}</div>`;
+    h+=`<div class="deleg-response">${escHTML(d.response)}</div>`;
+    h+=`<div class="deleg-tokens">${fmtTokens(tokens)} tokens &middot; ${fmtCost(cost)}</div>`;
+    h+=`</div>`;
+  });
+  h+=`</div></div>`;
+  return h;
+}
+
 function renderChatMessages(msgs){
   const container=document.getElementById('chatMessages');if(!container)return;
   if(!msgs){
@@ -2096,7 +2135,11 @@ function renderChatMessages(msgs){
       const cost=tokensToEUR(m.tokens_in,m.tokens_out);
       tokens=`<span class="token-chip" title="in: ${m.tokens_in} / out: ${m.tokens_out}">${fmtTokens((m.tokens_in||0)+(m.tokens_out||0))} tk &middot; ${fmtCost(cost)}</span>`;
     }
+    // Trace de delegations (Manager uniquement)
+    const trace=m.metadata&&m.metadata.trace?m.metadata.trace:null;
+    const traceHTML=trace?renderDelegationTrace(trace):'';
     h+=`<div class="msg ${cls}">`;
+    if(traceHTML)h+=traceHTML;
     h+=`<div class="msg-bubble">${escHTML(m.content)}</div>`;
     h+=`<div class="msg-meta">${author}<span>${fmtDate(m.created_at)}</span>${tokens}</div>`;
     h+=`</div>`;
