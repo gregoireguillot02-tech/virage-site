@@ -320,9 +320,16 @@
     .agent-avatar .avatar-inner{width:100%;height:100%;border-radius:50%;overflow:hidden;border:3px solid var(--agent-color,var(--green));background:radial-gradient(circle at 50% 35%,#F5F9F3 0%,#E3EEE0 100%);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -8px 16px rgba(10,14,22,.06),0 6px 14px rgba(10,14,22,.12);position:relative}
     .agent-avatar img{width:100%;height:100%;object-fit:cover;object-position:center}
     .agent-avatar .fallback{font-size:3rem;filter:drop-shadow(0 2px 4px rgba(10,14,22,.15))}
-    .agent-avatar::after{content:'';position:absolute;bottom:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--green-light);border:3px solid var(--surface);box-shadow:0 0 0 0 rgba(82,183,136,.4);animation:pulseRing 2s ease-out infinite;z-index:2}
+    .agent-avatar::after{content:'';position:absolute;bottom:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--green-light);border:3px solid var(--surface);box-shadow:0 0 0 0 rgba(82,183,136,.4);animation:pulseRing 2.2s ease-out infinite;z-index:2;transition:background var(--trans-fast)}
+    .agent-card.busy .agent-avatar::after{background:#DC2626;animation:pulseBusy 1.2s ease-out infinite}
+    .agent-card.busy .agent-avatar{animation:floatBusy 1.5s ease-in-out infinite}
+    .agent-status-line{font-size:.6875rem;font-weight:600;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--green)}
+    .agent-card.busy .agent-status-line{color:#DC2626}
+    .agent-status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
     @keyframes floatIdle{0%,100%{transform:translateY(0) rotate(-1deg)}25%{transform:translateY(-4px) rotate(.5deg)}50%{transform:translateY(-8px) rotate(1deg)}75%{transform:translateY(-3px) rotate(-.5deg)}}
+    @keyframes floatBusy{0%,100%{transform:translateY(0) rotate(-2deg) scale(1)}50%{transform:translateY(-3px) rotate(2deg) scale(1.03)}}
     @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(82,183,136,.5)}70%{box-shadow:0 0 0 8px rgba(82,183,136,0)}100%{box-shadow:0 0 0 0 rgba(82,183,136,0)}}
+    @keyframes pulseBusy{0%{box-shadow:0 0 0 0 rgba(220,38,38,.6)}70%{box-shadow:0 0 0 10px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
     .agent-card:hover .agent-avatar{animation-play-state:paused}
     .agent-card:nth-child(2) .agent-avatar{animation-delay:.3s}
     .agent-card:nth-child(3) .agent-avatar{animation-delay:.6s}
@@ -334,11 +341,11 @@
 
     /* CHAT VIEW */
     .chat-container{display:grid;grid-template-columns:240px 1fr;grid-template-rows:1fr;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;height:calc(100vh - 140px);min-height:560px}
-    .chat-sidebar{background:var(--surface-alt);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;height:100%}
-    .chat-sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
-    .chat-sidebar-header h4{font-size:.75rem;color:var(--grey);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
-    .chat-new-btn{padding:6px 10px;background:var(--green);color:#FFF;border:none;border-radius:6px;font-size:.6875rem;font-weight:600;cursor:pointer;transition:background var(--trans-fast)}
-    .chat-new-btn:hover{background:var(--green-dark)}
+    .chat-sidebar{background:var(--surface-alt);border-right:1px solid var(--border);padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;height:100%}
+    .chat-sidebar-header{padding:8px 8px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .chat-sidebar-header h4{font-size:.625rem;color:var(--grey);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+    .chat-new-btn{padding:6px 12px;background:var(--green);color:#FFF;border:none;border-radius:999px;font-size:.6875rem;font-weight:600;cursor:pointer;transition:all var(--trans-fast);letter-spacing:-.01em;font-family:inherit}
+    .chat-new-btn:hover{background:var(--green-dark);box-shadow:var(--shadow)}
     .conv-item{padding:10px 12px;border-radius:8px;cursor:pointer;transition:background var(--trans-fast);display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:none;color:inherit;font-family:inherit;width:100%;position:relative}
     .conv-item:hover{background:var(--surface)}
     .conv-item.active{background:var(--surface);border:1px solid var(--border)}
@@ -350,14 +357,18 @@
     .chat-empty-convs{padding:20px 12px;text-align:center;color:var(--grey);font-size:.75rem}
 
     .chat-main{display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden}
-    .chat-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface)}
+    .chat-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface)}
     .chat-back{background:none;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:.75rem;color:var(--slate);font-family:inherit;transition:all var(--trans-fast)}
     .chat-back:hover{border-color:var(--green-light);color:var(--green)}
-    .chat-header-avatar{width:44px;height:44px;border-radius:50%;border:2px solid var(--agent-color,var(--green));overflow:hidden;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .chat-header-avatar{width:44px;height:44px;border-radius:50%;border:2px solid var(--agent-color,var(--green));overflow:hidden;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
     .chat-header-avatar img{width:100%;height:100%;object-fit:cover}
+    .chat-header-avatar::after{content:'';position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:var(--green-light);border:2px solid var(--surface);transition:background var(--trans-fast)}
+    .chat-container.busy .chat-header-avatar::after{background:#DC2626;animation:pulseBusy 1.2s ease-out infinite}
     .chat-header-info{flex:1;min-width:0}
-    .chat-header-info h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
-    .chat-header-info p{font-size:.75rem;color:var(--grey);margin-top:1px}
+    .chat-header-info h3{font-family:'Outfit',sans-serif;font-size:1.0625rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+    .chat-header-info p{font-size:.75rem;color:var(--green);margin-top:1px;display:flex;align-items:center;gap:5px;font-weight:500}
+    .chat-container.busy .chat-header-info p{color:#DC2626}
+    .chat-header-info p::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
 
     .chat-messages{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden;padding:24px;display:flex;flex-direction:column;gap:14px;background:var(--bg);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
     .chat-messages::-webkit-scrollbar{width:10px}
@@ -366,12 +377,27 @@
     .chat-messages::-webkit-scrollbar-thumb:hover{background:rgba(10,14,22,.35);background-clip:padding-box}
     .chat-welcome{text-align:center;padding:40px 20px;color:var(--grey);font-size:.875rem}
     .chat-welcome h4{font-family:'Outfit',sans-serif;font-size:1.125rem;color:var(--ink);margin-bottom:6px}
-    .msg{display:flex;flex-direction:column;gap:2px}
-    .msg-user{align-self:flex-end;align-items:flex-end;max-width:80%}
-    .msg-assistant{align-self:flex-start;max-width:92%;width:92%}
-    .msg-bubble{padding:14px 18px;border-radius:14px;font-size:.875rem;line-height:1.6;word-wrap:break-word;overflow-wrap:break-word}
+    .msg{display:flex;flex-direction:column;gap:3px;animation:msgFadeIn .3s ease-out}
+    @keyframes msgFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .msg-user{align-self:flex-end;align-items:flex-end;max-width:78%}
+    .msg-assistant{align-self:flex-start;max-width:90%;width:90%}
+    .msg-row{display:flex;gap:10px;align-items:flex-end}
+    .msg-user .msg-row{justify-content:flex-end}
+    .msg-mini-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid var(--agent-color,var(--green));background:var(--surface-alt);flex-shrink:0}
+    .msg-mini-avatar img{width:100%;height:100%;object-fit:cover}
+    .msg-bubble{padding:12px 16px;border-radius:16px;font-size:.875rem;line-height:1.55;word-wrap:break-word;overflow-wrap:break-word}
     .msg-user .msg-bubble{background:var(--green);color:#FFF;border-bottom-right-radius:4px;white-space:pre-wrap}
     .msg-assistant .msg-bubble{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-bottom-left-radius:4px}
+    .msg-agent-name{font-size:.6875rem;font-weight:700;color:var(--agent-color,var(--green));letter-spacing:-.01em;margin-left:40px;margin-bottom:2px}
+    /* Date separator */
+    .date-sep{display:flex;align-items:center;gap:12px;margin:12px 0;font-size:.625rem;color:var(--grey);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+    .date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+    /* Suggestions empty state */
+    .chat-suggestions{display:grid;gap:10px;margin:16px auto;max-width:560px}
+    .suggestion-chip{padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;font-size:.8125rem;color:var(--ink);transition:all var(--trans-fast);font-family:inherit;line-height:1.4}
+    .suggestion-chip:hover{border-color:var(--green-light);background:var(--green-pale);transform:translateX(2px)}
+    .welcome-avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--agent-color,var(--green));overflow:hidden;margin:20px auto 12px;background:var(--surface-alt);box-shadow:var(--shadow-md)}
+    .welcome-avatar img{width:100%;height:100%;object-fit:cover}
     /* Markdown rendering dans les bulles assistant et dans les delegations */
     .md-body h1,.md-body h2,.md-body h3,.md-body h4{font-family:'Outfit',sans-serif;font-weight:700;letter-spacing:-.01em;line-height:1.3;margin:16px 0 8px}
     .md-body h1{font-size:1.125rem;color:var(--green-dark)}
@@ -708,7 +734,7 @@
               <div class="chat-header-avatar" id="chatHeaderAvatar"></div>
               <div class="chat-header-info">
                 <h3 id="chatHeaderName"></h3>
-                <p id="chatHeaderRole"></p>
+                <p id="chatHeaderStatus">Disponible</p>
               </div>
             </div>
             <div class="chat-messages" id="chatMessages"></div>
@@ -2006,12 +2032,18 @@ function getAgentAuthor(){
 }
 
 const AGENTS=[
-  {id:'manager',name:'Le Manager',role:'Vision strategique, priorites, briefs',avatar:'avatars/pulmo-manager.png',fallback:'&#9818;',color:'#1B4332'},
-  {id:'marketing',name:'La Marketing',role:'Social media, copy posts, calendrier edito',avatar:'avatars/pulmo-marketing.png',fallback:'&#128226;',color:'#E09F3E'},
-  {id:'dev',name:'Le Dev Web',role:'Site, app, dashboard, Supabase, specs tech',avatar:'avatars/pulmo-dev.png',fallback:'&#60;/&#62;',color:'#3A86A8'},
-  {id:'compliance',name:'La Compliance',role:'DM/MDR, HDS, RGPD sante, App Store',avatar:'avatars/pulmo-compliance.png',fallback:'&#9877;',color:'#7B3FA0'},
-  {id:'partenariats',name:'Le Partenariats',role:'Demarchage pros, financement, RDV',avatar:'avatars/pulmo-partenariats.png',fallback:'&#129309;',color:'#52B788'},
+  {id:'manager',name:'Le Manager',role:'Vision strategique, priorites, briefs',avatar:'avatars/pulmo-manager.png',fallback:'&#9818;',color:'#1B4332',
+    suggestions:['Donne-moi les 3 priorites de la semaine','Fais le point sur l\'avancement VIRAGE','Aide-moi a trancher : on pousse le lancement beta publique ou on polish encore ?','Oriente-moi vers le bon agent pour mon besoin']},
+  {id:'marketing',name:'La Marketing',role:'Social media, copy posts, calendrier edito',avatar:'avatars/pulmo-marketing.png',fallback:'&#128226;',color:'#E09F3E',
+    suggestions:['Propose un post Instagram pour cette semaine','Redige un cold email pour approcher une mutuelle','Planifie le calendrier edito de la semaine prochaine','Idee de Reel qui pourrait performer']},
+  {id:'dev',name:'Le Dev Web',role:'Site, app, dashboard, Supabase, specs tech',avatar:'avatars/pulmo-dev.png',fallback:'&#60;/&#62;',color:'#3A86A8',
+    suggestions:['Propose une amelioration pour le dashboard','Comment optimiser le cout Claude API quand on scale ?','Specs pour la feature du Coach IA de l\'app','Quelles tables manquent dans Supabase pour aller plus loin ?']},
+  {id:'compliance',name:'La Compliance',role:'DM/MDR, HDS, RGPD sante, App Store',avatar:'avatars/pulmo-compliance.png',fallback:'&#9877;',color:'#7B3FA0',
+    suggestions:['Est-ce que VIRAGE risque d\'etre qualifie dispositif medical ?','Rappel des mentions obligatoires pour la landing','Que prevoir pour passer en HDS quand on aura des users reels ?','Checklist avant publication sur App Store (categorie sante)']},
+  {id:'partenariats',name:'Le Partenariats',role:'Demarchage pros, financement, RDV',avatar:'avatars/pulmo-partenariats.png',fallback:'&#129309;',color:'#52B788',
+    suggestions:['Redige un cold email pour un addictologue APHP','Prepare ma fiche RDV avec le Dr Talbot (28/04)','Liste les dossiers financement a relancer cette semaine','Challenge ma one-pager avant envoi a un investisseur']},
 ];
+const busyAgents=new Set();
 
 let currentAgentId=null,currentConversationId=null,allConversations=[],isSending=false;
 // Pricing Sonnet 4.5 en USD par token
@@ -2021,16 +2053,24 @@ function tokensToEUR(tIn,tOut){return((tIn||0)*PRICE_IN+(tOut||0)*PRICE_OUT)*USD
 function fmtCost(eur){return eur<0.01?'<0,01 EUR':eur.toFixed(2).replace('.',',')+' EUR'}
 function fmtTokens(n){return (n||0).toLocaleString('fr-FR')}
 
+const HIST_KEY='virage_agents_hist_tokens';
+function getHistTokens(){try{return JSON.parse(localStorage.getItem(HIST_KEY))||{in:0,out:0}}catch(e){return{in:0,out:0}}}
+function addHistTokens(tIn,tOut){const h=getHistTokens();h.in+=tIn||0;h.out+=tOut||0;localStorage.setItem(HIST_KEY,JSON.stringify(h))}
+
 async function updateGlobalTokenStats(){
+  // Tokens encore en BDD (baisse si suppression)
+  let dbIn=0,dbOut=0;
   try{
     const r=await fetch(SB_URL+'/rest/v1/agent_messages?select=tokens_in,tokens_out',{headers:HEADERS});
-    if(r.ok){const data=await r.json();
-      let tIn=0,tOut=0;data.forEach(m=>{tIn+=m.tokens_in||0;tOut+=m.tokens_out||0});
-      const g1=document.getElementById('globalTokens'),g2=document.getElementById('globalCost');
-      if(g1)g1.textContent=fmtTokens(tIn+tOut);
-      if(g2)g2.textContent=fmtCost(tokensToEUR(tIn,tOut));
-    }
+    if(r.ok){const data=await r.json();data.forEach(m=>{dbIn+=m.tokens_in||0;dbOut+=m.tokens_out||0})}
   }catch(e){}
+  // Tokens historiques (jamais decremente)
+  const hist=getHistTokens();
+  // Le vrai "paye" est le max des 2 (hist au cas ou pas encore tracke)
+  const tIn=Math.max(hist.in,dbIn),tOut=Math.max(hist.out,dbOut);
+  const g1=document.getElementById('globalTokens'),g2=document.getElementById('globalCost');
+  if(g1)g1.textContent=fmtTokens(tIn+tOut);
+  if(g2)g2.textContent=fmtCost(tokensToEUR(tIn,tOut));
 }
 
 function updateConvStats(messages){
@@ -2043,22 +2083,22 @@ function updateConvStats(messages){
 
 function renderAgentsGrid(){
   const grid=document.getElementById('agentsGrid');if(!grid)return;
-  // Load conversations counts
   loadAllConversations().then(()=>{
     const byAgent={};allConversations.forEach(c=>{byAgent[c.agent_id]=(byAgent[c.agent_id]||0)+1});
     let h='';
     AGENTS.forEach(a=>{
       const count=byAgent[a.id]||0;
-      h+=`<div class="agent-card" style="--agent-color:${a.color}" onclick="openAgentChat('${a.id}')">`;
+      const busy=busyAgents.has(a.id);
+      h+=`<div class="agent-card${busy?' busy':''}" data-agent="${a.id}" style="--agent-color:${a.color}" onclick="openAgentChat('${a.id}')">`;
       h+=`<div class="agent-card-inner">`;
       h+=`<div class="agent-avatar"><div class="avatar-inner"><img src="${a.avatar}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="fallback" style="display:none">${a.fallback}</div></div></div>`;
       h+=`<div class="agent-name">${a.name}</div>`;
       h+=`<div class="agent-role">${a.role}</div>`;
+      h+=`<div class="agent-status-line"><span class="agent-status-dot"></span>${busy?'En train de reflechir...':'Disponible'}</div>`;
       h+=`<div class="agent-badge">${count} conversation${count>1?'s':''}</div>`;
       h+=`</div></div>`;
     });
     grid.innerHTML=h;
-    // Parallax 3D on hover
     grid.querySelectorAll('.agent-card').forEach(card=>{
       const inner=card.querySelector('.agent-card-inner');
       const av=card.querySelector('.agent-avatar');
@@ -2079,6 +2119,24 @@ function renderAgentsGrid(){
   });
 }
 
+function setAgentBusy(agentId,busy){
+  if(busy)busyAgents.add(agentId);else busyAgents.delete(agentId);
+  // Update grid card si visible
+  const card=document.querySelector('.agent-card[data-agent="'+agentId+'"]');
+  if(card){
+    card.classList.toggle('busy',busy);
+    const line=card.querySelector('.agent-status-line');
+    if(line)line.innerHTML='<span class="agent-status-dot"></span>'+(busy?'En train de reflechir...':'Disponible');
+  }
+  // Update chat header si c'est l'agent courant
+  if(agentId===currentAgentId){
+    const ctn=document.querySelector('.chat-container');
+    if(ctn)ctn.classList.toggle('busy',busy);
+    const pStatus=document.getElementById('chatHeaderStatus');
+    if(pStatus)pStatus.textContent=busy?'En train de reflechir...':'Disponible';
+  }
+}
+
 async function loadAllConversations(){
   try{
     const r=await fetch(SB_URL+'/rest/v1/agent_conversations?select=*&archived=eq.false&order=updated_at.desc&limit=200',{headers:HEADERS});
@@ -2093,9 +2151,13 @@ function openAgentChat(agentId,convId){
   document.getElementById('agentsGridView').style.display='none';
   document.getElementById('agentsChatView').style.display='block';
   document.getElementById('chatHeaderName').textContent=agent.name;
-  document.getElementById('chatHeaderRole').textContent=agent.role;
-  document.getElementById('chatHeaderAvatar').style.borderColor=agent.color;
-  document.getElementById('chatHeaderAvatar').innerHTML=`<img src="${agent.avatar}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none;font-size:1.5rem">${agent.fallback}</div>`;
+  const status=document.getElementById('chatHeaderStatus');
+  if(status)status.textContent=busyAgents.has(agentId)?'En train de reflechir...':'Disponible';
+  const ctn=document.querySelector('.chat-container');
+  if(ctn)ctn.classList.toggle('busy',busyAgents.has(agentId));
+  const hAv=document.getElementById('chatHeaderAvatar');
+  hAv.style.borderColor=agent.color;
+  hAv.innerHTML=`<img src="${agent.avatar}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none;font-size:1.5rem">${agent.fallback}</div>`;
   renderConvList();
   renderChatMessages();
   setTimeout(()=>document.getElementById('chatInput').focus(),100);
@@ -2249,31 +2311,64 @@ function renderDelegationTrace(trace){
   return h;
 }
 
+function relativeDate(iso){
+  const d=new Date(iso),now=new Date();
+  const sameDay=d.toDateString()===now.toDateString();
+  if(sameDay)return 'Aujourd\'hui';
+  const y=new Date(now);y.setDate(now.getDate()-1);
+  if(d.toDateString()===y.toDateString())return 'Hier';
+  return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+}
+
 function renderChatMessages(msgs){
   const container=document.getElementById('chatMessages');if(!container)return;
-  if(!msgs){
-    const agent=AGENTS.find(a=>a.id===currentAgentId);
-    container.innerHTML=`<div class="chat-welcome"><h4>${agent?agent.name:''}</h4><p>Demarre une nouvelle conversation en envoyant un message.</p></div>`;
+  const agent=AGENTS.find(a=>a.id===currentAgentId);
+  // Empty state : welcome + suggestions
+  if(!msgs||msgs.length===0){
+    let h='<div class="chat-welcome">';
+    if(agent){
+      h+=`<div class="welcome-avatar" style="--agent-color:${agent.color}"><img src="${agent.avatar}"></div>`;
+      h+=`<h4>${agent.name}</h4>`;
+      h+=`<p style="max-width:440px;margin:0 auto 4px">${agent.role}.</p>`;
+      h+=`<p style="font-size:.75rem;color:var(--grey);max-width:440px;margin:0 auto">Demarre en choisissant une question, ou ecris ton message.</p>`;
+      if(agent.suggestions){
+        h+='<div class="chat-suggestions">';
+        agent.suggestions.forEach(s=>{h+=`<button class="suggestion-chip" onclick="document.getElementById('chatInput').value=${JSON.stringify(s).replace(/'/g,"&#39;")};document.getElementById('chatInput').focus()">${escHTML(s)}</button>`});
+        h+='</div>';
+      }
+    }
+    h+='</div>';
+    container.innerHTML=h;
     updateConvStats([]);updateGlobalTokenStats();
     return;
   }
-  if(msgs.length===0){container.innerHTML='<div class="chat-welcome">Conversation vide</div>';updateConvStats([]);updateGlobalTokenStats();return}
   let h='';
+  let lastDate='';
   msgs.forEach(m=>{
     const cls=m.role==='user'?'msg-user':'msg-assistant';
+    const dateLabel=relativeDate(m.created_at);
+    if(dateLabel!==lastDate){h+=`<div class="date-sep">${dateLabel}</div>`;lastDate=dateLabel}
     const author=m.author?`<span class="author-chip">${escHTML(m.author)}</span>`:'';
     let tokens='';
     if(m.role==='assistant'&&(m.tokens_in||m.tokens_out)){
       const cost=tokensToEUR(m.tokens_in,m.tokens_out);
       tokens=`<span class="token-chip" title="in: ${m.tokens_in} / out: ${m.tokens_out}">${fmtTokens((m.tokens_in||0)+(m.tokens_out||0))} tk &middot; ${fmtCost(cost)}</span>`;
     }
-    // Trace de delegations (Manager uniquement)
     const trace=m.metadata&&m.metadata.trace?m.metadata.trace:null;
     const traceHTML=trace?renderDelegationTrace(trace):'';
     const bubbleContent=m.role==='assistant'?`<div class="md-body">${mdToHTML(m.content)}</div>`:escHTML(m.content);
-    h+=`<div class="msg ${cls}">`;
+    const agentColor=agent?agent.color:'#52B788';
+    h+=`<div class="msg ${cls}" style="--agent-color:${agentColor}">`;
+    if(m.role==='assistant'&&agent)h+=`<div class="msg-agent-name">${agent.name}</div>`;
     if(traceHTML)h+=traceHTML;
-    h+=`<div class="msg-bubble">${bubbleContent}</div>`;
+    if(m.role==='assistant'&&agent){
+      h+=`<div class="msg-row">`;
+      h+=`<div class="msg-mini-avatar" style="--agent-color:${agentColor}"><img src="${agent.avatar}"></div>`;
+      h+=`<div class="msg-bubble">${bubbleContent}</div>`;
+      h+=`</div>`;
+    } else {
+      h+=`<div class="msg-bubble">${bubbleContent}</div>`;
+    }
     h+=`<div class="msg-meta">${author}<span>${fmtDate(m.created_at)}</span>${tokens}</div>`;
     h+=`</div>`;
   });
@@ -2297,6 +2392,7 @@ async function sendChatMessage(){
   if(!message)return;
   const btn=document.getElementById('chatSendBtn');
   isSending=true;btn.disabled=true;btn.textContent='...';input.disabled=true;
+  setAgentBusy(currentAgentId,true);
   const author=getAgentAuthor();
   // Optimistic UI
   const container=document.getElementById('chatMessages');
@@ -2329,7 +2425,9 @@ async function sendChatMessage(){
       container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble" style="color:var(--red)">Erreur : ${escHTML(data.error||'inconnue')}</div></div>`);
     }else{
       currentConversationId=data.conversation_id;
-      // Pas de rendu optimiste ici : on recharge tout pour avoir les delegations complete + tokens + metadata
+      // Enregistre les tokens dans l'historique local (jamais decremente)
+      if(data.usage){addHistTokens(data.usage.input_tokens||0,data.usage.output_tokens||0)}
+      // Recharge pour avoir les delegations complete + tokens + metadata
       await loadAllConversations();renderConvList();
       await loadConversation(currentConversationId);
     }
@@ -2339,6 +2437,7 @@ async function sendChatMessage(){
     container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble" style="color:var(--red)">Erreur reseau : ${escHTML(e.message)}</div></div>`);
   }finally{
     isSending=false;btn.disabled=false;btn.textContent='Envoyer';input.disabled=false;input.focus();
+    setAgentBusy(currentAgentId,false);
   }
 }
 
