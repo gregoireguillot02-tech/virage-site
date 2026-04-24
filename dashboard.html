@@ -365,8 +365,12 @@
     .msg-bubble{padding:12px 16px;border-radius:14px;font-size:.875rem;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
     .msg-user .msg-bubble{background:var(--green);color:#FFF;border-bottom-right-radius:4px}
     .msg-assistant .msg-bubble{background:var(--surface);border:1px solid var(--border);color:var(--ink);border-bottom-left-radius:4px}
-    .msg-meta{font-size:.625rem;color:var(--grey);padding:0 8px;display:flex;align-items:center;gap:6px}
+    .msg-meta{font-size:.625rem;color:var(--grey);padding:0 8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
     .msg-meta .author-chip{background:var(--surface-alt);padding:1px 6px;border-radius:4px;font-weight:600}
+    .msg-meta .token-chip{background:rgba(82,183,136,.1);color:var(--green);padding:1px 6px;border-radius:4px;font-weight:600;font-variant-numeric:tabular-nums}
+    .chat-footer-stats{padding:8px 20px;border-top:1px solid var(--border);background:var(--surface-alt);font-size:.6875rem;color:var(--slate);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .chat-footer-stats .stat-group{display:flex;gap:12px;align-items:center}
+    .chat-footer-stats .stat-group strong{color:var(--ink);font-variant-numeric:tabular-nums}
     .msg-typing{display:flex;gap:4px;padding:16px}
     .msg-typing span{width:8px;height:8px;border-radius:50%;background:var(--grey-light);animation:typingBounce 1.2s infinite}
     .msg-typing span:nth-child(2){animation-delay:.15s}
@@ -656,6 +660,10 @@
             <div class="chat-input-bar">
               <textarea class="chat-input" id="chatInput" placeholder="Ecris ton message... (Entree pour envoyer, Shift+Entree pour saut de ligne)" rows="1"></textarea>
               <button class="chat-send" id="chatSendBtn" onclick="sendChatMessage()">Envoyer</button>
+            </div>
+            <div class="chat-footer-stats" id="chatFooterStats">
+              <div class="stat-group"><span>Conversation : <strong id="convTokens">0</strong> tokens</span><span>Cout estime : <strong id="convCost">0,00 EUR</strong></span></div>
+              <div class="stat-group"><span>Total agents (tout) : <strong id="globalTokens">--</strong> tokens &middot; <strong id="globalCost">--</strong></span></div>
             </div>
           </div>
         </div>
@@ -1951,6 +1959,32 @@ const AGENTS=[
 ];
 
 let currentAgentId=null,currentConversationId=null,allConversations=[],isSending=false;
+// Pricing Sonnet 4.5 en USD par token
+const PRICE_IN=3/1000000, PRICE_OUT=15/1000000;
+const USD_EUR=0.93; // approximation
+function tokensToEUR(tIn,tOut){return((tIn||0)*PRICE_IN+(tOut||0)*PRICE_OUT)*USD_EUR}
+function fmtCost(eur){return eur<0.01?'<0,01 EUR':eur.toFixed(2).replace('.',',')+' EUR'}
+function fmtTokens(n){return (n||0).toLocaleString('fr-FR')}
+
+async function updateGlobalTokenStats(){
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/agent_messages?select=tokens_in,tokens_out',{headers:HEADERS});
+    if(r.ok){const data=await r.json();
+      let tIn=0,tOut=0;data.forEach(m=>{tIn+=m.tokens_in||0;tOut+=m.tokens_out||0});
+      const g1=document.getElementById('globalTokens'),g2=document.getElementById('globalCost');
+      if(g1)g1.textContent=fmtTokens(tIn+tOut);
+      if(g2)g2.textContent=fmtCost(tokensToEUR(tIn,tOut));
+    }
+  }catch(e){}
+}
+
+function updateConvStats(messages){
+  let tIn=0,tOut=0;
+  (messages||[]).forEach(m=>{tIn+=m.tokens_in||0;tOut+=m.tokens_out||0});
+  const c1=document.getElementById('convTokens'),c2=document.getElementById('convCost');
+  if(c1)c1.textContent=fmtTokens(tIn+tOut);
+  if(c2)c2.textContent=fmtCost(tokensToEUR(tIn,tOut));
+}
 
 function renderAgentsGrid(){
   const grid=document.getElementById('agentsGrid');if(!grid)return;
@@ -2047,23 +2081,30 @@ async function loadConversation(convId){
 function renderChatMessages(msgs){
   const container=document.getElementById('chatMessages');if(!container)return;
   if(!msgs){
-    // Welcome par defaut
     const agent=AGENTS.find(a=>a.id===currentAgentId);
     container.innerHTML=`<div class="chat-welcome"><h4>${agent?agent.name:''}</h4><p>Demarre une nouvelle conversation en envoyant un message.</p></div>`;
+    updateConvStats([]);updateGlobalTokenStats();
     return;
   }
-  if(msgs.length===0){container.innerHTML='<div class="chat-welcome">Conversation vide</div>';return}
+  if(msgs.length===0){container.innerHTML='<div class="chat-welcome">Conversation vide</div>';updateConvStats([]);updateGlobalTokenStats();return}
   let h='';
   msgs.forEach(m=>{
     const cls=m.role==='user'?'msg-user':'msg-assistant';
     const author=m.author?`<span class="author-chip">${escHTML(m.author)}</span>`:'';
+    let tokens='';
+    if(m.role==='assistant'&&(m.tokens_in||m.tokens_out)){
+      const cost=tokensToEUR(m.tokens_in,m.tokens_out);
+      tokens=`<span class="token-chip" title="in: ${m.tokens_in} / out: ${m.tokens_out}">${fmtTokens((m.tokens_in||0)+(m.tokens_out||0))} tk &middot; ${fmtCost(cost)}</span>`;
+    }
     h+=`<div class="msg ${cls}">`;
     h+=`<div class="msg-bubble">${escHTML(m.content)}</div>`;
-    h+=`<div class="msg-meta">${author}<span>${fmtDate(m.created_at)}</span></div>`;
+    h+=`<div class="msg-meta">${author}<span>${fmtDate(m.created_at)}</span>${tokens}</div>`;
     h+=`</div>`;
   });
   container.innerHTML=h;
   container.scrollTop=container.scrollHeight;
+  updateConvStats(msgs);
+  updateGlobalTokenStats();
 }
 
 function newConversation(){
@@ -2106,7 +2147,12 @@ async function sendChatMessage(){
       container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble" style="color:var(--red)">Erreur : ${escHTML(data.error||'inconnue')}</div></div>`);
     }else{
       currentConversationId=data.conversation_id;
-      container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble">${escHTML(data.content)}</div><div class="msg-meta"><span class="author-chip">${escHTML(data.agent.name)}</span><span>maintenant</span></div></div>`);
+      const u=data.usage||{};
+      const tIn=u.input_tokens||0,tOut=u.output_tokens||0;
+      const costHTML=(tIn||tOut)?`<span class="token-chip" title="in: ${tIn} / out: ${tOut}">${fmtTokens(tIn+tOut)} tk &middot; ${fmtCost(tokensToEUR(tIn,tOut))}</span>`:'';
+      container.insertAdjacentHTML('beforeend',`<div class="msg msg-assistant"><div class="msg-bubble">${escHTML(data.content)}</div><div class="msg-meta"><span class="author-chip">${escHTML(data.agent.name)}</span><span>maintenant</span>${costHTML}</div></div>`);
+      // Recharger les messages pour avoir les stats exactes
+      if(currentConversationId){loadConversation(currentConversationId)}
       await loadAllConversations();renderConvList();
     }
     container.scrollTop=container.scrollHeight;
