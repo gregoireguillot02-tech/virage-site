@@ -2,7 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VIRAGE">
+  <meta name="theme-color" content="#1B4332" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)">
   <title>VIRAGE Command Center</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private">
@@ -50,8 +55,8 @@
       --shadow-lg:0 12px 32px rgba(0,0,0,.5);
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:"cv02","cv03","cv04","cv11"}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:"cv02","cv03","cv04","cv11";overflow-x:hidden}
 
     /* LOGIN */
     .login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1B4332,#2D6A4F);display:flex;align-items:center;justify-content:center;z-index:9999}
@@ -295,6 +300,19 @@
       .btn-sm{min-height:36px;padding:8px 14px;font-size:.8125rem}
       .btn-primary{min-height:42px;padding:10px 18px;font-size:.875rem}
       .btn-icon{min-width:38px;min-height:38px}
+
+      /* Force 16px sur tous les inputs en mobile (sinon Safari iOS zoom auto au focus) */
+      input[type="text"],input[type="email"],input[type="number"],input[type="password"],input[type="search"],input[type="tel"],input[type="url"],input[type="date"],input[type="datetime-local"],input[type="time"],select,textarea{font-size:16px!important}
+      .task-modal-form input,.task-modal-form textarea,.task-modal-form select{font-size:16px!important}
+      .login-input{font-size:16px}
+
+      /* Reduire les fontes globales mobile pour eviter sensation de "zoom" */
+      body{font-size:.9375rem}
+      .login-box{padding:28px 22px;border-radius:18px}
+      .login-box h2{font-size:1.25rem}
+
+      /* Limiter le scaling automatique du contenu */
+      .main{font-size:.9375rem}
     }
     [data-theme="dark"] .bottom-nav{background:rgba(26,29,38,.92);border-top-color:var(--border)}
     @media(max-width:380px){
