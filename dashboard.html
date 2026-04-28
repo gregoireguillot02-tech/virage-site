@@ -1092,6 +1092,10 @@
       <!-- KPI globaux : performance des 25 derniers posts -->
       <div class="kpi-grid" id="instagramKPIs"></div>
       <div class="cards-grid">
+        <div class="card full">
+          <div class="card-title">Reach 30 jours <span class="badge" id="igTrendBadge"></span></div>
+          <div class="chart-wrap h200"><canvas id="chartIGReach"></canvas></div>
+        </div>
         <div class="card">
           <div class="card-title">Top 3 posts (engagement)</div>
           <div id="instagramTopPosts"></div>
@@ -1105,13 +1109,25 @@
           <div id="instagramByDay"></div>
         </div>
         <div class="card">
-          <div class="card-title">Recommandations CM</div>
+          <div class="card-title">Heure de publication</div>
+          <div id="instagramByHour"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top hashtags <span class="badge" id="igHashtagsCount"></span></div>
+          <div id="instagramHashtags"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Format de caption</div>
+          <div id="instagramCaptionAnalysis"></div>
+        </div>
+        <div class="card full">
+          <div class="card-title">Recommandations Community Manager</div>
           <div id="instagramRecos"></div>
         </div>
         <div class="card full">
           <div class="card-title">
             Tous les posts <span id="igMediaCount" class="badge"></span>
-            <div style="display:flex;gap:6px;margin-left:auto">
+            <div style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
               <select id="igSortBy" class="tasks-select" style="min-width:140px"><option value="date">Plus recents</option><option value="engagement">Engagement %</option><option value="reach">Reach</option><option value="likes">Likes</option><option value="saves">Sauvegardes</option></select>
               <button class="btn-sm" onclick="refreshInstagram()" id="igRefreshBtn">&#8635; Actualiser</button>
               <button class="btn-sm" onclick="window.open('https://www.instagram.com/virage.app/','_blank')">Ouvrir IG &#8599;</button>
@@ -1997,13 +2013,20 @@ async function fetchInstagramData(kind, force=false){
   return await r.json();
 }
 
+let igTrend=null;
+
 async function loadInstagramOverview(force){
   if(igLoading)return;
   igLoading=true;
   const profileEl=document.getElementById('instagramProfile');
-  const mediaEl=document.getElementById('instagramMedia');
   try{
-    igOverview=await fetchInstagramData('overview',force);
+    // Fetch overview (profil + posts + insights par post) et trend 30j en parallele
+    const [overview,trend]=await Promise.all([
+      fetchInstagramData('overview',force),
+      fetchInstagramData('trend',force).catch(()=>null) // trend optionnel
+    ]);
+    igOverview=overview;
+    igTrend=trend;
     renderInstagramAll();
   }catch(e){
     if(profileEl)profileEl.innerHTML='<div class="ig-error">Erreur chargement Instagram : '+escHTML(e.message)+'<br><br>Verifie : <ul style="margin-top:8px;padding-left:20px"><li>Edge Function instagram-fetch deployee</li><li>Secrets INSTAGRAM_ACCESS_TOKEN et INSTAGRAM_BUSINESS_ID definis</li><li>Token Insta valide (60j)</li></ul></div>';
@@ -2014,11 +2037,169 @@ function renderInstagramAll(){
   if(!igOverview)return;
   renderInstagramProfile();
   renderInstagramKPIs();
+  renderInstagramReachChart();
   renderInstagramTopPosts();
   renderInstagramByType();
   renderInstagramByDay();
+  renderInstagramByHour();
+  renderInstagramHashtags();
+  renderInstagramCaptionAnalysis();
   renderInstagramRecos();
   renderInstagramMedia();
+}
+
+function renderInstagramReachChart(){
+  const reach=igTrend?.reach||[];
+  const badgeEl=document.getElementById('igTrendBadge');
+  if(reach.length===0){
+    if(badgeEl)badgeEl.textContent='donnees indisponibles';
+    return;
+  }
+  const labels=reach.map(r=>{const d=new Date(r.end_time);return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})});
+  const values=reach.map(r=>r.value||0);
+  const total=values.reduce((s,v)=>s+v,0);
+  const avg=values.length?Math.round(total/values.length):0;
+  if(badgeEl)badgeEl.textContent=total.toLocaleString('fr-FR')+' total &middot; '+avg+'/jour';
+  createChart('chartIGReach',{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:'Reach',
+        data:values,
+        borderColor:'#dc2743',
+        backgroundColor:'rgba(220,39,67,.12)',
+        borderWidth:2,
+        tension:.35,
+        fill:true,
+        pointRadius:2,
+        pointHoverRadius:6,
+        pointBackgroundColor:'#dc2743'
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:defaultScales,
+      plugins:{...defaultPlugins,legend:{display:false}}
+    }
+  });
+}
+
+function renderInstagramByHour(){
+  const el=document.getElementById('instagramByHour');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(items.length===0){el.innerHTML='<div class="empty">Pas encore de posts</div>';return}
+  // Buckets 4 tranches : Matin (6-12), Midi (12-15), Aprem (15-19), Soir (19-23), Nuit (23-6)
+  const slots=[
+    {label:'Matin',from:6,to:12,icon:'&#9728;'},
+    {label:'Midi',from:12,to:15,icon:'&#127869;'},
+    {label:'Aprem',from:15,to:19,icon:'&#127773;'},
+    {label:'Soir',from:19,to:23,icon:'&#127774;'},
+    {label:'Nuit',from:23,to:30,icon:'&#127769;'}
+  ];
+  const buckets=slots.map(()=>({count:0,eng:0,reach:0}));
+  items.forEach(p=>{
+    const h=new Date(p.timestamp).getHours();
+    const hCheck=h<6?h+24:h;
+    const idx=slots.findIndex(s=>hCheck>=s.from&&hCheck<s.to);
+    const i=idx>=0?idx:4; // par defaut Nuit
+    buckets[i].count++;
+    buckets[i].eng+=p._engRate;
+    buckets[i].reach+=p._reach;
+  });
+  const maxEng=Math.max(...buckets.map(b=>b.count?b.eng/b.count:0),0.01);
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+slots.map((s,i)=>{
+    const b=buckets[i];
+    const avgEng=b.count?b.eng/b.count:0;
+    const pct=avgEng/maxEng*100;
+    const isBest=b.count>0&&avgEng===Math.max(...buckets.map(x=>x.count?x.eng/x.count:0));
+    return '<div style="display:flex;align-items:center;gap:8px">'+
+      '<div style="width:60px;font-size:.7rem;font-weight:'+(isBest?'700':'500')+';color:'+(isBest?'var(--green)':'var(--slate)')+'">'+s.icon+' '+s.label+'</div>'+
+      '<div style="flex:1;background:var(--surface-alt);border-radius:6px;height:18px;overflow:hidden;position:relative">'+
+        (b.count>0?'<div style="background:'+(isBest?'var(--green)':'rgba(82,183,136,.4)')+';height:100%;width:'+pct+'%;border-radius:6px;transition:width .3s"></div>':'')+
+      '</div>'+
+      '<div style="width:64px;text-align:right;font-size:.65rem;color:var(--slate);font-variant-numeric:tabular-nums">'+(b.count?avgEng.toFixed(1)+'%':'-')+'<span style="opacity:.5"> &middot;'+b.count+'p</span></div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function extractHashtags(caption){
+  if(!caption)return [];
+  const matches=caption.match(/#[a-zA-Z0-9_À-ſ]+/g)||[];
+  return matches.map(h=>h.toLowerCase());
+}
+
+function renderInstagramHashtags(){
+  const el=document.getElementById('instagramHashtags');
+  const countEl=document.getElementById('igHashtagsCount');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  // Aggreger par hashtag : nb posts, reach total, engagement total
+  const tagStats={};
+  items.forEach(p=>{
+    const tags=extractHashtags(p.caption);
+    const uniqueTags=Array.from(new Set(tags));
+    uniqueTags.forEach(t=>{
+      if(!tagStats[t])tagStats[t]={count:0,reach:0,eng:0,saves:0};
+      tagStats[t].count++;
+      tagStats[t].reach+=p._reach;
+      tagStats[t].eng+=p._engRate;
+      tagStats[t].saves+=p._saves;
+    });
+  });
+  const sortedTags=Object.entries(tagStats).sort((a,b)=>b[1].reach/b[1].count-a[1].reach/a[1].count);
+  if(countEl)countEl.textContent=sortedTags.length+' uniques';
+  if(sortedTags.length===0){el.innerHTML='<div class="empty">Aucun hashtag detecte dans tes captions. C\'est limitant : ajoute 10-15 hashtags par post pour booster ton reach.</div>';return}
+  // Top 8
+  const top=sortedTags.slice(0,8);
+  const maxReach=Math.max(...top.map(([_,s])=>s.reach/s.count));
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+top.map(([tag,s])=>{
+    const avgReach=Math.round(s.reach/s.count);
+    const avgEng=(s.eng/s.count).toFixed(1);
+    const pct=avgReach/maxReach*100;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface-alt);border-radius:8px">'+
+      '<span style="font-size:.72rem;font-weight:600;color:var(--green-dark);min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHTML(tag)+'</span>'+
+      '<span style="font-size:.65rem;color:var(--grey);white-space:nowrap">x'+s.count+'</span>'+
+      '<div style="width:60px;background:var(--surface);border-radius:4px;height:6px;overflow:hidden"><div style="background:var(--green);height:100%;width:'+pct+'%"></div></div>'+
+      '<span style="font-size:.7rem;color:var(--slate);font-weight:600;font-variant-numeric:tabular-nums;min-width:42px;text-align:right">'+avgReach+'</span>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function renderInstagramCaptionAnalysis(){
+  const el=document.getElementById('instagramCaptionAnalysis');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(items.length===0){el.innerHTML='<div class="empty">Pas encore de posts</div>';return}
+  // Analyse format
+  const withQuestion=items.filter(p=>(p.caption||'').match(/[?]/)).map(p=>p._engRate);
+  const withoutQuestion=items.filter(p=>!(p.caption||'').match(/[?]/)).map(p=>p._engRate);
+  const withEmoji=items.filter(p=>(p.caption||'').match(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u)).map(p=>p._engRate);
+  const withoutEmoji=items.filter(p=>!(p.caption||'').match(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u)).map(p=>p._engRate);
+  const lengths=items.map(p=>(p.caption||'').length);
+  const avgLength=Math.round(lengths.reduce((s,l)=>s+l,0)/lengths.length);
+  const avg=arr=>arr.length?(arr.reduce((s,v)=>s+v,0)/arr.length).toFixed(2):'-';
+  const compareRow=(label,with_,without)=>{
+    if(with_.length===0||without.length===0)return '';
+    const wAvg=parseFloat(avg(with_)),woAvg=parseFloat(avg(without));
+    const better=wAvg>woAvg;
+    return '<div style="display:flex;justify-content:space-between;padding:6px 8px;background:var(--surface-alt);border-radius:6px;font-size:.72rem;align-items:center">'+
+      '<span><strong>'+label+'</strong></span>'+
+      '<span><span style="color:'+(better?'var(--green)':'var(--slate)')+';font-weight:'+(better?'700':'500')+'">avec '+wAvg.toFixed(2)+'%</span> &nbsp;<span style="opacity:.5">vs</span>&nbsp; <span style="color:'+(!better?'var(--green)':'var(--slate)')+';font-weight:'+(!better?'700':'500')+'">sans '+woAvg.toFixed(2)+'%</span></span>'+
+    '</div>';
+  };
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+
+    '<div style="display:flex;justify-content:space-between;padding:6px 8px;font-size:.72rem;color:var(--slate)">'+
+      '<span>Longueur moyenne</span><strong style="color:var(--ink)">'+avgLength+' caracteres</strong>'+
+    '</div>'+
+    compareRow('Question (?)',withQuestion,withoutQuestion)+
+    compareRow('Emoji',withEmoji,withoutEmoji)+
+    '<div style="font-size:.65rem;color:var(--grey);padding:4px 8px;line-height:1.4">'+
+      'Ideal IG : 138-150 caracteres pour le hook (avant le "...plus"), tout le reste en bas avec sauts de ligne pour respirer. CTA en derniere ligne.'+
+    '</div>'+
+  '</div>';
 }
 
 function getEnrichedMedia(){
