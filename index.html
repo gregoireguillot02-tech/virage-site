@@ -7,6 +7,11 @@
   <meta name="description" content="VIRAGE est la plateforme d'aide au sevrage tabac et vaping pour les 18-35 ans. Coach IA, téléconsultation, substituts et suivi personnalisé au même endroit.">
   <meta name="theme-color" content="#1B4332">
   <meta name="robots" content="index, follow">
+  <!-- Headers securite (audit 2026-04-24). Pour des vrais headers HTTP, configurer cote hebergeur (Cloudflare Transform Rules) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://cipxesubpcpsqplcqnus.supabase.co; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <link rel="canonical" href="https://virage.one/">
   <!-- Open Graph (LinkedIn, Facebook, etc.) -->
   <meta property="og:title" content="VIRAGE — Reprends le contrôle de ta consommation">
@@ -33,6 +38,13 @@
   <link rel="preconnect" href="https://cipxesubpcpsqplcqnus.supabase.co" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"></noscript>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Draggable.min.js"></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -214,6 +226,19 @@
     }
 
     .nav-links a:hover::after { width: 100%; }
+    .nav-links a.is-active::before {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--color-primary-light);
+      box-shadow: 0 0 10px rgba(82, 183, 136, 0.5);
+    }
+    .nav.scrolled .nav-links a.is-active::before { background: var(--color-primary); }
     .nav-links a:hover { color: var(--color-white); }
     .nav.scrolled .nav-links a { color: var(--color-grey); }
     .nav.scrolled .nav-links a:hover { color: var(--color-charcoal); }
@@ -1149,14 +1174,20 @@
       background: var(--color-white);
       border-radius: var(--radius-xl);
       padding: var(--space-8);
-      transition: all var(--transition-slower);
-      border: 1px solid var(--color-off-white);
+      transition: transform 0.5s var(--ease-apple), box-shadow 0.5s var(--ease-apple), border-color 0.5s var(--ease-apple);
+      border: 1px solid rgba(0,0,0,0.04);
       position: relative;
       overflow: hidden;
       transform: translate3d(0, 0, 0) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
       transform-style: preserve-3d;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 2px 4px rgba(15, 25, 30, 0.04),
+        0 12px 28px rgba(15, 25, 30, 0.06),
+        0 28px 56px rgba(15, 25, 30, 0.05);
     }
 
+    /* Top accent line that grows on hover */
     .feature-card::before {
       content: '';
       position: absolute;
@@ -1164,30 +1195,137 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: var(--color-primary);
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
       transform: scaleX(0);
       transform-origin: left;
-      transition: transform var(--transition-slower);
+      transition: transform 0.6s var(--ease-apple);
+      z-index: 2;
     }
+
+    /* Spotlight that follows the cursor */
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        260px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(82, 183, 136, 0.18),
+        rgba(82, 183, 136, 0.06) 30%,
+        transparent 60%
+      );
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .feature-card:hover {
-      box-shadow: 0 18px 56px rgba(0,0,0,0.1);
-      transform: translate3d(0, -6px, 0) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
-      border-color: transparent;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.7) inset,
+        0 4px 8px rgba(15, 25, 30, 0.06),
+        0 20px 40px rgba(15, 25, 30, 0.10),
+        0 40px 80px rgba(45, 106, 79, 0.12);
+      transform: translate3d(0, -8px, 0) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      border-color: rgba(82, 183, 136, 0.18);
     }
     .feature-card:hover::before { transform: scaleX(1); }
+    .feature-card:hover::after { opacity: 1; }
+
     .features-grid { perspective: 1400px; }
 
+    .feature-card > * {
+      position: relative;
+      z-index: 2;
+      transform: translateZ(0);
+    }
+
     .feature-icon {
-      width: 52px;
-      height: 52px;
+      width: 56px;
+      height: 56px;
       border-radius: var(--radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: var(--space-4);
-      transition: transform 400ms var(--ease-apple);
+      transition: transform 0.5s var(--ease-apple), box-shadow 0.5s var(--ease-apple);
+      box-shadow: 0 4px 14px rgba(15, 25, 30, 0.05);
+      transform: translateZ(20px);
+      position: relative;
     }
-    .feature-card:hover .feature-icon { transform: scale(1.08) rotate(-3deg); }
+    .feature-card:hover .feature-icon {
+      transform: translateZ(40px) scale(1.08) rotate(-3deg);
+      box-shadow: 0 12px 24px rgba(15, 25, 30, 0.10);
+    }
+    /* Subtle pulse glow under icon at rest */
+    .feature-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: 0 0 0 0 currentColor;
+      opacity: 0.25;
+      pointer-events: none;
+      animation: featureIconPulse 2.8s ease-in-out infinite;
+    }
+    @keyframes featureIconPulse {
+      0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 0.0; }
+      50% { box-shadow: 0 0 0 6px currentColor; opacity: 0.06; }
+    }
+
+    /* Live micro-animations on feature icons */
+    .feature-icon svg {
+      transition: transform 0.4s var(--ease-apple);
+    }
+    .feature-card:nth-child(1) .feature-icon svg { animation: featChat 4s ease-in-out infinite; transform-origin: center; }
+    .feature-card:nth-child(2) .feature-icon svg { animation: featClock 8s linear infinite; transform-origin: center; }
+    .feature-card:nth-child(3) .feature-icon svg { animation: featMoney 3.5s ease-in-out infinite; transform-origin: center 80%; }
+    .feature-card:nth-child(4) .feature-icon svg { animation: featStar 6s ease-in-out infinite; transform-origin: center; }
+    .feature-card:nth-child(5) .feature-icon svg { animation: featPing 3s ease-in-out infinite; transform-origin: center; }
+    .feature-card:nth-child(6) .feature-icon svg { animation: featHeart 1.6s ease-in-out infinite; transform-origin: center; }
+    @keyframes featChat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-2px) rotate(-3deg); }
+    }
+    @keyframes featClock {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes featMoney {
+      0%, 100% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(-3px); opacity: 0.85; }
+    }
+    @keyframes featStar {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.08) rotate(8deg); }
+    }
+    @keyframes featPing {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    @keyframes featHeart {
+      0%, 30%, 50%, 70%, 100% { transform: scale(1); }
+      40% { transform: scale(1.15); }
+      60% { transform: scale(1.08); }
+    }
+
+    /* Editorial corner number on each card */
+    .feature-card-num {
+      position: absolute;
+      top: var(--space-6);
+      right: var(--space-6);
+      font-family: var(--font-heading);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--color-grey-light);
+      z-index: 3;
+      transform: translateZ(10px);
+      transition: color 0.4s ease;
+    }
+    .feature-card:hover .feature-card-num {
+      color: var(--color-primary);
+    }
 
     .feature-icon svg {
       width: 24px;
@@ -1856,6 +1994,7 @@
       margin-bottom: var(--space-6);
     }
 
+    .team-card-header { perspective: 800px; }
     .team-avatar {
       width: 72px;
       height: 72px;
@@ -1873,7 +2012,17 @@
       background: #FFFFFF;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
       transition: transform 450ms var(--ease-apple), box-shadow 450ms var(--ease-apple);
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
     }
+    .team-avatar img { backface-visibility: hidden; }
+    .team-avatar-flipper {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .team-avatar-flipper img { width: 100%; height: 100%; object-fit: cover; }
 
     .team-avatar img {
       width: 100%;
@@ -2661,6 +2810,834 @@
 
     /* Honeypot anti-bot */
     .ohnohoney { position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; overflow: hidden; }
+
+    /* Section dividers animated */
+    .section-divider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: var(--space-12) 0;
+      background: var(--color-off-white);
+    }
+    .section-divider-line {
+      width: 1px;
+      height: 0;
+      background: linear-gradient(180deg, transparent, var(--color-primary-light));
+      transition: height 0.9s var(--ease-apple);
+    }
+    .section-divider.is-visible .section-divider-line { height: 60px; }
+    .section-divider-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      box-shadow: 0 0 12px rgba(82, 183, 136, 0.4);
+      opacity: 0;
+      transform: scale(0);
+      transition: opacity 0.5s ease 0.7s, transform 0.5s var(--ease-apple) 0.7s;
+    }
+    .section-divider.is-visible .section-divider-dot {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Editorial section numbering */
+    .section-num {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--color-grey);
+      margin-right: 14px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .section-num::after {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--color-grey-light);
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    .section-label--with-num { display: inline-block; }
+
+    /* ===========================
+       SECTION SHOWCASE — sticky scroll
+       =========================== */
+    .section-showcase {
+      position: relative;
+      background: linear-gradient(180deg, var(--color-off-white) 0%, var(--color-white) 60%, var(--color-off-white) 100%);
+    }
+    .showcase-track {
+      position: relative;
+    }
+    .showcase-inner {
+      min-height: 100vh;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-16);
+      align-items: center;
+    }
+    .showcase-text {
+      position: relative;
+      max-width: 520px;
+    }
+    .showcase-text-header { margin-bottom: var(--space-10); }
+    .showcase-steps {
+      position: relative;
+      min-height: 300px;
+    }
+    .showcase-step {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: opacity 0.55s var(--ease-apple), transform 0.55s var(--ease-apple);
+    }
+    .showcase-step.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .showcase-step-num {
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--color-primary-light);
+      margin-bottom: var(--space-3);
+    }
+    .showcase-step h3 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 700;
+      color: var(--color-charcoal);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: var(--space-4);
+    }
+    .showcase-step p {
+      font-size: 1.0625rem;
+      color: var(--color-grey);
+      line-height: 1.65;
+      max-width: 440px;
+    }
+    .showcase-progress-track {
+      position: relative;
+      width: 3px;
+      height: 100%;
+      background: var(--color-off-white);
+      border-radius: 2px;
+      margin-top: var(--space-8);
+      max-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      background: transparent;
+    }
+    .showcase-dot {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.4s ease;
+    }
+    .showcase-dot.is-active { opacity: 1; }
+    .showcase-dot-mark {
+      width: 24px;
+      height: 2px;
+      background: var(--color-grey-light);
+      border-radius: 2px;
+      transition: background 0.4s ease, width 0.4s ease;
+    }
+    .showcase-dot.is-active .showcase-dot-mark {
+      background: var(--color-primary);
+      width: 40px;
+    }
+    .showcase-dot-label {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-slate);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* Phone wrap pinned */
+    .showcase-phone-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1400px;
+      position: relative;
+    }
+    .showcase-phone-wrap::after {
+      content: '';
+      position: absolute;
+      top: calc(50% + 330px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      height: 90px;
+      background: radial-gradient(ellipse at center top,
+        rgba(82, 183, 136, 0.32) 0%,
+        rgba(82, 183, 136, 0.12) 35%,
+        transparent 70%);
+      border-radius: 50%;
+      filter: blur(14px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    @property --neon-angle {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+    .showcase-phone-neon {
+      position: absolute;
+      width: 326px;
+      height: 666px;
+      border-radius: 51px;
+      padding: 5px;
+      background: conic-gradient(from var(--neon-angle),
+        rgba(82, 183, 136, 0) 0deg,
+        rgba(82, 183, 136, 0) 260deg,
+        rgba(82, 183, 136, 0.5) 295deg,
+        #52B788 330deg,
+        #B7E4C7 348deg,
+        #52B788 358deg,
+        rgba(82, 183, 136, 0) 360deg
+      );
+      -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+              mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+      z-index: 2;
+      filter: drop-shadow(0 0 8px rgba(82, 183, 136, 0.7)) drop-shadow(0 0 18px rgba(82, 183, 136, 0.45));
+    }
+    .showcase-phone {
+      width: 320px;
+      height: 660px;
+      background: linear-gradient(180deg, #DDF2E5 0%, #C8E5D2 100%);
+      border-radius: 48px;
+      border: 4px solid #1A1A2E;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 60px 120px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04);
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+    .showcase-phone-notch {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 28px;
+      background: #1A1A2E;
+      border-radius: 0 0 18px 18px;
+      z-index: 10;
+    }
+    .showcase-screens {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .showcase-screen {
+      position: absolute;
+      inset: 0;
+      padding: 50px 22px 22px;
+      opacity: 0;
+      transform: scale(0.96);
+      pointer-events: none;
+      overflow: hidden;
+      background: linear-gradient(180deg, #DDF2E5 0%, #C8E5D2 100%);
+      transition: opacity 0.5s var(--ease-apple), transform 0.5s var(--ease-apple);
+    }
+    .showcase-screen.is-active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    /* SCREEN 0 — Accueil */
+    .showcase-greeting {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--color-charcoal);
+      letter-spacing: -0.02em;
+      margin-top: 4px;
+    }
+    .showcase-subtitle {
+      font-size: 0.875rem;
+      color: var(--color-grey);
+      margin-top: 4px;
+      margin-bottom: 16px;
+    }
+    .showcase-bell {
+      position: absolute;
+      top: 62px;
+      right: 22px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .showcase-bell svg { width: 16px; height: 16px; stroke: var(--color-charcoal); fill: none; stroke-width: 2; }
+    .showcase-card {
+      background: var(--color-white);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
+    .showcase-card-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--color-grey);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .showcase-counter-big {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .showcase-counter-num {
+      font-family: var(--font-heading);
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--color-charcoal);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .showcase-counter-unit {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--color-grey);
+    }
+    .showcase-progressbar {
+      margin-top: 12px;
+      height: 6px;
+      background: var(--color-off-white);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .showcase-progressbar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--color-primary);
+      border-radius: 4px;
+      transition: width 1.2s var(--ease-apple);
+    }
+    .showcase-progress-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.75rem;
+    }
+    .showcase-progress-meta span:first-child { color: var(--color-grey); }
+    .showcase-progress-meta span:last-child { color: var(--color-charcoal); font-weight: 700; }
+
+    .showcase-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .showcase-mini-card {
+      background: var(--color-white);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .showcase-mini-card-label {
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: var(--color-grey);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .showcase-mini-card-num {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-charcoal);
+      line-height: 1;
+    }
+    .showcase-mini-card-sub {
+      font-size: 0.6875rem;
+      color: var(--color-grey);
+      margin-top: 4px;
+    }
+
+    .showcase-coach-card {
+      background: var(--color-white);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .showcase-coach-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-white);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+    .showcase-coach-content { flex: 1; }
+    .showcase-coach-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--color-charcoal);
+    }
+    .showcase-coach-meta {
+      font-size: 0.625rem;
+      color: var(--color-grey);
+      margin-bottom: 6px;
+    }
+    .showcase-coach-text {
+      font-size: 0.8125rem;
+      color: var(--color-charcoal);
+      line-height: 1.4;
+    }
+
+    /* SCREEN 1 — Sante */
+    .showcase-screen-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-charcoal);
+      letter-spacing: -0.02em;
+      margin-top: 4px;
+      margin-bottom: 18px;
+    }
+    .showcase-health-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .showcase-health-card {
+      background: var(--color-white);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .showcase-health-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: var(--color-off-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .showcase-health-icon svg { width: 16px; height: 16px; stroke: var(--color-primary); fill: none; stroke-width: 2; }
+    .showcase-health-time {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--color-charcoal);
+      margin-bottom: 4px;
+    }
+    .showcase-health-desc {
+      font-size: 0.6875rem;
+      color: var(--color-grey);
+      line-height: 1.4;
+    }
+    .showcase-unlock {
+      background: var(--color-accent-light);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .showcase-unlock-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .showcase-unlock-text {
+      font-size: 0.8125rem;
+      color: var(--color-charcoal);
+      line-height: 1.4;
+    }
+    .showcase-tip {
+      background: var(--color-accent-light);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .showcase-tip-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* SCREEN 2 — Calendrier */
+    .showcase-streak-card {
+      background: var(--color-white);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
+    .showcase-streak-label {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .showcase-streak-num {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--color-charcoal);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .showcase-streak-bar {
+      margin-top: 10px;
+      height: 5px;
+      background: var(--color-off-white);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .showcase-streak-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--color-accent);
+      border-radius: 4px;
+      transition: width 1.4s var(--ease-apple);
+    }
+    .showcase-stat-mini {
+      background: var(--color-white);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      text-align: center;
+    }
+    .showcase-stat-mini-icon {
+      font-size: 0.875rem;
+      margin-bottom: 4px;
+    }
+    .showcase-stat-mini-num {
+      font-family: var(--font-heading);
+      font-size: 1.375rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .showcase-stat-mini-label {
+      font-size: 0.625rem;
+      color: var(--color-grey);
+      margin-top: 2px;
+    }
+    .showcase-cal {
+      background: var(--color-white);
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .showcase-cal-month {
+      font-family: var(--font-heading);
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+      color: var(--color-charcoal);
+    }
+    .showcase-cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .showcase-cal-day {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      background: var(--color-off-white);
+      font-size: 0.5625rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-grey);
+    }
+    .showcase-cal-day.is-clean {
+      background: var(--color-primary);
+      color: var(--color-white);
+      font-weight: 700;
+    }
+
+    /* SCREEN 3 — Groupe / Leaderboard */
+    .showcase-team-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .showcase-team-header h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--color-charcoal);
+      letter-spacing: -0.02em;
+    }
+    .showcase-team-header p {
+      font-size: 0.75rem;
+      color: var(--color-grey);
+      margin-top: 2px;
+    }
+    .showcase-leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .showcase-rank {
+      background: var(--color-white);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .showcase-rank--first {
+      background: linear-gradient(135deg, #FFF8E1 0%, #FFF1D0 100%);
+      border: 1px solid rgba(224, 159, 62, 0.35);
+    }
+    .showcase-rank-pos {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1rem;
+      width: 22px;
+      text-align: center;
+      color: var(--color-grey);
+    }
+    .showcase-rank--first .showcase-rank-pos { color: var(--color-accent); }
+    .showcase-rank-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--color-white);
+      flex-shrink: 0;
+    }
+    .showcase-rank-info { flex: 1; min-width: 0; }
+    .showcase-rank-name {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-charcoal);
+      margin-bottom: 4px;
+    }
+    .showcase-rank-bar {
+      height: 4px;
+      background: var(--color-off-white);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .showcase-rank-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--color-primary);
+      border-radius: 4px;
+    }
+    .showcase-rank--first .showcase-rank-fill { background: var(--color-accent); }
+    .showcase-rank-pts {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--color-charcoal);
+      text-align: right;
+    }
+    .showcase-rank-pts span {
+      font-size: 0.625rem;
+      color: var(--color-grey);
+      font-weight: 500;
+      display: block;
+    }
+
+    /* SCREEN 3 — AI scan card */
+    .showcase-ai-scan {
+      margin-top: 14px;
+      background: linear-gradient(135deg, rgba(45, 106, 79, 0.92), rgba(82, 183, 136, 0.92));
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 6px 18px rgba(45, 106, 79, 0.25);
+    }
+    .showcase-ai-scan-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--color-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .showcase-ai-scan-icon svg {
+      width: 20px;
+      height: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .showcase-scan-pulse {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      top: 50%;
+      height: 2px;
+      background: var(--color-white);
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+      transform: translateY(-50%);
+      animation: showcaseScanLine 2.4s ease-in-out infinite;
+    }
+    @keyframes showcaseScanLine {
+      0%, 100% { transform: translateY(-12px); opacity: 0.7; }
+      50% { transform: translateY(12px); opacity: 0.3; }
+    }
+    .showcase-ai-scan-content { flex: 1; min-width: 0; }
+    .showcase-ai-scan-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 4px;
+    }
+    .showcase-ai-scan-text {
+      font-size: 0.75rem;
+      color: var(--color-white);
+      line-height: 1.4;
+    }
+    .showcase-ai-scan-text strong { font-weight: 700; }
+
+    /* SCREEN 4 — Coach IA */
+    .showcase-chat-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 14px;
+    }
+    .showcase-chat-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-white);
+      font-family: var(--font-heading);
+      font-weight: 700;
+    }
+    .showcase-chat-info-name { font-size: 0.875rem; font-weight: 700; color: var(--color-charcoal); }
+    .showcase-chat-info-status {
+      font-size: 0.6875rem;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .showcase-chat-info-status::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+    .showcase-chat-bubbles {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .showcase-bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .showcase-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .showcase-bubble--user {
+      align-self: flex-end;
+      background: var(--color-charcoal);
+      color: var(--color-white);
+      border-bottom-right-radius: 4px;
+    }
+    .showcase-bubble--coach {
+      align-self: flex-start;
+      background: var(--color-white);
+      color: var(--color-charcoal);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    /* Mobile / tablet adjustments for showcase */
+    @media (max-width: 1024px) {
+      .showcase-inner { grid-template-columns: 1fr; gap: var(--space-10); }
+      .showcase-phone-wrap { order: -1; }
+      .showcase-phone { width: 280px; height: 580px; }
+    }
+    @media (max-width: 480px) {
+      .showcase-phone { width: 240px; height: 500px; border-radius: 38px; }
+      .showcase-screen { padding: 44px 18px 18px; }
+    }
 
     /* ===========================
        RESPONSIVE
@@ -3481,6 +4458,7 @@
       </a>
       <ul class="nav-links">
         <li><a href="#features">Fonctionnalités</a></li>
+        <li><a href="#showcase">L'app</a></li>
         <li><a href="#approach">Notre approche</a></li>
         <li><a href="#testimonials">Témoignages</a></li>
         <li><a href="#team">Équipe</a></li>
@@ -3498,6 +4476,7 @@
 
   <div class="nav-mobile" id="mobileMenu">
     <a href="#features" onclick="closeMobile()">Fonctionnalités</a>
+    <a href="#showcase" onclick="closeMobile()">L'app</a>
     <a href="#approach" onclick="closeMobile()">Notre approche</a>
     <a href="#testimonials" onclick="closeMobile()">Témoignages</a>
     <a href="#team" onclick="closeMobile()">Équipe</a>
@@ -3755,6 +4734,254 @@
     </div>
   </section>
 
+  <div class="section-divider" aria-hidden="true">
+    <span class="section-divider-line"></span>
+    <span class="section-divider-dot"></span>
+  </div>
+
+  <!-- SHOWCASE — Sticky scroll-driven app tour -->
+  <section class="section-showcase" id="showcase">
+    <div class="showcase-track">
+    <div class="showcase-inner">
+      <!-- Colonne gauche : textes qui changent -->
+      <div class="showcase-text">
+        <div class="showcase-text-header reveal">
+          <p class="section-label">L'app en action</p>
+          <h2 class="section-heading">Ton sevrage, en mieux.</h2>
+          <p class="section-subheading">Cinq écrans qui t'accompagnent au quotidien. Du compteur d'abstinence au coach IA, tout est pensé pour te tenir.</p>
+        </div>
+        <div class="showcase-steps">
+          <div class="showcase-step is-active" data-step="0">
+            <p class="showcase-step-num">01 / DASHBOARD</p>
+            <h3>Suis ta progression jour après jour.</h3>
+            <p>Compteur d'abstinence, économies réalisées, cigarettes évitées. Tout est au même endroit, mis à jour en temps réel.</p>
+          </div>
+          <div class="showcase-step" data-step="1">
+            <p class="showcase-step-num">02 / CORPS</p>
+            <h3>Vois ton corps qui récupère.</h3>
+            <p>Timeline OMS de la régénération. Chaque palier débloqué, c'est une preuve concrète que ton corps revient à la normale.</p>
+          </div>
+          <div class="showcase-step" data-step="2">
+            <p class="showcase-step-num">03 / CALENDRIER</p>
+            <h3>Construis ta série, célèbre tes records.</h3>
+            <p>Calendrier complet, record en cours, mauvais virages assumés. La data qui te rappelle d'où tu viens.</p>
+          </div>
+          <div class="showcase-step" data-step="3">
+            <p class="showcase-step-num">04 / GROUPE</p>
+            <h3>Défie tes potes, gagnez ensemble.</h3>
+            <p>Crée un groupe, fixez un max cigs/jour. Le soir, tu prends ton paquet en photo : l'IA compte les cigarettes restantes pour toi. Pas de triche, pas de saisie manuelle.</p>
+          </div>
+          <div class="showcase-step" data-step="4">
+            <p class="showcase-step-num">05 / COACH IA</p>
+            <h3>Ton coach IA, dispo 24/7.</h3>
+            <p>Une envie à 3h du matin ? Le coach répond. Pas de jugement, des solutions concrètes.</p>
+          </div>
+        </div>
+        <div class="showcase-progress-track">
+          <div class="showcase-dot is-active" data-dot="0">
+            <span class="showcase-dot-mark"></span>
+            <span class="showcase-dot-label">Dashboard</span>
+          </div>
+          <div class="showcase-dot" data-dot="1">
+            <span class="showcase-dot-mark"></span>
+            <span class="showcase-dot-label">Corps</span>
+          </div>
+          <div class="showcase-dot" data-dot="2">
+            <span class="showcase-dot-mark"></span>
+            <span class="showcase-dot-label">Calendrier</span>
+          </div>
+          <div class="showcase-dot" data-dot="3">
+            <span class="showcase-dot-mark"></span>
+            <span class="showcase-dot-label">Groupe</span>
+          </div>
+          <div class="showcase-dot" data-dot="4">
+            <span class="showcase-dot-mark"></span>
+            <span class="showcase-dot-label">Coach IA</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne droite : phone pinned -->
+      <div class="showcase-phone-wrap">
+        <div class="showcase-phone-neon" id="showcasePhoneNeon" aria-hidden="true"></div>
+        <div class="showcase-phone" id="showcasePhone">
+          <div class="showcase-phone-notch"></div>
+          <div class="showcase-screens">
+            <!-- Ecran 0 : Accueil -->
+            <div class="showcase-screen is-active" data-screen="0">
+              <p class="showcase-subtitle">Bonjour</p>
+              <p class="showcase-greeting">Salut, Grégoire.</p>
+              <button class="showcase-bell" aria-label="Notifications">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </button>
+              <div class="showcase-card" style="margin-top:14px;">
+                <p class="showcase-card-label">Sans fumer depuis</p>
+                <div class="showcase-counter-big">
+                  <span class="showcase-counter-num" id="showcaseDays">7</span>
+                  <span class="showcase-counter-unit">jours</span>
+                </div>
+                <div class="showcase-progressbar"><div class="showcase-progressbar-fill" id="showcaseProgressFill" data-target="100"></div></div>
+                <div class="showcase-progress-meta"><span>Objectif : 7 jours</span><span>100%</span></div>
+              </div>
+              <div class="showcase-row">
+                <div class="showcase-mini-card">
+                  <p class="showcase-mini-card-label">Économies</p>
+                  <p class="showcase-mini-card-num" style="color:var(--color-primary);"><span id="showcaseSavings">87</span> €</p>
+                  <p class="showcase-mini-card-sub">depuis le début</p>
+                </div>
+                <div class="showcase-mini-card">
+                  <p class="showcase-mini-card-label">Non fumées</p>
+                  <p class="showcase-mini-card-num" style="color:var(--color-charcoal);"><span id="showcaseNotSmoked">140</span></p>
+                  <p class="showcase-mini-card-sub">cigarettes évitées</p>
+                </div>
+              </div>
+              <div class="showcase-coach-card">
+                <div class="showcase-coach-avatar">V</div>
+                <div class="showcase-coach-content">
+                  <p class="showcase-coach-title">Coach IA</p>
+                  <p class="showcase-coach-meta">En ligne</p>
+                  <p class="showcase-coach-text">7 jours, c'est solide. Le pire est passé. Continue comme ça.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ecran 1 : Sante -->
+            <div class="showcase-screen" data-screen="1">
+              <p class="showcase-screen-title">Ton corps récupère.</p>
+              <div class="showcase-health-cards">
+                <div class="showcase-health-card">
+                  <div class="showcase-health-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                  <p class="showcase-health-time">20 min</p>
+                  <p class="showcase-health-desc">Ta tension et ton pouls redescendent à la normale.</p>
+                </div>
+                <div class="showcase-health-card">
+                  <div class="showcase-health-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                  <p class="showcase-health-time">8 h</p>
+                  <p class="showcase-health-desc">Le monoxyde de carbone est évacué de ton sang.</p>
+                </div>
+              </div>
+              <div class="showcase-unlock">
+                <p class="showcase-unlock-label">Prochain déblocage · 2 jours</p>
+                <p class="showcase-unlock-text">Tu retrouves le goût et l'odorat. La nicotine quitte ton corps.</p>
+              </div>
+              <div class="showcase-tip">
+                <p class="showcase-tip-label">Savais-tu ?</p>
+                <p class="showcase-unlock-text">La nicotine perturbe le sommeil. Après 2 semaines, tes nuits sont plus profondes.</p>
+              </div>
+            </div>
+
+            <!-- Ecran 2 : Calendrier -->
+            <div class="showcase-screen" data-screen="2">
+              <p class="showcase-subtitle">Bonsoir Grégoire</p>
+              <p class="showcase-screen-title" style="margin-top:0;">Résumé.</p>
+              <div class="showcase-streak-card">
+                <p class="showcase-streak-label">Série en cours</p>
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                  <span class="showcase-streak-num">7</span>
+                  <span class="showcase-counter-unit">jours</span>
+                </div>
+                <div class="showcase-streak-bar"><div class="showcase-streak-bar-fill" id="showcaseStreakFill" data-target="100"></div></div>
+                <div class="showcase-progress-meta"><span>Record : 7 jours</span><span>100%</span></div>
+              </div>
+              <div class="showcase-row" style="grid-template-columns:1fr 1fr 1fr;gap:6px;">
+                <div class="showcase-stat-mini"><p class="showcase-stat-mini-num" style="color:var(--color-primary);">7</p><p class="showcase-stat-mini-label">Jours sans</p></div>
+                <div class="showcase-stat-mini"><p class="showcase-stat-mini-num" style="color:var(--color-accent);">7</p><p class="showcase-stat-mini-label">Record</p></div>
+                <div class="showcase-stat-mini"><p class="showcase-stat-mini-num" style="color:#D64045;">1</p><p class="showcase-stat-mini-label">Mauvais virage</p></div>
+              </div>
+              <div class="showcase-cal">
+                <p class="showcase-cal-month">Avril 2026</p>
+                <div class="showcase-cal-grid">
+                  <div class="showcase-cal-day">L</div><div class="showcase-cal-day">M</div><div class="showcase-cal-day">M</div><div class="showcase-cal-day">J</div><div class="showcase-cal-day">V</div><div class="showcase-cal-day">S</div><div class="showcase-cal-day">D</div>
+                  <div class="showcase-cal-day"></div><div class="showcase-cal-day"></div><div class="showcase-cal-day is-clean">1</div><div class="showcase-cal-day is-clean">2</div><div class="showcase-cal-day is-clean">3</div><div class="showcase-cal-day is-clean">4</div><div class="showcase-cal-day is-clean">5</div>
+                  <div class="showcase-cal-day is-clean">6</div><div class="showcase-cal-day is-clean">7</div><div class="showcase-cal-day">8</div><div class="showcase-cal-day">9</div><div class="showcase-cal-day">10</div><div class="showcase-cal-day">11</div><div class="showcase-cal-day">12</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ecran 3 : Groupe / Leaderboard -->
+            <div class="showcase-screen" data-screen="3">
+              <div class="showcase-team-header">
+                <p class="showcase-subtitle" style="margin:0;">Communauté</p>
+                <h3>Team Virage</h3>
+                <p>4 membres · max 5 cigs/jour</p>
+              </div>
+              <div class="showcase-leaderboard" id="showcaseLeaderboard">
+                <div class="showcase-rank showcase-rank--first" data-pts="35">
+                  <span class="showcase-rank-pos">1</span>
+                  <span class="showcase-rank-avatar" style="background:var(--color-accent);">G</span>
+                  <div class="showcase-rank-info">
+                    <p class="showcase-rank-name">Grégoire (toi)</p>
+                    <div class="showcase-rank-bar"><div class="showcase-rank-fill" data-fill="100"></div></div>
+                  </div>
+                  <p class="showcase-rank-pts">35<span>pts</span></p>
+                </div>
+                <div class="showcase-rank" data-pts="28">
+                  <span class="showcase-rank-pos">2</span>
+                  <span class="showcase-rank-avatar" style="background:var(--color-primary);">L</span>
+                  <div class="showcase-rank-info">
+                    <p class="showcase-rank-name">Lucas</p>
+                    <div class="showcase-rank-bar"><div class="showcase-rank-fill" data-fill="80"></div></div>
+                  </div>
+                  <p class="showcase-rank-pts">28<span>pts</span></p>
+                </div>
+                <div class="showcase-rank" data-pts="22">
+                  <span class="showcase-rank-pos">3</span>
+                  <span class="showcase-rank-avatar" style="background:var(--color-terracotta);">M</span>
+                  <div class="showcase-rank-info">
+                    <p class="showcase-rank-name">Marie</p>
+                    <div class="showcase-rank-bar"><div class="showcase-rank-fill" data-fill="62"></div></div>
+                  </div>
+                  <p class="showcase-rank-pts">22<span>pts</span></p>
+                </div>
+                <div class="showcase-rank" data-pts="14">
+                  <span class="showcase-rank-pos">4</span>
+                  <span class="showcase-rank-avatar" style="background:var(--color-slate);">T</span>
+                  <div class="showcase-rank-info">
+                    <p class="showcase-rank-name">Tom</p>
+                    <div class="showcase-rank-bar"><div class="showcase-rank-fill" data-fill="40"></div></div>
+                  </div>
+                  <p class="showcase-rank-pts">14<span>pts</span></p>
+                </div>
+              </div>
+              <div class="showcase-ai-scan">
+                <div class="showcase-ai-scan-icon">
+                  <span class="showcase-scan-pulse"></span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+                <div class="showcase-ai-scan-content">
+                  <p class="showcase-ai-scan-label">Scan du soir · IA</p>
+                  <p class="showcase-ai-scan-text">Photo de ton paquet : <strong>3 cigarettes detectees</strong> aujourd'hui.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ecran 4 : Coach IA -->
+            <div class="showcase-screen" data-screen="4">
+              <div class="showcase-chat-header">
+                <div class="showcase-chat-avatar">V</div>
+                <div>
+                  <p class="showcase-chat-info-name">Coach IA</p>
+                  <p class="showcase-chat-info-status">En ligne</p>
+                </div>
+              </div>
+              <div class="showcase-chat-bubbles" id="showcaseChat">
+                <div class="showcase-bubble showcase-bubble--user" data-bubble="0">j'ai une grosse envie là</div>
+                <div class="showcase-bubble showcase-bubble--coach" data-bubble="1">Normal. Ça dure 3 minutes max.</div>
+                <div class="showcase-bubble showcase-bubble--coach" data-bubble="2">Sors prendre l'air, bois un grand verre d'eau, reviens.</div>
+                <div class="showcase-bubble showcase-bubble--user" data-bubble="3">ok merci</div>
+                <div class="showcase-bubble showcase-bubble--coach" data-bubble="4">Tu gagnes à chaque envie qui passe. T'es à 7 jours, c'est solide.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
   <!-- CHALLENGE — GROUP SCAN TEASER -->
   <section class="section-challenge" id="challenge">
     <div class="challenge-grid-bg" aria-hidden="true"></div>
@@ -3885,6 +5112,11 @@
       </div>
     </div>
   </section>
+
+  <div class="section-divider" aria-hidden="true">
+    <span class="section-divider-line"></span>
+    <span class="section-divider-dot"></span>
+  </div>
 
   <!-- APPROACH -->
   <section class="section-approach" id="approach">
@@ -4069,7 +5301,9 @@
         <div class="team-card reveal">
           <div class="team-card-header">
             <div class="team-avatar team-avatar--gg">
-              <img src="/gregoire.jpeg" alt="Portrait de Grégoire Guillot" loading="lazy" width="80" height="80">
+              <div class="team-avatar-flipper">
+                <img src="/gregoire.jpeg" alt="Portrait de Grégoire Guillot" loading="lazy" width="80" height="80">
+              </div>
             </div>
             <div>
               <p class="team-name">Grégoire Guillot</p>
@@ -4086,7 +5320,9 @@
         <div class="team-card reveal reveal-delay-1">
           <div class="team-card-header">
             <div class="team-avatar team-avatar--pm">
-              <img src="/paul.jpeg" alt="Portrait de Paul Michel" loading="lazy" width="80" height="80">
+              <div class="team-avatar-flipper">
+                <img src="/paul.jpeg" alt="Portrait de Paul Michel" loading="lazy" width="80" height="80">
+              </div>
             </div>
             <div>
               <p class="team-name">Paul Michel</p>
@@ -4334,6 +5570,7 @@
         <p class="footer-column-title">Produit</p>
         <ul class="footer-links">
           <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#showcase">L'app</a></li>
           <li><a href="#how">Comment ça marche</a></li>
           <li><a href="#approach">Notre approche</a></li>
           <li><a href="#contact">Liste d'attente</a></li>
@@ -4369,50 +5606,51 @@
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ============================================================
+    // GSAP INIT — register plugins, defaults
+    // ============================================================
+    if (window.gsap) {
+      gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, Draggable);
+      // ScrollSmoother optional (paid plugin previously, now free) - register if present
+      if (window.ScrollSmoother) gsap.registerPlugin(ScrollSmoother);
+      gsap.defaults({ ease: 'power2.out', duration: 0.8 });
+    }
+
+    // ============================================================
     // HERO — split words for composition animation
     // ============================================================
     (function splitHeroTitle() {
       const title = document.querySelector('.hero-title[data-split-words]');
       if (!title) return;
 
-      const WORD_DELAY_BASE = 350; // ms, after overline reveal starts
-      const WORD_STEP = 90;
-      let wordIndex = 0;
-
-      function wrapTextNodes(node) {
-        const children = Array.from(node.childNodes);
-        children.forEach(child => {
-          if (child.nodeType === Node.TEXT_NODE) {
-            const text = child.textContent;
-            if (!text.trim()) return;
-            const frag = document.createDocumentFragment();
-            const parts = text.split(/(\s+)/);
-            parts.forEach(part => {
-              if (!part) return;
-              if (/^\s+$/.test(part)) {
-                const sp = document.createElement('span');
-                sp.className = 'word-space';
-                sp.innerHTML = '&nbsp;';
-                frag.appendChild(sp);
-              } else {
-                const span = document.createElement('span');
-                span.className = 'word';
-                span.textContent = part;
-                const delay = WORD_DELAY_BASE + wordIndex * WORD_STEP;
-                span.style.animationDelay = prefersReduced ? '0s' : (delay + 'ms');
-                frag.appendChild(span);
-                wordIndex++;
-              }
-            });
-            node.replaceChild(frag, child);
-          } else if (child.nodeType === Node.ELEMENT_NODE && !child.classList.contains('line-break')) {
-            wrapTextNodes(child);
-          }
+      if (window.gsap && window.SplitText) {
+        document.fonts.ready.then(() => {
+          const split = SplitText.create(title, { type: 'words', wordsClass: 'hero-word' });
+          gsap.from(split.words, {
+            duration: 0.9,
+            yPercent: 80,
+            opacity: 0,
+            filter: 'blur(8px)',
+            stagger: 0.06,
+            ease: 'power3.out',
+            delay: 0.3
+          });
         });
       }
-
-      wrapTextNodes(title);
     })();
+
+    // ============================================================
+    // HERO PHONE — subtle floating pulse
+    // ============================================================
+    if (window.gsap && !prefersReduced) {
+      gsap.to('.hero-phone', {
+        y: -8,
+        duration: 2.8,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+        delay: 1.5
+      });
+    }
 
     // ============================================================
     // NAV — progressive blur + shadow + height reduction
@@ -4489,90 +5727,302 @@
     }
 
     // ============================================================
-    // COUNTER ANIMATION — easeOutQuart, slower tail
+    // COUNTER ANIMATION — GSAP ScrambleText
     // ============================================================
     function animateCounter(el) {
       const target = parseInt(el.dataset.target, 10);
-      const duration = parseInt(el.dataset.duration || '1200', 10);
+      const duration = parseInt(el.dataset.duration || '1800', 10) / 1000;
       const formatted = target >= 1000 ? target.toLocaleString('fr-FR') : String(target);
 
-      if (prefersReduced) {
+      if (!window.gsap || !window.ScrambleTextPlugin) {
         el.textContent = formatted;
         return;
       }
 
-      // Typewriter style: rapid count then reveal digits left to right
-      const chars = formatted.replace(/\s/g, ' ').split('');
-      el.textContent = '';
-      let revealed = 0;
+      // Find the parent stat-giant-number for scale/flash effect
+      const parent = el.closest('.stat-giant-number') || el.parentElement;
 
-      function revealNext() {
-        if (revealed >= chars.length) return;
-        el.textContent = formatted.substring(0, revealed + 1);
-        revealed++;
-        // Each digit appears with a slight scramble effect
-        const remaining = chars.length - revealed;
-        if (remaining > 0) {
-          // Show random digits for unrevealed positions
-          let display = formatted.substring(0, revealed);
-          const scrambleCount = 3;
-          let scrambleStep = 0;
-
-          function scramble() {
-            let tail = '';
-            for (let j = revealed; j < chars.length; j++) {
-              if (chars[j] === ' ') { tail += ' '; continue; }
-              tail += Math.floor(Math.random() * 10);
-            }
-            el.textContent = display + tail;
-            scrambleStep++;
-            if (scrambleStep < scrambleCount) {
-              setTimeout(scramble, 40);
-            } else {
-              setTimeout(revealNext, 30);
-            }
-          }
-          scramble();
+      el.textContent = '0';
+      const tl = gsap.timeline();
+      tl.fromTo(parent,
+        { scale: 0.6, opacity: 0, filter: 'blur(8px)' },
+        { scale: 1, opacity: 1, filter: 'blur(0px)', duration: 0.7, ease: 'back.out(1.5)' }
+      );
+      tl.to(el, {
+        duration,
+        ease: 'power3.out',
+        scrambleText: {
+          text: formatted,
+          chars: '0123456789',
+          revealDelay: 0.4,
+          tweenLength: false,
+          speed: 0.5
         }
-      }
-
-      // Start with all scrambled
-      let initScrambles = 0;
-      const initTotal = 5;
-      function initScramble() {
-        let s = '';
-        for (let j = 0; j < chars.length; j++) {
-          if (chars[j] === ' ') { s += ' '; continue; }
-          s += Math.floor(Math.random() * 10);
-        }
-        el.textContent = s;
-        initScrambles++;
-        if (initScrambles < initTotal) {
-          setTimeout(initScramble, 60);
-        } else {
-          revealNext();
-        }
-      }
-      initScramble();
+      }, '-=0.4');
+      // Glow flash when done
+      tl.fromTo(parent,
+        { textShadow: '0 0 0 rgba(82,183,136,0)' },
+        { textShadow: '0 0 24px rgba(82,183,136,0.55)', duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut' },
+        '-=0.2'
+      );
     }
 
-    const counterObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateCounter(entry.target);
-          counterObserver.unobserve(entry.target);
+    if (window.gsap) {
+      gsap.utils.toArray('.counter-animate').forEach(el => {
+        if (el.closest('.hero-visual')) {
+          gsap.delayedCall(1.2, () => animateCounter(el));
+        } else {
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => animateCounter(el)
+          });
         }
       });
-    }, { threshold: 0.1 });
+    } else {
+      // Fallback if GSAP not loaded
+      document.querySelectorAll('.counter-animate').forEach(el => {
+        const target = parseInt(el.dataset.target, 10);
+        el.textContent = target >= 1000 ? target.toLocaleString('fr-FR') : target;
+      });
+    }
 
-    document.querySelectorAll('.counter-animate').forEach(el => {
-      // Phone counters trigger earlier (visible on load)
-      if (el.closest('.hero-visual')) {
-        setTimeout(() => animateCounter(el), prefersReduced ? 0 : 1200);
-      } else {
-        counterObserver.observe(el);
+    // ============================================================
+    // SECTION NUMBERING — Editorial style 01, 02, 03...
+    // ============================================================
+    (function numberSections() {
+      const sectionsToNumber = [
+        '#how', '#features', '#showcase', '#approach',
+        '#testimonials', '#team', '#trust', '#faq'
+      ];
+      let counter = 1;
+      sectionsToNumber.forEach((sel) => {
+        const sec = document.querySelector(sel);
+        if (!sec) return;
+        const label = sec.querySelector('.section-label');
+        if (!label || label.dataset.numbered === '1') return;
+        const num = String(counter).padStart(2, '0');
+        const numEl = document.createElement('span');
+        numEl.className = 'section-num';
+        numEl.textContent = num;
+        label.parentNode.insertBefore(numEl, label);
+        label.classList.add('section-label--with-num');
+        label.dataset.numbered = '1';
+        counter++;
+      });
+    })();
+
+    // ============================================================
+    // SECTION DIVIDERS — line + dot draw on scroll
+    // ============================================================
+    if (window.gsap && window.ScrollTrigger) {
+      gsap.utils.toArray('.section-divider').forEach(div => {
+        ScrollTrigger.create({
+          trigger: div,
+          start: 'top 85%',
+          once: true,
+          onEnter: () => div.classList.add('is-visible')
+        });
+      });
+    }
+
+    // ============================================================
+    // NAV — Active section indicator (dot under active link)
+    // ============================================================
+    if (window.gsap && window.ScrollTrigger) {
+      ['#features', '#showcase', '#approach', '#testimonials', '#team', '#faq', '#pro'].forEach(id => {
+        const sec = document.querySelector(id);
+        if (!sec) return;
+        ScrollTrigger.create({
+          trigger: sec,
+          start: 'top 50%',
+          end: 'bottom 50%',
+          onToggle: (self) => {
+            const link = document.querySelector(`.nav-links a[href="${id}"]`);
+            if (link) link.classList.toggle('is-active', self.isActive);
+          }
+        });
+      });
+    }
+
+    // ============================================================
+    // FEATURE CARDS — Cursor-following spotlight + 3D tilt
+    // ============================================================
+    if (window.gsap && window.matchMedia('(hover: hover)').matches) {
+      gsap.utils.toArray('.feature-card').forEach(card => {
+        const setX = gsap.quickTo(card, '--tilt-y', { duration: 0.5, ease: 'power3.out' });
+        const setY = gsap.quickTo(card, '--tilt-x', { duration: 0.5, ease: 'power3.out' });
+        const setMX = gsap.quickTo(card, '--mx', { duration: 0.3, ease: 'power2.out' });
+        const setMY = gsap.quickTo(card, '--my', { duration: 0.3, ease: 'power2.out' });
+
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;
+          const y = (e.clientY - rect.top) / rect.height;
+          setX(((x - 0.5) * 2 * 8) + 'deg');
+          setY(((y - 0.5) * -2 * 8) + 'deg');
+          setMX(x * 100 + '%');
+          setMY(y * 100 + '%');
+        });
+        card.addEventListener('mouseleave', () => {
+          setX('0deg');
+          setY('0deg');
+        });
+      });
+    }
+
+    // ============================================================
+    // TEAM AVATARS — Coin flip + scale on scroll into view
+    // ============================================================
+    if (window.gsap && window.ScrollTrigger) {
+      gsap.utils.toArray('.team-avatar-flipper').forEach((flipper, i) => {
+        gsap.set(flipper, { rotationY: -180, scale: 0.5, opacity: 0 });
+        gsap.to(flipper, {
+          rotationY: 540,
+          scale: 1,
+          opacity: 1,
+          duration: 1.5,
+          ease: 'back.out(1.4)',
+          delay: i * 0.2,
+          scrollTrigger: {
+            trigger: flipper.closest('.team-card'),
+            start: 'top 85%',
+            once: true,
+            invalidateOnRefresh: true
+          }
+        });
+      });
+    }
+
+    // ============================================================
+    // SHOWCASE — Sticky/pin scroll-driven app tour
+    // ============================================================
+    (function setupShowcase() {
+      const showcaseSection = document.getElementById('showcase');
+      if (!showcaseSection) return;
+
+      const screens = Array.from(document.querySelectorAll('.showcase-screen'));
+      const steps = Array.from(document.querySelectorAll('.showcase-step'));
+      const dots = Array.from(document.querySelectorAll('.showcase-dot'));
+      const inner = showcaseSection.querySelector('.showcase-inner');
+      const track = showcaseSection.querySelector('.showcase-track');
+      const totalScreens = screens.length;
+      if (totalScreens === 0) return;
+
+      const setActive = (index) => {
+        screens.forEach((s, i) => s.classList.toggle('is-active', i === index));
+        steps.forEach((s, i) => s.classList.toggle('is-active', i === index));
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === index));
+      };
+
+      const isDesktop = window.matchMedia('(min-width: 1025px)').matches;
+      const animatedScreens = new Set();
+
+      function animateScreen(idx) {
+        if (animatedScreens.has(idx) || !window.gsap) return;
+        animatedScreens.add(idx);
+
+        if (idx === 0) {
+          const days = document.getElementById('showcaseDays');
+          const savings = document.getElementById('showcaseSavings');
+          const notSmoked = document.getElementById('showcaseNotSmoked');
+          const fill = document.getElementById('showcaseProgressFill');
+          if (window.ScrambleTextPlugin && days) {
+            gsap.to(days, { duration: 1.2, scrambleText: { text: '7', chars: '0123456789', revealDelay: 0.2 } });
+            gsap.to(savings, { duration: 1.4, delay: 0.2, scrambleText: { text: '87', chars: '0123456789', revealDelay: 0.3 } });
+            gsap.to(notSmoked, { duration: 1.6, delay: 0.4, scrambleText: { text: '140', chars: '0123456789', revealDelay: 0.4 } });
+          }
+          if (fill) gsap.to(fill, { width: '100%', duration: 1.4, ease: 'power2.out' });
+        }
+        if (idx === 1) {
+          gsap.from('.showcase-screen[data-screen="1"] .showcase-health-card', {
+            y: 16, opacity: 0, stagger: 0.12, duration: 0.6, ease: 'power2.out'
+          });
+          gsap.from('.showcase-screen[data-screen="1"] .showcase-unlock, .showcase-screen[data-screen="1"] .showcase-tip', {
+            y: 12, opacity: 0, stagger: 0.15, duration: 0.6, delay: 0.3, ease: 'power2.out'
+          });
+        }
+        if (idx === 2) {
+          const fill = document.getElementById('showcaseStreakFill');
+          if (fill) gsap.to(fill, { width: '100%', duration: 1.4, ease: 'power2.out' });
+          gsap.from('.showcase-screen[data-screen="2"] .showcase-cal-day.is-clean', {
+            scale: 0.4, opacity: 0, stagger: 0.05, duration: 0.4, ease: 'back.out(1.6)', delay: 0.2
+          });
+        }
+        if (idx === 3) {
+          const ranks = Array.from(document.querySelectorAll('.showcase-screen[data-screen="3"] .showcase-rank'));
+          gsap.from(ranks, { x: 30, opacity: 0, stagger: 0.12, duration: 0.6, ease: 'power3.out' });
+          const fills = Array.from(document.querySelectorAll('.showcase-screen[data-screen="3"] .showcase-rank-fill'));
+          fills.forEach((f, i) => {
+            gsap.to(f, { width: f.dataset.fill + '%', duration: 1.2, delay: 0.4 + i * 0.1, ease: 'power2.out' });
+          });
+          gsap.from('.showcase-screen[data-screen="3"] .showcase-ai-scan', {
+            y: 20, opacity: 0, duration: 0.7, delay: 0.9, ease: 'power3.out'
+          });
+        }
+        if (idx === 4) {
+          const bubbles = Array.from(document.querySelectorAll('.showcase-screen[data-screen="4"] .showcase-bubble'));
+          bubbles.forEach((b, i) => {
+            setTimeout(() => b.classList.add('visible'), i * 500);
+          });
+        }
       }
-    });
+
+      // DESKTOP : pin + scroll-driven (force on regardless of reduced-motion preference)
+      if (isDesktop && window.gsap && window.ScrollTrigger) {
+        // Pin the inner for the duration of screen transitions
+        ScrollTrigger.create({
+          trigger: track,
+          start: 'top top',
+          end: () => '+=' + ((totalScreens - 1) * window.innerHeight),
+          pin: inner,
+          pinSpacing: true,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const idx = Math.min(Math.floor(self.progress * totalScreens * 0.999), totalScreens - 1);
+            setActive(idx);
+            animateScreen(idx);
+          }
+        });
+
+        // Subtle phone rotation
+        gsap.to('#showcasePhone', {
+          rotationY: 4,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: track,
+            start: 'top top',
+            end: () => '+=' + ((totalScreens - 1) * window.innerHeight),
+            scrub: 0.5
+          }
+        });
+
+        // Neon border rotation tied to scroll
+        gsap.to('#showcasePhoneNeon', {
+          '--neon-angle': '720deg',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: track,
+            start: 'top top',
+            end: () => '+=' + ((totalScreens - 1) * window.innerHeight),
+            scrub: 0.5
+          }
+        });
+      } else {
+        // MOBILE / NO GSAP : show only screen 0 by default, dots become tabs
+        if (track) track.style.height = 'auto';
+        const stepsWrap = document.querySelector('.showcase-steps');
+        if (stepsWrap) stepsWrap.style.minHeight = '0';
+        setActive(0);
+        animateScreen(0);
+        // Dots clickable to navigate
+        dots.forEach((d, i) => {
+          d.style.cursor = 'pointer';
+          d.addEventListener('click', () => { setActive(i); animateScreen(i); });
+        });
+      }
+    })();
 
     // ============================================================
     // PARALLAX — rAF-throttled, GPU-only
