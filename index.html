@@ -1994,7 +1994,6 @@
       margin-bottom: var(--space-6);
     }
 
-    .team-card-header { perspective: 800px; }
     .team-avatar {
       width: 72px;
       height: 72px;
@@ -2012,14 +2011,10 @@
       background: #FFFFFF;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
       transition: transform 450ms var(--ease-apple), box-shadow 450ms var(--ease-apple);
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
     }
-    .team-avatar img { backface-visibility: hidden; }
     .team-avatar-flipper {
       width: 100%;
       height: 100%;
-      transform-style: preserve-3d;
       will-change: transform;
     }
     .team-avatar-flipper img { width: 100%; height: 100%; object-fit: cover; }
@@ -5875,19 +5870,19 @@
     // ============================================================
     // TEAM AVATARS — Coin flip + scale on scroll into view
     // ============================================================
-    if (window.gsap && window.ScrollTrigger) {
+    if (window.gsap && window.ScrollTrigger && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       gsap.utils.toArray('.team-avatar-flipper').forEach((flipper, i) => {
-        gsap.set(flipper, { rotationY: -180, scale: 0.5, opacity: 0 });
-        gsap.to(flipper, {
-          rotationY: 540,
-          scale: 1,
-          opacity: 1,
-          duration: 1.5,
+        gsap.from(flipper, {
+          rotationY: -540,
+          scale: 0.6,
+          duration: 1.4,
           ease: 'back.out(1.4)',
           delay: i * 0.2,
+          immediateRender: false,
           scrollTrigger: {
             trigger: flipper.closest('.team-card'),
             start: 'top 85%',
+            toggleActions: 'play none none none',
             once: true,
             invalidateOnRefresh: true
           }
