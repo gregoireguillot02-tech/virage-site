@@ -14,7 +14,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <!-- Headers securite (audit 2026-04-24). A completer avec vrais headers HTTP cote hebergeur -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.googleusercontent.com https://*.gstatic.com; connect-src 'self' https://cipxesubpcpsqplcqnus.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://content.googleapis.com; frame-src https://accounts.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.googleusercontent.com https://*.gstatic.com https://*.cdninstagram.com https://*.fbcdn.net https://scontent.cdninstagram.com; media-src 'self' https://*.cdninstagram.com https://*.fbcdn.net; connect-src 'self' https://cipxesubpcpsqplcqnus.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://content.googleapis.com; frame-src https://accounts.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
   <meta http-equiv="Referrer-Policy" content="no-referrer">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -756,6 +756,49 @@
     .identity-card h4{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);margin:0 0 4px}
     .identity-card p{font-size:.75rem;color:var(--slate);margin:0}
 
+    /* ===== Instagram pilotage ===== */
+    .ig-profile{background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);border-radius:var(--radius-lg);padding:24px 26px;color:#fff;margin-bottom:18px;box-shadow:var(--shadow-md);position:relative;overflow:hidden}
+    .ig-profile::before{content:"";position:absolute;top:-60px;right:-60px;width:240px;height:240px;background:rgba(255,255,255,.08);border-radius:50%;pointer-events:none}
+    .ig-profile-head{display:flex;gap:18px;align-items:center;margin-bottom:18px;position:relative;z-index:1;flex-wrap:wrap}
+    .ig-avatar{width:72px;height:72px;border-radius:50%;border:3px solid #fff;background:rgba(255,255,255,.2);object-fit:cover;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+    .ig-avatar-fallback{width:72px;height:72px;border-radius:50%;border:3px solid #fff;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;font-family:'Outfit',sans-serif;color:#fff;flex-shrink:0}
+    .ig-profile-info{flex:1;min-width:200px}
+    .ig-profile-handle{font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:2px}
+    .ig-profile-name{font-size:.875rem;opacity:.9;margin-bottom:4px}
+    .ig-profile-bio{font-size:.75rem;opacity:.85;line-height:1.4;max-width:520px}
+    .ig-profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;position:relative;z-index:1}
+    .ig-stat{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:14px;text-align:center}
+    .ig-stat-value{font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+    .ig-stat-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;opacity:.85;margin-top:4px;font-weight:600}
+    .ig-meta-row{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;opacity:.75;margin-top:14px;position:relative;z-index:1;flex-wrap:wrap;gap:8px}
+    .ig-loading{padding:24px;text-align:center;color:#fff;opacity:.85;font-size:.8125rem}
+    .ig-error{padding:14px 18px;background:rgba(220,38,38,.18);border:1px solid rgba(220,38,38,.4);border-radius:10px;font-size:.8125rem;color:#fff;line-height:1.5}
+
+    /* Grille des posts */
+    .ig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+    .ig-post{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all var(--trans-fast);display:flex;flex-direction:column;position:relative}
+    .ig-post:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+    .ig-post-media{aspect-ratio:1/1;background:var(--surface-alt);position:relative;overflow:hidden}
+    .ig-post-media img,.ig-post-media video{width:100%;height:100%;object-fit:cover;display:block}
+    .ig-post-type{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.65rem;padding:3px 7px;border-radius:6px;font-weight:600;backdrop-filter:blur(4px)}
+    .ig-post-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:8px}
+    .ig-post-caption{font-size:.78rem;color:var(--ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .ig-post-stats{display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--slate);margin-top:auto}
+    .ig-post-stat{display:inline-flex;align-items:center;gap:4px;font-weight:600}
+    .ig-post-stat.likes{color:var(--red)}
+    .ig-post-stat.comments{color:var(--blue)}
+    .ig-post-date{font-size:.65rem;color:var(--grey);font-weight:500}
+    .ig-post.engagement-high{border-top:3px solid var(--green)}
+    .ig-post.engagement-low{opacity:.85}
+
+    @media (max-width:768px){
+      .ig-profile{padding:20px}
+      .ig-profile-stats{grid-template-columns:repeat(3,1fr);gap:8px}
+      .ig-stat-value{font-size:1.2rem}
+      .ig-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+      .ig-post-caption{-webkit-line-clamp:2}
+    }
+
     /* Widget tasks dans Pilote 360 */
     .mytasks-section{margin-bottom:14px}
     .mytasks-section:last-child{margin-bottom:0}
@@ -869,6 +912,7 @@
       <div class="nav-section-mobile">Pilotage</div>
       <button class="active" data-page="pilote360"><span class="nav-icon">&#9728;</span>Pilote 360</button>
       <button data-page="tasks"><span class="nav-icon">&#10003;</span>Tasks</button>
+      <button data-page="instagram"><span class="nav-icon">&#128247;</span>Instagram</button>
       <div class="nav-section-mobile">Equipe IA</div>
       <button data-page="agents"><span class="nav-icon">&#9733;</span>Hub agents</button>
       <div class="nav-section-mobile">Site &amp; Leads</div>
@@ -908,6 +952,7 @@
       <div class="nav-section">Pilotage</div>
       <button class="active" data-page="pilote360"><span class="nav-icon">&#9728;</span>Pilote 360</button>
       <button data-page="tasks"><span class="nav-icon">&#10003;</span>Tasks</button>
+      <button data-page="instagram"><span class="nav-icon">&#128247;</span>Instagram</button>
       <div class="nav-section">Equipe IA</div>
       <button data-page="agents"><span class="nav-icon">&#9733;</span>Hub agents</button>
       <div class="nav-section">Site &amp; Leads</div>
@@ -1030,6 +1075,23 @@
             <span class="kanban-count" id="kanbanCountDone">0</span>
           </div>
           <div class="kanban-body" id="kanbanColDone" data-status="done"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTAGRAM : pilotage @virage.app -->
+    <div class="page" id="page-instagram">
+      <div id="instagramProfile" class="ig-profile">
+        <div class="ig-loading">Chargement du profil Instagram...</div>
+      </div>
+      <div class="cards-grid">
+        <div class="card full">
+          <div class="card-title">
+            Posts recents <span id="igMediaCount" class="badge"></span>
+            <button class="btn-sm" onclick="refreshInstagram()" id="igRefreshBtn">&#8635; Actualiser</button>
+            <button class="btn-sm" onclick="window.open('https://www.instagram.com/virage.app/','_blank')">Ouvrir Instagram &#8599;</button>
+          </div>
+          <div id="instagramMedia"></div>
         </div>
       </div>
     </div>
@@ -1893,6 +1955,137 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else setTimeout(initTodayWidget,300);
 
 // ============================================================
+// INSTAGRAM : pilotage @virage.app via Edge Function
+// ============================================================
+let igProfile=null, igMedia=null, igLoading=false;
+
+async function fetchInstagramData(kind, force=false){
+  const url=`${SB_URL}/functions/v1/instagram-fetch?kind=${kind}`+(force?'&force=1':'');
+  const r=await fetch(url,{
+    headers:{'x-dashboard-auth':AUTH_HASH,'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  });
+  if(!r.ok){
+    const txt=await r.text();
+    throw new Error('IG '+kind+' HTTP '+r.status+' : '+txt);
+  }
+  return await r.json();
+}
+
+async function loadInstagramProfile(force){
+  const el=document.getElementById('instagramProfile');
+  if(!el)return;
+  if(igLoading)return;
+  igLoading=true;
+  try{
+    igProfile=await fetchInstagramData('profile',force);
+    renderInstagramProfile();
+  }catch(e){
+    el.innerHTML='<div class="ig-error">Erreur chargement profil Instagram : '+escHTML(e.message)+'<br><br>Verifie que :<ul style="margin-top:8px;padding-left:20px"><li>L\'Edge Function instagram-fetch est deployee</li><li>Les secrets INSTAGRAM_ACCESS_TOKEN et INSTAGRAM_BUSINESS_ID sont definis</li><li>Le token n\'a pas expire (60 jours)</li></ul></div>';
+  }finally{igLoading=false}
+}
+
+async function loadInstagramMedia(force){
+  const el=document.getElementById('instagramMedia');
+  if(!el)return;
+  el.innerHTML='<div class="empty" style="padding:24px">Chargement des posts...</div>';
+  try{
+    igMedia=await fetchInstagramData('media',force);
+    renderInstagramMedia();
+  }catch(e){
+    el.innerHTML='<div class="ig-error">Erreur chargement posts : '+escHTML(e.message)+'</div>';
+  }
+}
+
+function renderInstagramProfile(){
+  const el=document.getElementById('instagramProfile');
+  if(!el||!igProfile)return;
+  const p=igProfile;
+  const avatar=p.profile_picture_url
+    ? '<img class="ig-avatar" src="'+escHTML(p.profile_picture_url)+'" alt="'+escHTML(p.username||'')+'" referrerpolicy="no-referrer">'
+    : '<div class="ig-avatar-fallback">'+(p.username||'?').charAt(0).toUpperCase()+'</div>';
+  const ageText=p._cached?('cache '+Math.round((p._age_seconds||0)/60)+' min'):'frais';
+  el.innerHTML=
+    '<div class="ig-profile-head">'+
+      avatar+
+      '<div class="ig-profile-info">'+
+        '<div class="ig-profile-handle">@'+escHTML(p.username||'')+'</div>'+
+        (p.name?'<div class="ig-profile-name">'+escHTML(p.name)+'</div>':'')+
+        (p.biography?'<div class="ig-profile-bio">'+escHTML(p.biography)+'</div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="ig-profile-stats">'+
+      '<div class="ig-stat"><div class="ig-stat-value">'+(p.followers_count||0).toLocaleString('fr-FR')+'</div><div class="ig-stat-label">Abonnes</div></div>'+
+      '<div class="ig-stat"><div class="ig-stat-value">'+(p.follows_count||0).toLocaleString('fr-FR')+'</div><div class="ig-stat-label">Abonnements</div></div>'+
+      '<div class="ig-stat"><div class="ig-stat-value">'+(p.media_count||0).toLocaleString('fr-FR')+'</div><div class="ig-stat-label">Publications</div></div>'+
+    '</div>'+
+    '<div class="ig-meta-row"><span>Donnees '+ageText+'</span>'+(p.website?'<a href="'+escHTML(p.website)+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">'+escHTML(p.website)+'</a>':'')+'</div>';
+}
+
+function renderInstagramMedia(){
+  const el=document.getElementById('instagramMedia');
+  const countEl=document.getElementById('igMediaCount');
+  if(!el||!igMedia)return;
+  const items=igMedia.data||[];
+  if(countEl)countEl.textContent=items.length+' affiches';
+  if(items.length===0){
+    el.innerHTML='<div class="empty">Aucun post recent.</div>';
+    return;
+  }
+  // Calculer engagement par post (likes + comments) / followers
+  const followers=igProfile?.followers_count||1;
+  const enriched=items.map(m=>{
+    const likes=m.like_count||0;
+    const comments=m.comments_count||0;
+    const eng=(likes+comments)/followers*100;
+    return {...m,_engagement:eng,_total:likes+comments};
+  });
+  // Mediane d'engagement pour reperer les posts au-dessus / en dessous
+  const sorted=[...enriched].sort((a,b)=>a._engagement-b._engagement);
+  const median=sorted[Math.floor(sorted.length/2)]?._engagement||0;
+
+  el.innerHTML='<div class="ig-grid">'+enriched.map(m=>{
+    const isVideo=m.media_type==='VIDEO';
+    const isCarousel=m.media_type==='CAROUSEL_ALBUM';
+    const imgUrl=isVideo?(m.thumbnail_url||m.media_url):m.media_url;
+    const typeLabel=isVideo?'Reel/Video':isCarousel?'Carrousel':'Photo';
+    const date=new Date(m.timestamp);
+    const dateStr=date.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'2-digit'});
+    const caption=m.caption||'';
+    const captionShort=caption.length>180?caption.substring(0,180)+'...':caption;
+    const engClass=m._engagement>median*1.3?' engagement-high':(m._engagement<median*0.7?' engagement-low':'');
+    return '<div class="ig-post'+engClass+'" onclick="window.open(\''+escHTML(m.permalink||'#')+'\',\'_blank\')">'+
+      '<div class="ig-post-media">'+(imgUrl?'<img src="'+escHTML(imgUrl)+'" alt="" referrerpolicy="no-referrer" loading="lazy">':'<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--grey);font-size:.75rem">Pas de preview</div>')+'<span class="ig-post-type">'+typeLabel+'</span></div>'+
+      '<div class="ig-post-body">'+
+        (captionShort?'<div class="ig-post-caption">'+escHTML(captionShort)+'</div>':'')+
+        '<div class="ig-post-stats">'+
+          '<span class="ig-post-stat likes">&#9829; '+(m.like_count||0).toLocaleString('fr-FR')+'</span>'+
+          '<span class="ig-post-stat comments">&#128172; '+(m.comments_count||0).toLocaleString('fr-FR')+'</span>'+
+          '<span class="ig-post-date">'+dateStr+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+async function refreshInstagram(){
+  const btn=document.getElementById('igRefreshBtn');
+  if(btn){btn.disabled=true;btn.textContent='Actualisation...'}
+  try{
+    await Promise.all([loadInstagramProfile(true),loadInstagramMedia(true)]);
+  }finally{
+    if(btn){btn.disabled=false;btn.innerHTML='&#8635; Actualiser'}
+  }
+}
+
+let instagramLoaded=false;
+function ensureInstagramLoaded(){
+  if(instagramLoaded)return;
+  instagramLoaded=true;
+  loadInstagramProfile(false);
+  loadInstagramMedia(false);
+}
+
+// ============================================================
 // FACTOIDS : 'Le saviez-vous ?' sur tabac/vape/sevrage
 // Chiffres source : OMS, Sante Publique France, INSERM, Inca, Tabac Info Service
 // ============================================================
@@ -2393,8 +2586,8 @@ else initTasksUI();
 // ============================================================
 // NAVIGATION
 // ============================================================
-const pageTitles={pilote360:'Pilote 360',tasks:'Tasks',agents:'Equipe IA',overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
-const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',tasks:'Todo partagee Greg et Paul',agents:'Ta team IA connectee a Claude',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
+const pageTitles={pilote360:'Pilote 360',tasks:'Tasks',instagram:'Instagram',agents:'Equipe IA',overview:'Vue d\'ensemble',traffic:'Trafic & Acquisition',audience:'Audience',crm:'CRM Waitlist',pro:'CRM Pro Sante',conversions:'Conversions',live:'Temps reel',app:'App VIRAGE : beta testers',demarchage:'Pipeline contacts',finance:'Finance & Burn'};
+const pageSubtitles={pilote360:'Vision consolidee de l\'activite VIRAGE',tasks:'Todo partagee Greg et Paul',instagram:'@virage.app : abonnes, posts, engagement',agents:'Ta team IA connectee a Claude',overview:'Metriques site et acquisition',app:'Utilisateurs de l\'app VIRAGE',demarchage:'77 contacts addictologues suivis',finance:'Cash, burn, runway et pipeline financement'};
 
 function navigateTo(pg){
   document.querySelectorAll('.sidebar-nav button, .mobile-menu-nav button, .bottom-nav button').forEach(b=>b.classList.remove('active'));
@@ -2415,6 +2608,8 @@ function navigateTo(pg){
     if(grid)grid.style.display='block';if(chat)chat.style.display='none';
     currentAgentId=null;currentConversationId=null;
     renderAgentsGrid();
+  } else if(pg==='instagram'){
+    ensureInstagramLoaded();
   } else {
     renderAll();
   }
