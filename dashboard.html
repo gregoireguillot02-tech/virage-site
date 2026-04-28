@@ -654,6 +654,49 @@
     .today-error{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.35);padding:10px 12px;border-radius:8px;font-size:.75rem;margin-top:8px;position:relative;z-index:1}
     [data-theme="dark"] .today-card{background:linear-gradient(135deg,#0B1F15,#1B4332 60%,#2D6A4F)}
 
+    /* ===== Mode discret : flou les donnees sensibles pour partage d'ecran ===== */
+    /* Toggle button (etat actif) */
+    .privacy-toggle.active,.privacy-toggle-mobile.active{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important;animation:privacyPulse 2s ease-in-out infinite}
+    @keyframes privacyPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,159,62,.5)}50%{box-shadow:0 0 0 6px rgba(224,159,62,0)}}
+
+    /* Indicateur visuel global (bordure haute discrete) quand actif */
+    body.privacy-on::before{content:"Mode discret actif - les donnees sensibles sont floutees (survol pour voir)";position:fixed;top:0;left:0;right:0;background:var(--accent);color:#fff;font-size:.7rem;font-weight:600;text-align:center;padding:5px 10px;z-index:9999;letter-spacing:.02em;font-family:'Inter',sans-serif;box-shadow:0 2px 8px rgba(224,159,62,.3)}
+    body.privacy-on{padding-top:28px}
+    @media(max-width:900px){body.privacy-on::before{font-size:.62rem;padding:4px 8px}body.privacy-on{padding-top:24px}}
+
+    /* Selecteurs cibles : floute les chiffres financiers, donnees perso CRM, beta testers */
+    body.privacy-on #page-finance .kpi-card .kpi-value,
+    body.privacy-on #page-finance .kpi-card .kpi-trend,
+    body.privacy-on #page-finance tbody td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-finance .pipeline-card .pc-value,
+    body.privacy-on #page-app .kpi-card .kpi-value,
+    body.privacy-on #page-app tbody td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-crm .kpi-card .kpi-value,
+    body.privacy-on #page-crm tbody td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-pro .kpi-card .kpi-value,
+    body.privacy-on #page-pro tbody td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-demarchage tbody td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-demarchage .pipeline-card .pc-value,
+    body.privacy-on #page-pilote360 .kpi-card .kpi-value:nth-of-type(2) /* cash actuel quand affiche */,
+    body.privacy-on .privacy-blur,
+    body.privacy-on [data-private]{filter:blur(8px);transition:filter .25s ease;user-select:none}
+
+    /* Hover unblur temporaire */
+    body.privacy-on #page-finance .kpi-card:hover .kpi-value,
+    body.privacy-on #page-finance .kpi-card:hover .kpi-trend,
+    body.privacy-on #page-finance tbody tr:hover td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-finance .pipeline-card:hover .pc-value,
+    body.privacy-on #page-app .kpi-card:hover .kpi-value,
+    body.privacy-on #page-app tbody tr:hover td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-crm .kpi-card:hover .kpi-value,
+    body.privacy-on #page-crm tbody tr:hover td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-pro .kpi-card:hover .kpi-value,
+    body.privacy-on #page-pro tbody tr:hover td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-demarchage tbody tr:hover td:not(:first-child):not(.col-actions),
+    body.privacy-on #page-demarchage .pipeline-card:hover .pc-value,
+    body.privacy-on .privacy-blur:hover,
+    body.privacy-on [data-private]:hover{filter:blur(0)!important}
+
     /* Bandeau 'Le saviez-vous ?' : info tabac/vape/sevrage rotative */
     .factoid-bar{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,rgba(82,183,136,.12) 0%,rgba(224,159,62,.08) 100%);border:1px solid rgba(82,183,136,.2);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:.8125rem;animation:factoidFade .4s ease}
     .factoid-icon{font-size:1.1rem;flex-shrink:0}
@@ -878,6 +921,7 @@
       </div>
     </div>
     <div class="mobile-header-actions">
+      <button class="privacy-toggle-mobile" onclick="togglePrivacyMode()" title="Mode discret" aria-label="Mode discret">&#128065;</button>
       <button onclick="loadAllData()" title="Actualiser" aria-label="Actualiser">&#8635;</button>
     </div>
   </div>
@@ -994,6 +1038,7 @@
         <button class="period-btn" data-days="30">30j</button>
         <button class="period-btn" data-days="90">90j</button>
         <button class="period-btn" data-days="0">Tout</button>
+        <button class="btn-icon privacy-toggle" onclick="togglePrivacyMode()" title="Mode discret (floute les donnees sensibles, utile en partage d'ecran)" aria-label="Mode discret">&#128065;</button>
         <button class="btn-icon" onclick="loadAllData()" title="Actualiser">&#8635;</button>
       </div>
     </div>
@@ -2506,6 +2551,38 @@ function ensureInstagramLoaded(){
   const sortEl=document.getElementById('igSortBy');
   if(sortEl)sortEl.addEventListener('change',()=>{igSortBy=sortEl.value;renderInstagramMedia()});
 }
+
+// ============================================================
+// MODE DISCRET : floute les donnees sensibles pour partage d'ecran
+// ============================================================
+const PRIVACY_KEY='virage_privacy_mode';
+
+function applyPrivacyMode(active){
+  document.body.classList.toggle('privacy-on',active);
+  document.querySelectorAll('.privacy-toggle, .privacy-toggle-mobile').forEach(b=>b.classList.toggle('active',active));
+}
+
+function togglePrivacyMode(){
+  const wasOn=document.body.classList.contains('privacy-on');
+  const next=!wasOn;
+  if(next)localStorage.setItem(PRIVACY_KEY,'1');
+  else localStorage.removeItem(PRIVACY_KEY);
+  applyPrivacyMode(next);
+}
+
+// Restaurer l'etat au chargement
+if(localStorage.getItem(PRIVACY_KEY)==='1'){
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>applyPrivacyMode(true));
+  else applyPrivacyMode(true);
+}
+
+// Raccourci clavier : Cmd/Ctrl + Shift + P
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.key.toLowerCase()==='p'){
+    e.preventDefault();
+    togglePrivacyMode();
+  }
+});
 
 // ============================================================
 // FACTOIDS : 'Le saviez-vous ?' sur tabac/vape/sevrage
