@@ -783,11 +783,16 @@
     .ig-post-type{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.65rem;padding:3px 7px;border-radius:6px;font-weight:600;backdrop-filter:blur(4px)}
     .ig-post-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:8px}
     .ig-post-caption{font-size:.78rem;color:var(--ink);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-    .ig-post-stats{display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--slate);margin-top:auto}
+    .ig-post-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;background:var(--surface-alt);border-radius:8px;font-size:.7rem}
+    .ig-metric{display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--slate)}
+    .ig-metric strong{font-size:.85rem;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+    .ig-metric-icon{font-size:.85rem;opacity:.7}
+    .ig-metric span:not(.ig-metric-icon){font-size:.6rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;opacity:.7}
+    .ig-post-stats{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--slate);margin-top:auto}
     .ig-post-stat{display:inline-flex;align-items:center;gap:4px;font-weight:600}
     .ig-post-stat.likes{color:var(--red)}
     .ig-post-stat.comments{color:var(--blue)}
-    .ig-post-date{font-size:.65rem;color:var(--grey);font-weight:500}
+    .ig-post-date{font-size:.65rem;color:var(--grey);font-weight:500;margin-left:auto}
     .ig-post.engagement-high{border-top:3px solid var(--green)}
     .ig-post.engagement-low{opacity:.85}
 
@@ -1084,12 +1089,33 @@
       <div id="instagramProfile" class="ig-profile">
         <div class="ig-loading">Chargement du profil Instagram...</div>
       </div>
+      <!-- KPI globaux : performance des 25 derniers posts -->
+      <div class="kpi-grid" id="instagramKPIs"></div>
       <div class="cards-grid">
+        <div class="card">
+          <div class="card-title">Top 3 posts (engagement)</div>
+          <div id="instagramTopPosts"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Performance par type de contenu</div>
+          <div id="instagramByType"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Quand poster ? (jour de la semaine)</div>
+          <div id="instagramByDay"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Recommandations CM</div>
+          <div id="instagramRecos"></div>
+        </div>
         <div class="card full">
           <div class="card-title">
-            Posts recents <span id="igMediaCount" class="badge"></span>
-            <button class="btn-sm" onclick="refreshInstagram()" id="igRefreshBtn">&#8635; Actualiser</button>
-            <button class="btn-sm" onclick="window.open('https://www.instagram.com/virage.app/','_blank')">Ouvrir Instagram &#8599;</button>
+            Tous les posts <span id="igMediaCount" class="badge"></span>
+            <div style="display:flex;gap:6px;margin-left:auto">
+              <select id="igSortBy" class="tasks-select" style="min-width:140px"><option value="date">Plus recents</option><option value="engagement">Engagement %</option><option value="reach">Reach</option><option value="likes">Likes</option><option value="saves">Sauvegardes</option></select>
+              <button class="btn-sm" onclick="refreshInstagram()" id="igRefreshBtn">&#8635; Actualiser</button>
+              <button class="btn-sm" onclick="window.open('https://www.instagram.com/virage.app/','_blank')">Ouvrir IG &#8599;</button>
+            </div>
           </div>
           <div id="instagramMedia"></div>
         </div>
@@ -1955,9 +1981,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else setTimeout(initTodayWidget,300);
 
 // ============================================================
-// INSTAGRAM : pilotage @virage.app via Edge Function
+// INSTAGRAM : pilotage @virage.app via Edge Function (mode CM)
 // ============================================================
-let igProfile=null, igMedia=null, igLoading=false;
+let igOverview=null, igLoading=false, igSortBy='date';
 
 async function fetchInstagramData(kind, force=false){
   const url=`${SB_URL}/functions/v1/instagram-fetch?kind=${kind}`+(force?'&force=1':'');
@@ -1971,39 +1997,57 @@ async function fetchInstagramData(kind, force=false){
   return await r.json();
 }
 
-async function loadInstagramProfile(force){
-  const el=document.getElementById('instagramProfile');
-  if(!el)return;
+async function loadInstagramOverview(force){
   if(igLoading)return;
   igLoading=true;
+  const profileEl=document.getElementById('instagramProfile');
+  const mediaEl=document.getElementById('instagramMedia');
   try{
-    igProfile=await fetchInstagramData('profile',force);
-    renderInstagramProfile();
+    igOverview=await fetchInstagramData('overview',force);
+    renderInstagramAll();
   }catch(e){
-    el.innerHTML='<div class="ig-error">Erreur chargement profil Instagram : '+escHTML(e.message)+'<br><br>Verifie que :<ul style="margin-top:8px;padding-left:20px"><li>L\'Edge Function instagram-fetch est deployee</li><li>Les secrets INSTAGRAM_ACCESS_TOKEN et INSTAGRAM_BUSINESS_ID sont definis</li><li>Le token n\'a pas expire (60 jours)</li></ul></div>';
+    if(profileEl)profileEl.innerHTML='<div class="ig-error">Erreur chargement Instagram : '+escHTML(e.message)+'<br><br>Verifie : <ul style="margin-top:8px;padding-left:20px"><li>Edge Function instagram-fetch deployee</li><li>Secrets INSTAGRAM_ACCESS_TOKEN et INSTAGRAM_BUSINESS_ID definis</li><li>Token Insta valide (60j)</li></ul></div>';
   }finally{igLoading=false}
 }
 
-async function loadInstagramMedia(force){
-  const el=document.getElementById('instagramMedia');
-  if(!el)return;
-  el.innerHTML='<div class="empty" style="padding:24px">Chargement des posts...</div>';
-  try{
-    igMedia=await fetchInstagramData('media',force);
-    renderInstagramMedia();
-  }catch(e){
-    el.innerHTML='<div class="ig-error">Erreur chargement posts : '+escHTML(e.message)+'</div>';
-  }
+function renderInstagramAll(){
+  if(!igOverview)return;
+  renderInstagramProfile();
+  renderInstagramKPIs();
+  renderInstagramTopPosts();
+  renderInstagramByType();
+  renderInstagramByDay();
+  renderInstagramRecos();
+  renderInstagramMedia();
+}
+
+function getEnrichedMedia(){
+  if(!igOverview?.media?.data)return [];
+  const followers=igOverview.profile?.followers_count||1;
+  return igOverview.media.data.map(m=>{
+    const likes=m.like_count||0;
+    const comments=m.comments_count||0;
+    const insights=m.insights||{};
+    const reach=insights.reach||0;
+    const saves=insights.saved||0;
+    const shares=insights.shares||0;
+    const total=insights.total_interactions||(likes+comments);
+    // Engagement rate / abonnes
+    const engRate=(total/followers)*100;
+    // Engagement rate / reach (plus pertinent pour les posts qui percent)
+    const engReachRate=reach>0?(total/reach)*100:0;
+    return {...m,_likes:likes,_comments:comments,_reach:reach,_saves:saves,_shares:shares,_total:total,_engRate:engRate,_engReachRate:engReachRate};
+  });
 }
 
 function renderInstagramProfile(){
   const el=document.getElementById('instagramProfile');
-  if(!el||!igProfile)return;
-  const p=igProfile;
+  if(!el||!igOverview?.profile)return;
+  const p=igOverview.profile;
   const avatar=p.profile_picture_url
     ? '<img class="ig-avatar" src="'+escHTML(p.profile_picture_url)+'" alt="'+escHTML(p.username||'')+'" referrerpolicy="no-referrer">'
     : '<div class="ig-avatar-fallback">'+(p.username||'?').charAt(0).toUpperCase()+'</div>';
-  const ageText=p._cached?('cache '+Math.round((p._age_seconds||0)/60)+' min'):'frais';
+  const ageText=igOverview._cached?('cache '+Math.round((igOverview._age_seconds||0)/60)+' min'):'frais';
   el.innerHTML=
     '<div class="ig-profile-head">'+
       avatar+
@@ -2021,45 +2065,243 @@ function renderInstagramProfile(){
     '<div class="ig-meta-row"><span>Donnees '+ageText+'</span>'+(p.website?'<a href="'+escHTML(p.website)+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">'+escHTML(p.website)+'</a>':'')+'</div>';
 }
 
+function renderInstagramKPIs(){
+  const el=document.getElementById('instagramKPIs');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(items.length===0){el.innerHTML='';return}
+  const totalReach=items.reduce((s,p)=>s+p._reach,0);
+  const totalInter=items.reduce((s,p)=>s+p._total,0);
+  const totalSaves=items.reduce((s,p)=>s+p._saves,0);
+  const totalShares=items.reduce((s,p)=>s+p._shares,0);
+  const totalLikes=items.reduce((s,p)=>s+p._likes,0);
+  const totalComments=items.reduce((s,p)=>s+p._comments,0);
+  const avgEngRate=items.reduce((s,p)=>s+p._engRate,0)/items.length;
+  const avgEngReach=items.filter(p=>p._reach>0).reduce((s,p,_,a)=>s+p._engReachRate/a.length,0);
+  const avgReach=items.length?Math.round(totalReach/items.length):0;
+  // Benchmark engagement IG : 1-3% bon, 3-6% excellent, >6% viral
+  const engCls=avgEngRate>=3?'up':avgEngRate>=1?'neutral':'down';
+  const engLabel=avgEngRate>=6?'viral':avgEngRate>=3?'excellent':avgEngRate>=1?'bon':'a ameliorer';
+  el.innerHTML=
+    kpiHTML('Reach total ('+items.length+' posts)',totalReach.toLocaleString('fr-FR'),'moy '+avgReach+'/post','neutral',null)+
+    kpiHTML('Interactions totales',totalInter.toLocaleString('fr-FR'),totalLikes+' likes &middot; '+totalComments+' com.','up',null)+
+    kpiHTML('Sauvegardes',totalSaves.toLocaleString('fr-FR'),totalShares+' partages','neutral',null)+
+    kpiHTML('Engagement rate moyen',avgEngRate.toFixed(2)+'%',engLabel,engCls,null);
+}
+
+function renderInstagramTopPosts(){
+  const el=document.getElementById('instagramTopPosts');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(items.length===0){el.innerHTML='<div class="empty">Pas encore de posts</div>';return}
+  const top=[...items].sort((a,b)=>b._engRate-a._engRate).slice(0,3);
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+top.map((p,i)=>{
+    const imgUrl=p.thumbnail_url||p.media_url;
+    const cap=(p.caption||'Sans legende').substring(0,80);
+    return '<a href="'+escHTML(p.permalink||'#')+'" target="_blank" rel="noopener" style="display:flex;gap:10px;padding:8px;background:var(--surface-alt);border-radius:8px;text-decoration:none;color:var(--ink);transition:all .15s" onmouseover="this.style.background=\'var(--green-pale)\'" onmouseout="this.style.background=\'var(--surface-alt)\'">'+
+      '<div style="width:48px;height:48px;background:var(--surface);border-radius:6px;flex-shrink:0;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--green);font-size:.8rem">'+(imgUrl?'<img src="'+escHTML(imgUrl)+'" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">':'#'+(i+1))+'<span style="position:absolute;top:-2px;left:-2px;background:var(--green);color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem">'+(i+1)+'</span></div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:.78rem;font-weight:500;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHTML(cap)+'</div>'+
+        '<div style="font-size:.68rem;color:var(--slate);margin-top:4px">'+
+          '<strong style="color:var(--green)">'+p._engRate.toFixed(2)+'%</strong> engagement &middot; '+
+          p._reach+' reach &middot; '+p._saves+' saved'+
+        '</div>'+
+      '</div>'+
+    '</a>';
+  }).join('')+'</div>';
+}
+
+function renderInstagramByType(){
+  const el=document.getElementById('instagramByType');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(items.length===0){el.innerHTML='<div class="empty">Pas encore de posts</div>';return}
+  const buckets={};
+  items.forEach(p=>{
+    let type=p.media_product_type||p.media_type||'IMAGE';
+    if(type==='REELS')type='REEL';
+    if(type==='FEED'){
+      type=p.media_type==='CAROUSEL_ALBUM'?'CAROUSEL':(p.media_type==='VIDEO'?'VIDEO':'IMAGE');
+    }
+    if(!buckets[type])buckets[type]={count:0,reach:0,total:0,saves:0,eng:0};
+    buckets[type].count++;
+    buckets[type].reach+=p._reach;
+    buckets[type].total+=p._total;
+    buckets[type].saves+=p._saves;
+    buckets[type].eng+=p._engRate;
+  });
+  const labels={IMAGE:'Photo',CAROUSEL:'Carrousel',VIDEO:'Video',REEL:'Reel',STORY:'Story'};
+  const rows=Object.entries(buckets).sort((a,b)=>b[1].eng/b[1].count-a[1].eng/a[1].count);
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+rows.map(([type,b])=>{
+    const avgEng=(b.eng/b.count).toFixed(2);
+    const avgReach=Math.round(b.reach/b.count);
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface-alt);border-radius:8px">'+
+      '<div><strong>'+(labels[type]||type)+'</strong> <span style="color:var(--grey);font-size:.72rem">x'+b.count+'</span></div>'+
+      '<div style="font-size:.72rem;color:var(--slate);text-align:right">'+
+        '<div><strong style="color:var(--green)">'+avgEng+'%</strong> engagement</div>'+
+        '<div style="opacity:.7">'+avgReach+' reach moy.</div>'+
+      '</div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function renderInstagramByDay(){
+  const el=document.getElementById('instagramByDay');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(items.length===0){el.innerHTML='<div class="empty">Pas encore de posts</div>';return}
+  const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const buckets=days.map(()=>({count:0,reach:0,total:0,eng:0}));
+  items.forEach(p=>{
+    const d=new Date(p.timestamp);
+    const dow=(d.getDay()+6)%7; // 0=Lun, 6=Dim
+    buckets[dow].count++;
+    buckets[dow].reach+=p._reach;
+    buckets[dow].total+=p._total;
+    buckets[dow].eng+=p._engRate;
+  });
+  const maxEng=Math.max(...buckets.map(b=>b.count?b.eng/b.count:0),0.01);
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+buckets.map((b,i)=>{
+    const avgEng=b.count?(b.eng/b.count):0;
+    const pct=avgEng/maxEng*100;
+    const isBest=b.count>0&&avgEng===Math.max(...buckets.map(x=>x.count?x.eng/x.count:0));
+    return '<div style="display:flex;align-items:center;gap:8px">'+
+      '<div style="width:32px;font-size:.72rem;font-weight:'+(isBest?'700':'500')+';color:'+(isBest?'var(--green)':'var(--slate)')+'">'+days[i]+'</div>'+
+      '<div style="flex:1;background:var(--surface-alt);border-radius:6px;height:18px;overflow:hidden;position:relative">'+
+        (b.count>0?'<div style="background:'+(isBest?'var(--green)':'rgba(82,183,136,.4)')+';height:100%;width:'+pct+'%;border-radius:6px;transition:width .3s"></div>':'')+
+      '</div>'+
+      '<div style="width:64px;text-align:right;font-size:.68rem;color:var(--slate);font-variant-numeric:tabular-nums">'+(b.count?avgEng.toFixed(1)+'%':'-')+'<span style="opacity:.5"> &middot;'+b.count+'p</span></div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function renderInstagramRecos(){
+  const el=document.getElementById('instagramRecos');
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(items.length===0){el.innerHTML='<div class="empty">Pas assez de posts pour analyser</div>';return}
+
+  const recos=[];
+
+  // 1. Engagement rate global
+  const avgEng=items.reduce((s,p)=>s+p._engRate,0)/items.length;
+  if(avgEng>=6)recos.push({icon:'&#9889;',type:'success',txt:'Engagement '+avgEng.toFixed(1)+'% : niveau viral. Continue ce que tu fais.'});
+  else if(avgEng>=3)recos.push({icon:'&#9989;',type:'success',txt:'Engagement '+avgEng.toFixed(1)+'% : excellent (>3% sur Insta). Profil performant.'});
+  else if(avgEng>=1)recos.push({icon:'&#128202;',type:'info',txt:'Engagement '+avgEng.toFixed(1)+'% : correct (1-3% norme). Pousse les Reels et CTA en fin de post pour grimper.'});
+  else recos.push({icon:'&#9888;',type:'warning',txt:'Engagement '+avgEng.toFixed(1)+'% sous la moyenne IG. Solution rapide : poser des questions en fin de caption pour booster les commentaires.'});
+
+  // 2. Type de contenu qui marche
+  const buckets={};
+  items.forEach(p=>{
+    let type=p.media_type==='CAROUSEL_ALBUM'?'CAROUSEL':(p.media_type==='VIDEO'||p.media_product_type==='REELS'?'REEL':'IMAGE');
+    if(!buckets[type])buckets[type]={count:0,eng:0};
+    buckets[type].count++;
+    buckets[type].eng+=p._engRate;
+  });
+  const types=Object.entries(buckets).filter(([_,b])=>b.count>=2).map(([t,b])=>({type:t,avg:b.eng/b.count,count:b.count}));
+  if(types.length>=2){
+    types.sort((a,b)=>b.avg-a.avg);
+    const best=types[0],worst=types[types.length-1];
+    if(best.avg>worst.avg*1.4){
+      const labels={IMAGE:'photos',CAROUSEL:'carrousels',VIDEO:'videos',REEL:'reels'};
+      recos.push({icon:'&#127919;',type:'info',txt:'Tes '+labels[best.type]+' performent '+(best.avg/worst.avg).toFixed(1)+'x mieux que tes '+labels[worst.type]+'. Augmente la frequence des '+labels[best.type]+'.'});
+    }
+  }
+
+  // 3. Saves : KPI valeur perçue
+  const totalSaves=items.reduce((s,p)=>s+p._saves,0);
+  const totalLikes=items.reduce((s,p)=>s+p._likes,0);
+  const saveRatio=totalLikes>0?totalSaves/totalLikes*100:0;
+  if(saveRatio<2)recos.push({icon:'&#128190;',type:'warning',txt:'Peu de sauvegardes ('+saveRatio.toFixed(1)+'% des likes). Pour passer en mode "valeur" : checklists, infographies, conseils concrets a sauvegarder.'});
+  else if(saveRatio>5)recos.push({icon:'&#11088;',type:'success',txt:'Tes posts sont sauvegardes ('+saveRatio.toFixed(1)+'% du ratio likes). Excellent signal de valeur percue, l\'algo IG kiffe.'});
+
+  // 4. Best day
+  const days=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  const dayBuckets=days.map(()=>({count:0,eng:0}));
+  items.forEach(p=>{
+    const dow=(new Date(p.timestamp).getDay()+6)%7;
+    dayBuckets[dow].count++;
+    dayBuckets[dow].eng+=p._engRate;
+  });
+  const filledDays=dayBuckets.map((b,i)=>({day:days[i],avg:b.count?b.eng/b.count:0,count:b.count})).filter(d=>d.count>=1);
+  if(filledDays.length>=3){
+    filledDays.sort((a,b)=>b.avg-a.avg);
+    recos.push({icon:'&#128197;',type:'info',txt:'Meilleur jour pour poster : '+filledDays[0].day+' ('+filledDays[0].avg.toFixed(1)+'% engagement). A eviter : '+filledDays[filledDays.length-1].day+'.'});
+  }
+
+  // 5. Frequence de post
+  const dates=items.map(p=>new Date(p.timestamp).getTime()).sort((a,b)=>b-a);
+  if(dates.length>=2){
+    const spans=[];
+    for(let i=0;i<dates.length-1;i++)spans.push((dates[i]-dates[i+1])/86400000);
+    const avgSpan=spans.reduce((s,x)=>s+x,0)/spans.length;
+    if(avgSpan>4)recos.push({icon:'&#128347;',type:'warning',txt:'Tu postes en moyenne tous les '+avgSpan.toFixed(0)+' jours. Pour grandir : viser 3-4 posts/semaine (Reels privilegies pour le reach).'});
+    else if(avgSpan<1.5)recos.push({icon:'&#128280;',type:'info',txt:'Cadence intense ('+avgSpan.toFixed(1)+'j entre posts). Risque de fatigue audience. Idealement 3-5 posts/semaine.'});
+  }
+
+  // 6. Reach vs followers
+  const followers=igOverview.profile?.followers_count||1;
+  const avgReachRatio=items.reduce((s,p)=>s+p._reach,0)/items.length/followers*100;
+  if(avgReachRatio<20)recos.push({icon:'&#128270;',type:'warning',txt:'Ton reach moyen ne touche que '+avgReachRatio.toFixed(0)+'% de ton audience. Diversifie les hashtags (10-15 par post, mix niche + grand public).'});
+  else if(avgReachRatio>50)recos.push({icon:'&#128640;',type:'success',txt:'Reach a '+avgReachRatio.toFixed(0)+'% de ton audience. Ton contenu sort dans l\'algo, c\'est parti pour la croissance.'});
+
+  if(recos.length===0){el.innerHTML='<div class="empty">Pas encore d\'analyse possible.</div>';return}
+
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+recos.map(r=>{
+    const bg=r.type==='success'?'var(--green-pale)':r.type==='warning'?'var(--accent-light)':'var(--blue-pale)';
+    const col=r.type==='success'?'var(--green)':r.type==='warning'?'var(--accent-deep)':'var(--blue)';
+    return '<div style="display:flex;gap:10px;padding:10px 12px;background:'+bg+';border-radius:8px;border-left:3px solid '+col+'">'+
+      '<span style="font-size:1.05rem;flex-shrink:0">'+r.icon+'</span>'+
+      '<span style="flex:1;font-size:.78rem;line-height:1.45;color:var(--ink)">'+r.txt+'</span>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
 function renderInstagramMedia(){
   const el=document.getElementById('instagramMedia');
   const countEl=document.getElementById('igMediaCount');
-  if(!el||!igMedia)return;
-  const items=igMedia.data||[];
-  if(countEl)countEl.textContent=items.length+' affiches';
-  if(items.length===0){
-    el.innerHTML='<div class="empty">Aucun post recent.</div>';
-    return;
-  }
-  // Calculer engagement par post (likes + comments) / followers
-  const followers=igProfile?.followers_count||1;
-  const enriched=items.map(m=>{
-    const likes=m.like_count||0;
-    const comments=m.comments_count||0;
-    const eng=(likes+comments)/followers*100;
-    return {...m,_engagement:eng,_total:likes+comments};
-  });
-  // Mediane d'engagement pour reperer les posts au-dessus / en dessous
-  const sorted=[...enriched].sort((a,b)=>a._engagement-b._engagement);
-  const median=sorted[Math.floor(sorted.length/2)]?._engagement||0;
+  if(!el)return;
+  const items=getEnrichedMedia();
+  if(countEl)countEl.textContent=items.length+' posts';
+  if(items.length===0){el.innerHTML='<div class="empty">Aucun post recent.</div>';return}
 
-  el.innerHTML='<div class="ig-grid">'+enriched.map(m=>{
-    const isVideo=m.media_type==='VIDEO';
+  // Tri selon igSortBy
+  const sorters={
+    date:(a,b)=>new Date(b.timestamp)-new Date(a.timestamp),
+    engagement:(a,b)=>b._engRate-a._engRate,
+    reach:(a,b)=>b._reach-a._reach,
+    likes:(a,b)=>b._likes-a._likes,
+    saves:(a,b)=>b._saves-a._saves
+  };
+  const sorted=[...items].sort(sorters[igSortBy]||sorters.date);
+
+  // Median engagement pour highlight
+  const sortedByEng=[...items].sort((a,b)=>a._engRate-b._engRate);
+  const median=sortedByEng[Math.floor(sortedByEng.length/2)]?._engRate||0;
+
+  el.innerHTML='<div class="ig-grid">'+sorted.map(m=>{
+    const isVideo=m.media_type==='VIDEO'||m.media_product_type==='REELS';
     const isCarousel=m.media_type==='CAROUSEL_ALBUM';
     const imgUrl=isVideo?(m.thumbnail_url||m.media_url):m.media_url;
-    const typeLabel=isVideo?'Reel/Video':isCarousel?'Carrousel':'Photo';
+    const typeLabel=isVideo?'Reel':isCarousel?'Carrousel':'Photo';
     const date=new Date(m.timestamp);
-    const dateStr=date.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'2-digit'});
+    const dateStr=date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
     const caption=m.caption||'';
-    const captionShort=caption.length>180?caption.substring(0,180)+'...':caption;
-    const engClass=m._engagement>median*1.3?' engagement-high':(m._engagement<median*0.7?' engagement-low':'');
+    const captionShort=caption.length>140?caption.substring(0,140)+'...':caption;
+    const engClass=m._engRate>median*1.3?' engagement-high':(m._engRate<median*0.7?' engagement-low':'');
     return '<div class="ig-post'+engClass+'" onclick="window.open(\''+escHTML(m.permalink||'#')+'\',\'_blank\')">'+
-      '<div class="ig-post-media">'+(imgUrl?'<img src="'+escHTML(imgUrl)+'" alt="" referrerpolicy="no-referrer" loading="lazy">':'<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--grey);font-size:.75rem">Pas de preview</div>')+'<span class="ig-post-type">'+typeLabel+'</span></div>'+
+      '<div class="ig-post-media">'+(imgUrl?'<img src="'+escHTML(imgUrl)+'" alt="" referrerpolicy="no-referrer" loading="lazy">':'<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--grey);font-size:.75rem">No preview</div>')+'<span class="ig-post-type">'+typeLabel+'</span></div>'+
       '<div class="ig-post-body">'+
         (captionShort?'<div class="ig-post-caption">'+escHTML(captionShort)+'</div>':'')+
+        '<div class="ig-post-metrics">'+
+          '<div class="ig-metric"><span class="ig-metric-icon">&#128065;</span><strong>'+(m._reach||0).toLocaleString('fr-FR')+'</strong><span>reach</span></div>'+
+          '<div class="ig-metric"><span class="ig-metric-icon">&#128190;</span><strong>'+m._saves+'</strong><span>saves</span></div>'+
+          '<div class="ig-metric"><span class="ig-metric-icon">&#128104;</span><strong>'+m._engRate.toFixed(1)+'%</strong><span>eng.</span></div>'+
+        '</div>'+
         '<div class="ig-post-stats">'+
-          '<span class="ig-post-stat likes">&#9829; '+(m.like_count||0).toLocaleString('fr-FR')+'</span>'+
-          '<span class="ig-post-stat comments">&#128172; '+(m.comments_count||0).toLocaleString('fr-FR')+'</span>'+
+          '<span class="ig-post-stat likes">&#9829; '+m._likes.toLocaleString('fr-FR')+'</span>'+
+          '<span class="ig-post-stat comments">&#128172; '+m._comments+'</span>'+
+          (m._shares>0?'<span class="ig-post-stat" style="color:var(--purple)">&#10148; '+m._shares+'</span>':'')+
           '<span class="ig-post-date">'+dateStr+'</span>'+
         '</div>'+
       '</div>'+
@@ -2070,19 +2312,18 @@ function renderInstagramMedia(){
 async function refreshInstagram(){
   const btn=document.getElementById('igRefreshBtn');
   if(btn){btn.disabled=true;btn.textContent='Actualisation...'}
-  try{
-    await Promise.all([loadInstagramProfile(true),loadInstagramMedia(true)]);
-  }finally{
-    if(btn){btn.disabled=false;btn.innerHTML='&#8635; Actualiser'}
-  }
+  try{await loadInstagramOverview(true)}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='&#8635; Actualiser'}}
 }
 
 let instagramLoaded=false;
 function ensureInstagramLoaded(){
   if(instagramLoaded)return;
   instagramLoaded=true;
-  loadInstagramProfile(false);
-  loadInstagramMedia(false);
+  loadInstagramOverview(false);
+  // Setup sort dropdown
+  const sortEl=document.getElementById('igSortBy');
+  if(sortEl)sortEl.addEventListener('change',()=>{igSortBy=sortEl.value;renderInstagramMedia()});
 }
 
 // ============================================================
