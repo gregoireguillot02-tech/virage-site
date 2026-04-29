@@ -2710,15 +2710,45 @@ function ensureIdentity(cb){
   document.getElementById('identityModal').classList.add('open');
 }
 
-async function sbMutate(method,path,body){
-  const r=await fetch(`${SB_URL}/rest/v1/${path}`,{
-    method,
-    headers:{...HEADERS,'Content-Type':'application/json','Prefer':'return=representation'},
-    body:body?JSON.stringify(body):undefined
-  });
-  if(!r.ok){const t=await r.text();throw new Error(`${method} ${path} HTTP ${r.status}: ${t}`)}
-  const txt=await r.text();
-  return txt?JSON.parse(txt):null;
+async function sbMutate(method,path,body,attempt=0){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/${path}`,{
+      method,
+      headers:{...HEADERS,'Content-Type':'application/json','Prefer':'return=representation'},
+      body:body?JSON.stringify(body):undefined
+    });
+    if(!r.ok){
+      const t=await r.text();
+      // Erreurs HTTP : pas la peine de retry sur 4xx (sauf 429 rate limit)
+      if(r.status>=400&&r.status<500&&r.status!==429){
+        throw new Error(`Supabase ${r.status} : ${t.substring(0,200)}`);
+      }
+      // 5xx ou 429 : retry possible
+      if(attempt<2){
+        await new Promise(res=>setTimeout(res,500*(attempt+1)));
+        return sbMutate(method,path,body,attempt+1);
+      }
+      throw new Error(`Serveur Supabase HTTP ${r.status} apres 3 essais`);
+    }
+    const txt=await r.text();
+    return txt?JSON.parse(txt):null;
+  }catch(e){
+    // TypeError "Load failed" / "Failed to fetch" = network error (filtre, offline, CORS bloque)
+    if(e.name==='TypeError'||/Load failed|Failed to fetch|NetworkError/.test(e.message)){
+      // Retry x2 avec backoff (le reseau peut etre intermittent)
+      if(attempt<2){
+        await new Promise(res=>setTimeout(res,500*(attempt+1)));
+        return sbMutate(method,path,body,attempt+1);
+      }
+      // Diagnostic : online ?
+      const online=navigator.onLine!==false;
+      const hint=online
+        ? "Verifie : 1) WiFi (KEDGE bloque les DELETE/PATCH vers Supabase, passe en hotspot), 2) Extension navigateur (uBlock, Privacy Badger peuvent bloquer), 3) supabase.com is up ?"
+        : "Tu sembles hors ligne. Reconnecte-toi puis reessaie.";
+      throw new Error(`Reseau : impossible de joindre Supabase. ${hint}`);
+    }
+    throw e;
+  }
 }
 
 async function loadTasks(){
